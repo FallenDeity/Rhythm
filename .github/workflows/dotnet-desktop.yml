@@ -76,7 +76,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: MSIX
-        path: ${{ env.Appx_Package_Dir }}
+        path: ${{ github.workspace }}/Packages
 
     # Create a release
     - name: Create a release
