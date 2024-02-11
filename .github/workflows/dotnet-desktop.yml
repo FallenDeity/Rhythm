@@ -86,6 +86,7 @@ jobs:
         tag: v1.0.0
         body: |
           WinUI 3 MSIX app
+        replacesArtifacts: false
         artifacts: MSIX
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
