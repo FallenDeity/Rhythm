@@ -83,6 +83,8 @@ jobs:
       id: create_release
       uses: ncipollo/release-action@v1
       with:
+        allowUpdates: true
+        tag: v1.0.0
         artifacts: MSIX
         body: |
           This is a release for the WinUI 3 MSIX app.
