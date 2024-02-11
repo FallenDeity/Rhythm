@@ -87,4 +87,4 @@ jobs:
         tag: v1.0.0
         artifacts: MSIX
         body: |
-          This is a release for the WinUI 3 MSIX app.
+          This is a release for the WinUI 3 MSIX app. Demo app for GitHub Actions.
