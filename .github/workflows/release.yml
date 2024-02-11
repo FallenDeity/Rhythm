@@ -79,7 +79,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         body: |
-          This is a release for the WinUI 3 MSIX app.
+          This is a release for the WinUI 3 MSIX app. Download the MSIX package from the artifacts.
         replacesArtifacts: false
         artifacts: |
           ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
