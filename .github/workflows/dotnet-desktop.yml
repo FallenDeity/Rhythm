@@ -81,10 +81,25 @@ jobs:
     # Create a release
     - name: Create a release
       id: create_release
-      uses: ncipollo/release-action@v1
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        allowUpdates: true
-        tag: v1.0.0
-        artifacts: MSIX
+        tag_name: v1.0.0
+        release_name: Release 1.0.0
         body: |
-          This is a release for the WinUI 3 MSIX app. Demo app for GitHub Actions.
+          Build and package the WinUI 3 MSIX app
+        draft: false
+        prerelease: false
+
+    # Upload the MSIX package to the release
+    - name: Upload MSIX package to the release
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/Packages
+        asset_name: MSIX
+        asset_content_type: application/msix
