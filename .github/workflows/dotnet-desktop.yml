@@ -79,7 +79,7 @@ jobs:
     # Zip the MSIX package as Packages-<architecture>.zip
     - name: Zip the MSIX package
       run: Compress-Archive -Path ${{ github.workspace }}/Packages -DestinationPath ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
-      
+
     # Create a release
     - name: Create GitHub Release
       id: create_release
@@ -87,7 +87,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: v1.0.0
+        tag: v1.0.1
         body: |
           WinUI 3 MSIX app
         replacesArtifacts: false
