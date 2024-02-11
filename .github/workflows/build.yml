@@ -5,9 +5,9 @@ name: WinUI 3 MSIX app
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ main, master ]
+        branches: [ master, main ]
 
 jobs:
 
@@ -20,8 +20,6 @@ jobs:
 
     runs-on: windows-latest  # For a list of available runner types, refer to
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
-
-    permissions: write-all
 
     env:
       Solution_Name: Demo.sln                         # Replace with your solution name, i.e. App1.sln.
@@ -75,23 +73,3 @@ jobs:
       with:
         name: MSIX
         path: ${{ github.workspace }}/Packages
-
-    # Zip the MSIX package as Packages-<architecture>.zip
-    - name: Zip the MSIX package
-      run: Compress-Archive -Path ${{ github.workspace }}/Packages -DestinationPath ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
-
-    # Create a release
-    - name: Create GitHub Release
-      id: create_release
-      uses: ncipollo/release-action@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag: v1.0.1
-        body: |
-          WinUI 3 MSIX app
-        replacesArtifacts: false
-        artifacts: |
-          ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
