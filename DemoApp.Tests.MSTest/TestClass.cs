@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 
-using Microsoft.UI.Xaml.Controls;
-
 namespace DemoApp.Tests.MSTest;
 
 // TODO: Write unit tests.
@@ -40,11 +38,5 @@ public class TestClass
     public void TestMethod()
     {
         Assert.IsTrue(true);
-    }
-
-    [UITestMethod]
-    public void UITestMethod()
-    {
-        Assert.AreEqual(0, new Grid().ActualWidth);
     }
 }
