@@ -21,7 +21,6 @@
 	<PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DemoApp.Core\DemoApp.Core.csproj" />
     <ProjectReference Include="..\DemoApp\DemoApp.csproj" />
   </ItemGroup>
 </Project>
