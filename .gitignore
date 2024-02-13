@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Build and Test results
+[Bb]uild/
+[Tt]est[Rr]esults/

@@ -3,9 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp", "DemoApp.csproj", "{D2887DEE-AFE9-4875-95D4-9B5561C3D067}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp", "DemoApp\DemoApp.csproj", "{D2887DEE-AFE9-4875-95D4-9B5561C3D067}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Core", "..\DemoApp.Core\DemoApp.Core.csproj", "{97AE9974-7D5F-40A3-9A68-760E8C33097C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoApp.Core", "DemoApp.Core\DemoApp.Core.csproj", "{97AE9974-7D5F-40A3-9A68-760E8C33097C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{DB2D6433-D3DC-4428-B4E5-2716B5FF5B44}"
+	ProjectSection(SolutionItems) = preProject
+		.\.editorconfig = .\.editorconfig
+		.\.gitignore = .\.gitignore
+		.\.pre-commit-config.yaml = .\.pre-commit-config.yaml
+		.\.vsconfig = .\.vsconfig
+		.\LICENSE = .\LICENSE
+		.\README.md = .\README.md
+		.\Settings.XamlStyler = .\Settings.XamlStyler
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

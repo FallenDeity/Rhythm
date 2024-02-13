@@ -1,0 +1,57 @@
+repos:
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args:
+          - --markdown-linebreak-ext=md
+      - id: check-toml
+      - id: check-added-large-files
+      - id: check-xml
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+      - id: python-use-type-annotations
+      - id: python-check-blanket-noqa
+
+    # C# WinUi App
+  - repo: local
+    hooks:
+      - id: Format
+        name: Format
+        entry: dotnet
+        language: system
+        types: [file]
+        files: \.(cs|csproj|vb|xaml)$
+        args: [format, DemoApp.sln]
+        pass_filenames: false
+        description: "Format C# and XAML files"
+        exclude: ^obj/|^bin/
+
+      - id: Restore
+        name: Restore
+        entry: dotnet
+        language: system
+        args: [msbuild, DemoApp.sln, '/t:Restore', '/p:Configuration=Release']
+        pass_filenames: false
+        description: "Restore the application"
+
+      - id: Build x86
+        name: Build x86
+        entry: dotnet
+        language: system
+        args: [msbuild, DemoApp.sln, '/p:Configuration=Release', '/p:Platform=x86', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=DemoApp_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
+        pass_filenames: false
+        description: "Build the application"
+
+      - id: Build x64
+        name: Build x64
+        entry: dotnet
+        language: system
+        args: [msbuild, DemoApp.sln, '/p:Configuration=Release', '/p:Platform=x64', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=DemoApp_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
+        pass_filenames: false
+        description: "Build the application"

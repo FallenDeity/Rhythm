@@ -69,4 +69,4 @@ Right click on the `Add-AppDevPackage.ps1` file and click `Run with PowerShell`.
 ![Run](Assets/run.png)
 
 > [!NOTE]
-> This process may require you to enable `Developer Mode` on your machine. You can enable `Developer Mode` by going to `Settings` > `Update & Security` > `For developers` and then selecting `Developer mode`. 
+> This process may require you to enable `Developer Mode` on your machine. You can enable `Developer Mode` by going to `Settings` > `Update & Security` > `For developers` and then selecting `Developer mode`.
