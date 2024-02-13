@@ -47,3 +47,6 @@ $cert = Get-Content -Path "<ProjectName>_TemporaryKey.pfx" -Encoding Byte
 ![Secrets](Assets/secret.png)
 
 Once you have completed all the above steps, you can now delete the certificate file and the `Base64` encoded string of the certificate file from your solution folder. Do not commit the certificate file or the `Base64` encoded string of the certificate file to your repository.
+
+> [!WARNING]
+> Before deleting the certificate `pfx` file make sure you have installed the certificate on your local machine. You can install the certificate by double clicking the `pfx` file and following the installation wizard.

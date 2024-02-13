@@ -74,5 +74,3 @@ jobs:
         with:
           name: MSIX-${{ matrix.platform }}
           path: ${{ env.Project_Name }}\\Packages
-
-      
