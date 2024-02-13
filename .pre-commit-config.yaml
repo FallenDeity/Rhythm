@@ -32,6 +32,17 @@ repos:
         description: "Format C# and XAML files"
         exclude: ^obj/|^bin/
 
+      - id: xstyler
+        name: xstyler
+        entry: xstyler
+        language: system
+        types: [file]
+        files: \.(xaml)$
+        args: [-r, -d, ./, -c, Settings.XamlStyler]
+        pass_filenames: false
+        description: "Format C# and XAML files"
+        exclude: ^obj/|^bin/|^build/
+
       - id: Restore
         name: Restore
         entry: dotnet
