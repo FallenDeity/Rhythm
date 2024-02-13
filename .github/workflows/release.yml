@@ -20,9 +20,8 @@ jobs:
     permissions: write-all
 
     env:
-      Solution_Name: DemoApp/DemoApp.sln
+      Solution_Name: DemoApp.sln
       Project_Name: DemoApp
-      Test_Project_Name: DemoApp.Tests.MSTest
 
     steps:
       - name: Checkout
