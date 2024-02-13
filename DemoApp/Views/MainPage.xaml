@@ -6,5 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid x:Name="ContentArea" />
+    <Grid x:Name="ContentArea">
+        <Button
+            x:Name="myButton"
+            Click="Button_ClickAsync"
+            Content="Standard XAML button" />
+    </Grid>
 </Page>

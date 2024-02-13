@@ -23,6 +23,7 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
+
     public IHost Host
     {
         get;
@@ -48,7 +49,9 @@ public partial class App : Application
 
     public App()
     {
+
         InitializeComponent();
+
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -103,8 +106,11 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        // TODO: Log and handle exceptions as appropriate.
-        // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
+
+        e.Handled = true;
+        System.Diagnostics.Debug.WriteLine(e.Exception);
+        var exceptionString = e.Exception.Message + Environment.NewLine + e.Exception.StackTrace;
+        App.MainWindow.ShowMessageDialogAsync(exceptionString, "Unhandled Exception");
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)

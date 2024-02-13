@@ -7,9 +7,16 @@
     xmlns:helpers="using:DemoApp.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxm="using:Microsoft.UI.Xaml.Media"
     Loaded="OnLoaded">
-
     <Grid>
+        <Grid.Resources>
+            <muxm:AcrylicBrush
+                x:Key="NavigationViewDefaultPaneBackground"
+                FallbackColor="{StaticResource SystemChromeMediumLowColor}"
+                TintColor="{ThemeResource LayerOnMicaBaseAltFillColorDefault}"
+                TintOpacity=".1" />
+        </Grid.Resources>
         <Grid
             x:Name="AppTitleBar"
             Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
@@ -30,22 +37,23 @@
         </Grid>
         <NavigationView
             x:Name="NavigationViewControl"
-            Canvas.ZIndex="0"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
             ExpandedModeThresholdWidth="1280"
             Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}"
             IsBackButtonVisible="Visible"
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
+            IsPaneOpen="False"
             IsSettingsVisible="True"
+            PaneDisplayMode="Auto"
             SelectedItem="{x:Bind ViewModel.Selected, Mode=OneWay}">
             <NavigationView.MenuItems>
                 <!--
-                TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
-                https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
+                    TODO: Update item titles by updating <x:Uid>.Content entries in Strings/en-us/Resources.resw.
+                    https://docs.microsoft.com/windows/uwp/app-resources/localize-strings-ui-manifest#refer-to-a-string-resource-identifier-from-xaml
 
-                TODO: Update item icons by updating FontIcon.Glyph properties.
-                https://docs.microsoft.com/windows/apps/design/style/segoe-fluent-icons-font#icon-list
-				-->
+                    TODO: Update item icons by updating FontIcon.Glyph properties.
+                    https://docs.microsoft.com/windows/apps/design/style/segoe-fluent-icons-font#icon-list
+	-->
                 <NavigationViewItem x:Uid="Shell_Main" helpers:NavigationHelper.NavigateTo="DemoApp.ViewModels.MainViewModel">
                     <NavigationViewItem.Icon>
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe7c3;" />
@@ -67,6 +75,9 @@
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
+            <NavigationView.AutoSuggestBox>
+                <AutoSuggestBox AutomationProperties.Name="Search" QueryIcon="Find" />
+            </NavigationView.AutoSuggestBox>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>
                     <Grid>
