@@ -20,7 +20,9 @@ jobs:
     permissions: write-all
 
     env:
-      Solution_Name: DemoApp.sln
+      Solution_Name: DemoApp/DemoApp.sln
+      Project_Name: DemoApp
+      Test_Project_Name: DemoApp.Tests.MSTest
 
     steps:
       - name: Checkout
@@ -67,7 +69,7 @@ jobs:
 
       # Zip the MSIX package as Packages-<architecture>.zip
       - name: Zip the MSIX package
-        run: Compress-Archive -Path ${{ github.workspace }}/Packages -DestinationPath ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
+        run: Compress-Archive -Path ${{ env.Project_Name }}/Packages -DestinationPath ${{ env.Project_Name }}/Packages-${{ matrix.platform }}.zip
 
       # Create a release
       - name: Create GitHub Release
@@ -80,6 +82,6 @@ jobs:
             This is a release for the WinUI 3 MSIX app. Download the MSIX package from the artifacts.
           replacesArtifacts: false
           artifacts: |
-            ${{ github.workspace }}/Packages-${{ matrix.platform }}.zip
+            ${{ env.Project_Name }}/Packages-${{ matrix.platform }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
