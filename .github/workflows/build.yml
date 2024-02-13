@@ -60,9 +60,14 @@ jobs:
         env:
           Appx_Bundle: Never
           Appx_Package_Build_Mode: SideloadOnly
-          Appx_Package_Dir: ${{ github.workspace }}/Packages
+          Appx_Package_Dir: Packages\
           Configuration: ${{ matrix.configuration }}
           Platform: ${{ matrix.platform }}
+
+      - name: Locate and print path to Packages folder
+        run: |
+          $path = Get-ChildItem -Path . -Recurse -Filter *.msix -ErrorAction SilentlyContinue | Select-Object -ExpandProperty DirectoryName
+          echo "##[set-output name=msix_path;]$path"
 
       # Remove the pfx
       - name: Remove the pfx
@@ -73,6 +78,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: MSIX
-          path: ${{ github.workspace }}/Packages
+          path: ${{ env.Solution_Name }}\\Packages
 
       
