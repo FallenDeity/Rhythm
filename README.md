@@ -2,6 +2,8 @@
 
 Base WinUi App Setup.
 
+![Demo](Assets/demo.png)
+
 ## Setup Repository
 
 You need to add a secret to your github repository to get the workflow actions up and working. Follow the given steps to do so:
@@ -62,7 +64,9 @@ Once the artifact is downloaded, extract the contents of the zip file.
 
 ![Install](Assets/install.png)
 
-Right click on the `install.ps1` file and click `Run with PowerShell`. This will install the app on your local machine. Grant the necessary permissions to the app when prompted.
+Right click on the `Add-AppDevPackage.ps1` file and click `Run with PowerShell`. Grant the necessary permissions and the app will be installed on your local machine.
+
+![Run](Assets/run.png)
 
 > [!NOTE]
 > This process may require you to enable `Developer Mode` on your machine. You can enable `Developer Mode` by going to `Settings` > `Update & Security` > `For developers` and then selecting `Developer mode`. 
