@@ -126,5 +126,7 @@ public class NavigationService : INavigationService
         }
     }
 
+    public string[] GetSearchSuggestions(string queryText) => _pageService.GetPageKeys().Where(p => p.Contains(queryText, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+
     public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);
 }

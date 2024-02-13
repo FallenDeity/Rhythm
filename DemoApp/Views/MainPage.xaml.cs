@@ -1,6 +1,7 @@
 ﻿using DemoApp.ViewModels;
 
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 
 namespace DemoApp.Views;
 
@@ -21,7 +22,6 @@ public sealed partial class MainPage : Page
     {
         var t = Task.Run(() =>
                {
-
                    var x = 0;
                    var y = 3 / x;
                    return y;

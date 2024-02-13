@@ -57,4 +57,12 @@ public class PageService : IPageService
             _pages.Add(key, type);
         }
     }
+
+    public string[] GetPageKeys()
+    {
+        lock (_pages)
+        {
+            return _pages.Keys.ToArray();
+        }
+    }
 }

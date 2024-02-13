@@ -2,10 +2,12 @@
 using DemoApp.Helpers;
 using DemoApp.ViewModels;
 
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 
 using Windows.System;
 
@@ -78,5 +80,44 @@ public sealed partial class ShellPage : Page
         var result = navigationService.GoBack();
 
         args.Handled = result;
+    }
+
+    private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+        if (args.ChosenSuggestion is string)
+        {
+            var suggestions = ViewModel.NavigationService.GetSearchSuggestions(sender.Text);
+            if (suggestions != null)
+            {
+                var suggestion = suggestions.FirstOrDefault(s => s.EndsWith(args.ChosenSuggestion as string));
+                if (suggestion != null)
+                {
+                    ViewModel.NavigationService.NavigateTo(suggestion);
+                }
+            }
+        }
+        else
+        {
+            ViewModel.NavigationService.NavigateTo(sender.Text);
+        }
+    }
+
+    private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        var suggestions = ViewModel.NavigationService.GetSearchSuggestions(sender.Text);
+        var suggestionsList = suggestions.Select(s => s.Split('.').Last()).ToList();
+        if (suggestionsList.Count > 0)
+        {
+            sender.ItemsSource = suggestionsList;
+        }
+        else
+        {
+            sender.ItemsSource = new string[] { "No results found" };
+        }
+    }
+
+    private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        controlsSearchBox.Focus(FocusState.Programmatic);
     }
 }

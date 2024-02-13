@@ -11,11 +11,29 @@
     Loaded="OnLoaded">
     <Grid>
         <Grid.Resources>
-            <muxm:AcrylicBrush
-                x:Key="NavigationViewDefaultPaneBackground"
-                FallbackColor="{StaticResource SystemChromeMediumLowColor}"
-                TintColor="{ThemeResource LayerOnMicaBaseAltFillColorDefault}"
-                TintOpacity=".1" />
+            <ResourceDictionary>
+                <ResourceDictionary.ThemeDictionaries>
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="myBrush" Color="{StaticResource SystemBaseHighColor}" />
+                        <AcrylicBrush
+                            x:Key="NavigationViewDefaultPaneBackground"
+                            FallbackColor="#F2F2F2"
+                            TintColor="White"
+                            TintOpacity="0.18" />
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="Dark">
+                        <SolidColorBrush x:Key="myBrush" Color="{StaticResource SystemBaseHighColor}" />
+                        <AcrylicBrush
+                            x:Key="NavigationViewDefaultPaneBackground"
+                            FallbackColor="#1F1F1F"
+                            TintColor="{ThemeResource SystemAccentColorDark3}"
+                            TintOpacity="0.18" />
+                    </ResourceDictionary>
+                    <ResourceDictionary x:Key="HighContrast">
+                        <SolidColorBrush x:Key="myBrush" Color="{ThemeResource SystemColorButtonFaceColor}" />
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
         </Grid.Resources>
         <Grid
             x:Name="AppTitleBar"
@@ -38,7 +56,7 @@
         <NavigationView
             x:Name="NavigationViewControl"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            ExpandedModeThresholdWidth="1280"
+            ExpandedModeThresholdWidth="720"
             Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}"
             IsBackButtonVisible="Visible"
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
@@ -76,7 +94,23 @@
                 </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.AutoSuggestBox>
-                <AutoSuggestBox AutomationProperties.Name="Search" QueryIcon="Find" />
+                <AutoSuggestBox
+                    x:Name="controlsSearchBox"
+                    MinWidth="200"
+                    VerticalAlignment="Center"
+                    x:FieldModifier="public"
+                    KeyboardAcceleratorPlacementMode="Hidden"
+                    PlaceholderText="Search"
+                    QueryIcon="Find"
+                    QuerySubmitted="OnControlsSearchBoxQuerySubmitted"
+                    TextChanged="OnControlsSearchBoxTextChanged">
+                    <AutoSuggestBox.KeyboardAccelerators>
+                        <KeyboardAccelerator
+                            Key="F"
+                            Invoked="CtrlF_Invoked"
+                            Modifiers="Control" />
+                    </AutoSuggestBox.KeyboardAccelerators>
+                </AutoSuggestBox>
             </NavigationView.AutoSuggestBox>
             <NavigationView.HeaderTemplate>
                 <DataTemplate>

@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
     <Grid x:Name="ContentArea">
+        <Image Height="400" Source="/Assets/LargeTile.scale-400.png" />
         <Button
             x:Name="myButton"
             Click="Button_ClickAsync"
