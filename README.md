@@ -48,5 +48,21 @@ $cert = Get-Content -Path "<ProjectName>_TemporaryKey.pfx" -Encoding Byte
 
 Once you have completed all the above steps, you can now delete the certificate file and the `Base64` encoded string of the certificate file from your solution folder. Do not commit the certificate file or the `Base64` encoded string of the certificate file to your repository.
 
-> [!WARNING]
-> Before deleting the certificate `pfx` file make sure you have installed the certificate on your local machine. You can install the certificate by double clicking the `pfx` file and following the installation wizard.
+## Installation Instructions
+
+On a successful build, the artifacts will be available in the workflow actions. You can download the artifacts and install the app on your local machine using the following steps:
+
+Go to your repository on github and click on `Actions` > `Latest workflow run`.
+
+![Artifact](Assets/artifact.png)
+
+Install the artifact based on your architecture. For example, if you are using a `x64` machine, you can install the `x64` artifact. Click on the artifact to download it.
+
+Once the artifact is downloaded, extract the contents of the zip file.
+
+![Install](Assets/install.png)
+
+Right click on the `install.ps1` file and click `Run with PowerShell`. This will install the app on your local machine. Grant the necessary permissions to the app when prompted.
+
+> [!NOTE]
+> This process may require you to enable `Developer Mode` on your machine. You can enable `Developer Mode` by going to `Settings` > `Update & Security` > `For developers` and then selecting `Developer mode`. 

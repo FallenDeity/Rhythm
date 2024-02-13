@@ -34,7 +34,7 @@ jobs:
       - name: Install .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
       - name: Setup MSBuild.exe
@@ -50,7 +50,7 @@ jobs:
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificatePath = "GitHubActionsWorkflow.pfx"
+          $certificatePath = "${{ env.Project_Name }}\GitHubActionsWorkflow.pfx"
           [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
       # Create the app package by building and packaging the project
@@ -65,7 +65,7 @@ jobs:
 
       # Remove the pfx
       - name: Remove the pfx
-        run: Remove-Item -path GitHubActionsWorkflow.pfx
+        run: Remove-Item -path ${{ env.Project_Name }}/GitHubActionsWorkflow.pfx
 
       # Zip the MSIX package as Packages-<architecture>.zip
       - name: Zip the MSIX package
