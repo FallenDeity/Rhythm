@@ -27,7 +27,7 @@ repos:
         language: system
         types: [file]
         files: \.(cs|csproj|vb|xaml)$
-        args: [format, DemoApp.sln]
+        args: [format, Rhythm.sln]
         pass_filenames: false
         description: "Format C# and XAML files"
         exclude: ^obj/|^bin/
@@ -47,7 +47,7 @@ repos:
         name: Restore
         entry: dotnet
         language: system
-        args: [msbuild, DemoApp.sln, '/t:Restore', '/p:Configuration=Release']
+        args: [msbuild, Rhythm.sln, '/t:Restore', '/p:Configuration=Release']
         pass_filenames: false
         description: "Restore the application"
 
@@ -55,7 +55,7 @@ repos:
         name: Build x86
         entry: dotnet
         language: system
-        args: [msbuild, DemoApp.sln, '/p:Configuration=Release', '/p:Platform=x86', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=DemoApp_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
+        args: [msbuild, Rhythm.sln, '/p:Configuration=Release', '/p:Platform=x86', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=Rhythm_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
         pass_filenames: false
         description: "Build the application"
 
@@ -63,6 +63,6 @@ repos:
         name: Build x64
         entry: dotnet
         language: system
-        args: [msbuild, DemoApp.sln, '/p:Configuration=Release', '/p:Platform=x64', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=DemoApp_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
+        args: [msbuild, Rhythm.sln, '/p:Configuration=Release', '/p:Platform=x64', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=Rhythm_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
         pass_filenames: false
         description: "Build the application"

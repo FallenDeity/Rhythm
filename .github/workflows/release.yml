@@ -20,8 +20,8 @@ jobs:
     permissions: write-all
 
     env:
-      Solution_Name: DemoApp.sln
-      Project_Name: DemoApp
+      Solution_Name: Rhythm.sln
+      Project_Name: Rhythm
 
     steps:
       - name: Checkout
