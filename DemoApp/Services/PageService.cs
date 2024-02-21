@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Reflection;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 using DemoApp.Contracts.Services;
 using DemoApp.ViewModels;
@@ -11,6 +12,8 @@ namespace DemoApp.Services;
 public class PageService : IPageService
 {
     private readonly Dictionary<string, Type> _pages = new();
+    private readonly Dictionary<string, Type> _hiddenPages = new();
+    private readonly Dictionary<string, string> _pageNames = new();
 
     public PageService()
     {
@@ -55,14 +58,30 @@ public class PageService : IPageService
             }
 
             _pages.Add(key, type);
+
+            if (type.GetField("IsPageHidden", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) is bool isPageHidden && isPageHidden)
+            {
+                _hiddenPages.Add(key, type);
+            }
+
+            var _page_name = type.GetField("PageName", BindingFlags.Public | BindingFlags.Static)?.GetValue(null) as string;
+            _pageNames.Add(key, (_page_name ?? type.Name).Replace("Page", string.Empty));
         }
     }
 
-    public string[] GetPageKeys()
+    public Dictionary<string, string> GetPageKeys()
     {
         lock (_pages)
         {
-            return _pages.Keys.ToArray();
+            var result = new Dictionary<string, string>();
+            foreach (var page in _pageNames)
+            {
+                if (!_hiddenPages.ContainsKey(page.Key))
+                {
+                    result.Add(page.Key, page.Value);
+                }
+            }
+            return result;
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.WinUI.UI.Animations;
-
 using DemoApp.Contracts.Services;
 using DemoApp.ViewModels;
 
@@ -10,6 +9,10 @@ namespace DemoApp.Views;
 
 public sealed partial class ContentGridDetailPage : Page
 {
+    public static readonly string PageName = "Content Grid Detail";
+
+    public static readonly bool IsPageHidden = true;
+
     public ContentGridDetailViewModel ViewModel
     {
         get;

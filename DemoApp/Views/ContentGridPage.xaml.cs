@@ -6,6 +6,10 @@ namespace DemoApp.Views;
 
 public sealed partial class ContentGridPage : Page
 {
+    public static readonly string PageName = "Content Grid";
+
+    public static readonly bool IsPageHidden = false;
+
     public ContentGridViewModel ViewModel
     {
         get;

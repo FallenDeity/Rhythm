@@ -13,7 +13,6 @@ using Windows.System;
 
 namespace DemoApp.Views;
 
-
 public sealed partial class ShellPage : Page
 {
     public ShellViewModel ViewModel
@@ -84,29 +83,37 @@ public sealed partial class ShellPage : Page
 
     private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
     {
-        if (args.ChosenSuggestion is string)
+        if (args.ChosenSuggestion != null)
         {
             var suggestions = ViewModel.NavigationService.GetSearchSuggestions(sender.Text);
             if (suggestions != null)
             {
-                var suggestion = suggestions.FirstOrDefault(s => s.EndsWith(args.ChosenSuggestion as string));
-                if (suggestion != null)
+                var pageKey = suggestions.FirstOrDefault(x => x.Value == (string)args.ChosenSuggestion).Key;
+                if (pageKey != null)
                 {
-                    ViewModel.NavigationService.NavigateTo(suggestion);
+                    ViewModel.NavigationService.NavigateTo(pageKey);
                 }
             }
         }
         else
         {
-            ViewModel.NavigationService.NavigateTo(sender.Text);
+            var suggestions = ViewModel.NavigationService.GetSearchSuggestions(sender.Text);
+            if (suggestions != null)
+            {
+                var pageKey = suggestions.FirstOrDefault(x => x.Value == sender.Text).Key;
+                if (pageKey != null)
+                {
+                    ViewModel.NavigationService.NavigateTo(pageKey);
+                }
+            }
         }
     }
 
     private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         var suggestions = ViewModel.NavigationService.GetSearchSuggestions(sender.Text);
-        var suggestionsList = suggestions.Select(s => s.Split('.').Last()).ToList();
-        if (suggestionsList.Count > 0)
+        var suggestionsList = suggestions?.Values.ToList();
+        if (suggestionsList != null && suggestionsList.Count > 0)
         {
             sender.ItemsSource = suggestionsList;
         }

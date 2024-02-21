@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.WinUI.UI.Controls;
-
 using DemoApp.ViewModels;
 
 using Microsoft.UI.Xaml.Controls;
@@ -8,6 +7,10 @@ namespace DemoApp.Views;
 
 public sealed partial class ListDetailsPage : Page
 {
+    public static readonly string PageName = "List Details";
+
+    public static readonly bool IsPageHidden = false;
+
     public ListDetailsViewModel ViewModel
     {
         get;

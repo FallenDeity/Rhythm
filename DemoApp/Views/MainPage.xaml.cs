@@ -7,6 +7,10 @@ namespace DemoApp.Views;
 
 public sealed partial class MainPage : Page
 {
+    public static readonly string PageName = "Home";
+
+    public static readonly bool IsPageHidden = false;
+
     public MainViewModel ViewModel
     {
         get;

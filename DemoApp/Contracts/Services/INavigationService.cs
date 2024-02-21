@@ -23,5 +23,5 @@ public interface INavigationService
 
     void SetListDataItemForNextConnectedAnimation(object item);
 
-    string[] GetSearchSuggestions(string queryText);
+    Dictionary<string, string> GetSearchSuggestions(string queryText);
 }

@@ -8,6 +8,10 @@ namespace DemoApp.Views;
 // For more details, see the documentation at https://docs.microsoft.com/windows/communitytoolkit/controls/datagrid.
 public sealed partial class DataGridPage : Page
 {
+    public static readonly string PageName = "Data Grid";
+
+    public static readonly bool IsPageHidden = false;
+
     public DataGridViewModel ViewModel
     {
         get;

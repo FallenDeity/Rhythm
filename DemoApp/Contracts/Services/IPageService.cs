@@ -4,5 +4,5 @@ public interface IPageService
 {
     Type GetPageType(string key);
 
-    string[] GetPageKeys();
+    Dictionary<string, string> GetPageKeys();
 }

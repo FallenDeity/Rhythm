@@ -126,7 +126,15 @@ public class NavigationService : INavigationService
         }
     }
 
-    public string[] GetSearchSuggestions(string queryText) => _pageService.GetPageKeys().Where(p => p.Contains(queryText, StringComparison.InvariantCultureIgnoreCase)).ToArray();
+    public Dictionary<string, string> GetSearchSuggestions(string queryText)
+    {
+        var result = new Dictionary<string, string>();
+        foreach (var page in _pageService.GetPageKeys().Where(p => p.Value.Contains(queryText, StringComparison.OrdinalIgnoreCase)))
+        {
+            result.Add(page.Key, page.Value);
+        }
+        return result;
+    }
 
     public void SetListDataItemForNextConnectedAnimation(object item) => Frame.SetListDataItemForNextConnectedAnimation(item);
 }
