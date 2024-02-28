@@ -1,4 +1,4 @@
-﻿namespace Rhythm.Behaviors;
+namespace Rhythm.Behaviors;
 
 public enum NavigationViewHeaderMode
 {

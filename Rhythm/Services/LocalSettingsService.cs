@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Contracts.Services;
 using Rhythm.Core.Helpers;
 using Rhythm.Helpers;
 using Rhythm.Models;
-using Windows.ApplicationModel;
 using Windows.Storage;
 
 namespace Rhythm.Services;

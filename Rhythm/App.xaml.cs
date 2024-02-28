@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 using Rhythm.Activation;
@@ -48,9 +48,7 @@ public partial class App : Application
 
     public App()
     {
-
         InitializeComponent();
-
 
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
@@ -76,6 +74,7 @@ public partial class App : Application
             // Core Services
             services.AddSingleton<ISampleDataService, SampleDataService>();
             services.AddSingleton<IFileService, FileService>();
+            services.AddSingleton<IDatabaseService, DatabaseService>();
 
             // Views and ViewModels
             services.AddTransient<SettingsViewModel>();
@@ -101,11 +100,12 @@ public partial class App : Application
         App.GetService<IAppNotificationService>().Initialize();
 
         UnhandledException += App_UnhandledException;
+
+        App.GetService<IDatabaseService>().ConnectToOracle();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-
         e.Handled = true;
         System.Diagnostics.Debug.WriteLine(e.Exception);
         var exceptionString = e.Exception.Message + Environment.NewLine + e.Exception.StackTrace;

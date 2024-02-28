@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.WinUI.UI.Animations;
+using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;

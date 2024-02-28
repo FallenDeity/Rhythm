@@ -1,9 +1,7 @@
-﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-using Microsoft.Windows.AppNotifications;
 using Rhythm.Contracts.Services;
-using Rhythm.ViewModels;
 
 namespace Rhythm.Activation;
 

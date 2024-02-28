@@ -1,4 +1,4 @@
-﻿namespace Rhythm.Models;
+namespace Rhythm.Models;
 
 public class LocalSettingsOptions
 {

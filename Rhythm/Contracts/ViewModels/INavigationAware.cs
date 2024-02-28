@@ -1,4 +1,4 @@
-﻿namespace Rhythm.Contracts.ViewModels;
+namespace Rhythm.Contracts.ViewModels;
 
 public interface INavigationAware
 {

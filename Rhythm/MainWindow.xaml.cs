@@ -1,4 +1,4 @@
-﻿using Rhythm.Helpers;
+using Rhythm.Helpers;
 
 using Windows.UI.ViewManagement;
 

@@ -1,4 +1,4 @@
-﻿using Rhythm.Core.Helpers;
+using Rhythm.Core.Helpers;
 
 using Windows.Storage;
 using Windows.Storage.Streams;

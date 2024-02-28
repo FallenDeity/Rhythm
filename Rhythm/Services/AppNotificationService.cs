@@ -1,8 +1,7 @@
-﻿using System.Collections.Specialized;
+using System.Collections.Specialized;
 using System.Web;
 using Microsoft.Windows.AppNotifications;
 using Rhythm.Contracts.Services;
-using Rhythm.ViewModels;
 
 namespace Rhythm.Notifications;
 

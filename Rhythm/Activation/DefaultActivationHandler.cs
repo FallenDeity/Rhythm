@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
 using Rhythm.Contracts.Services;
 using Rhythm.ViewModels;
 

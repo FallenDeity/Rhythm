@@ -1,4 +1,4 @@
-﻿namespace Rhythm.Contracts.Services;
+namespace Rhythm.Contracts.Services;
 
 public interface IPageService
 {

@@ -342,3 +342,10 @@ healthchecksdb
 # Build and Test results
 [Bb]uild/
 [Tt]est[Rr]esults/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production

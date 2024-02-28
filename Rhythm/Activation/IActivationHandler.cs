@@ -1,4 +1,4 @@
-﻿namespace Rhythm.Activation;
+namespace Rhythm.Activation;
 
 public interface IActivationHandler
 {
