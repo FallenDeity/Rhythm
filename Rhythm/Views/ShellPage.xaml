@@ -92,6 +92,17 @@
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe80a;" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItemSeparator />
+                <NavigationViewItem x:Uid="Shell_PlayQueue">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xe8e2;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Uid="Shell_PlayList">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xEA69;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.AutoSuggestBox>
                 <AutoSuggestBox

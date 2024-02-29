@@ -2,65 +2,136 @@
     x:Class="Rhythm.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="using:Rhythm.Helpers"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:xaml="using:Microsoft.UI.Xaml"
+    Loaded="OnLoaded"
     mc:Ignorable="d">
     <Page.Resources>
+        <!--  These styles can be referenced to create a consistent SettingsPage layout  -->
+
+        <!--  Spacing between cards  -->
+        <x:Double x:Key="SettingsCardSpacing">4</x:Double>
+
+        <!--  Style (inc. the correct spacing) of a section header  -->
+        <Style
+            x:Key="SettingsSectionHeaderTextBlockStyle"
+            BasedOn="{StaticResource BodyStrongTextBlockStyle}"
+            TargetType="TextBlock">
+            <Style.Setters>
+                <Setter Property="Margin" Value="1,30,0,6" />
+            </Style.Setters>
+        </Style>
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
     </Page.Resources>
-    <Grid>
-        <StackPanel x:Name="ContentArea">
-            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
-            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
-                <TextBlock x:Uid="Settings_Theme" />
+    <ScrollViewer>
+        <Grid>
+            <StackPanel
+                x:Name="ContentArea"
+                MaxWidth="1000"
+                HorizontalAlignment="Stretch"
+                Spacing="{StaticResource SettingsCardSpacing}">
+                <win:StackPanel.ChildrenTransitions>
+                    <win:EntranceThemeTransition FromVerticalOffset="50" />
+                    <win:RepositionThemeTransition IsStaggeringEnabled="False" />
+                </win:StackPanel.ChildrenTransitions>
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="Section 1" />
+                <controls:SettingsCard
+                    Description="This is a default card, with the Header, HeaderIcon, Description and Content set"
+                    Header="This is the Header"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE716;}">
+                    <ToggleSwitch IsOn="True" />
+                </controls:SettingsCard>
 
-                <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                    <RadioButton
-                        x:Uid="Settings_Theme_Light"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        FontSize="15"
-                        GroupName="AppTheme"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Light</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
-                    <RadioButton
-                        x:Uid="Settings_Theme_Dark"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        FontSize="15"
-                        GroupName="AppTheme"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Dark</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
-                    <RadioButton
-                        x:Uid="Settings_Theme_Default"
-                        Command="{x:Bind ViewModel.SwitchThemeCommand}"
-                        FontSize="15"
-                        GroupName="AppTheme"
-                        IsChecked="{x:Bind ViewModel.ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Default, Mode=OneWay}">
-                        <RadioButton.CommandParameter>
-                            <xaml:ElementTheme>Default</xaml:ElementTheme>
-                        </RadioButton.CommandParameter>
-                    </RadioButton>
-                </StackPanel>
-            </StackPanel>
+                <controls:SettingsExpander
+                    Description="The SettingsExpander has the same properties as a SettingsCard"
+                    Header="SettingsExpander"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE91B;}">
+                    <Button Content="Content" Style="{StaticResource AccentButtonStyle}" />
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard Header="A basic SettingsCard within an SettingsExpander">
+                            <Button Content="Button" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard
+                            Description="SettingsCard within an Expander can be made clickable too!"
+                            Header="This item can be clicked"
+                            IsClickEnabled="True" />
 
-            <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <controls:SettingsCard ContentAlignment="Left">
+                            <CheckBox Content="Here the ContentAlignment is set to Left. This is great for e.g. CheckBoxes or RadioButtons" />
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
 
-            <StackPanel Margin="{StaticResource XSmallTopMargin}">
-                <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" />
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="Personalization" />
+                <controls:SettingsCard
+                    Description="Choose your preferred theme"
+                    Header="Theme"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                    <ComboBox
+                        x:Name="ThemeComboBox"
+                        PlaceholderText="{x:Bind ViewModel.ElementTheme}"
+                        SelectionChanged="ComboBox_SelectionChanged">
+                        <ComboBoxItem
+                            x:Uid="Settings_Theme_Light"
+                            Content="Light"
+                            Tag="Light" />
+                        <ComboBoxItem
+                            x:Uid="Settings_Theme_Dark"
+                            Content="Dark"
+                            Tag="Dark" />
+                        <ComboBoxItem
+                            x:Uid="Settings_Theme_Default"
+                            Content="Default"
+                            Tag="Default" />
+                    </ComboBox>
 
+                </controls:SettingsCard>
+
+                <controls:SettingsCard
+                    Description="Another card to show grouping of cards"
+                    Header="Yet another SettingsCard"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE768;}">
+                    <Button Content="Content" />
+                </controls:SettingsCard>
+
+                <!--  Example 'About' section  -->
                 <TextBlock
-                    x:Uid="Settings_AboutDescription"
-                    Margin="{StaticResource XSmallTopMargin}"
-                    Style="{ThemeResource BodyTextBlockStyle}" />
-                <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
+                    x:Uid="Settings_About"
+                    Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="About" />
+
+                <controls:SettingsExpander
+                    Description="© 2024. All rights reserved."
+                    Header="Rhythm"
+                    HeaderIcon="{ui:BitmapIcon Source=ms-appx:///Assets/LargeTile.scale-200.png}">
+                    <TextBlock
+                        win:IsTextSelectionEnabled="True"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{x:Bind ViewModel.VersionDescription, Mode=OneWay}" />
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard
+                            x:Uid="Settings_AboutDescription"
+                            Header="App description"
+                            HeaderIcon="{ui:FontIcon Glyph=&#xE946;}">
+                            <HyperlinkButton Content="Learn more" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Left">
+                            <StackPanel Margin="-12,0,0,0" Orientation="Vertical">
+                                <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
+                                <HyperlinkButton Content="Link 1" />
+                                <HyperlinkButton Content="Link 2" />
+                                <HyperlinkButton Content="Link 3" />
+                            </StackPanel>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
+                <HyperlinkButton Margin="0,8,0,0" Content="Send feedback" />
             </StackPanel>
-        </StackPanel>
-    </Grid>
+        </Grid>
+    </ScrollViewer>
 </Page>

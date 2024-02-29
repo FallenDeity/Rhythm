@@ -1,3 +1,4 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Rhythm.ViewModels;
 
@@ -20,4 +21,36 @@ public sealed partial class SettingsPage : Page
         ViewModel = App.GetService<SettingsViewModel>();
         InitializeComponent();
     }
+
+    private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        var selectedText = ((ComboBoxItem)e.AddedItems[0]).Content.ToString();
+        var theme = selectedText switch
+        {
+
+            "Light" => ElementTheme.Light,
+            "Dark" => ElementTheme.Dark,
+            _ => ElementTheme.Default
+        };
+        ViewModel.SwitchThemeCommand.Execute(theme);
+    }
+
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        var theme = ViewModel.currentTheme;
+        switch (theme)
+        {
+            case "Light":
+                ThemeComboBox.SelectedIndex = 0;
+                break;
+            case "Dark":
+                ThemeComboBox.SelectedIndex = 1;
+                break;
+            default:
+                ThemeComboBox.SelectedIndex = 2;
+                break;
+        }
+    }
+
 }

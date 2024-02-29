@@ -41,6 +41,15 @@ public partial class SettingsViewModel : ObservableRecipient
             });
     }
 
+    public string currentTheme => ElementTheme switch
+    {
+
+        ElementTheme.Default => "System",
+        ElementTheme.Light => "Light",
+        ElementTheme.Dark => "Dark",
+        _ => "Unknown"
+    };
+
     private static string GetVersionDescription()
     {
         Version version;
