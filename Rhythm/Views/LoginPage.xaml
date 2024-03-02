@@ -111,17 +111,10 @@
                     HorizontalAlignment="Stretch"
                     Click="LoginButton_Click">
                     <StackPanel
+                        x:Name="LoginButtonStackPanel"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Orientation="Horizontal">
-                        <ProgressRing
-                            x:Name="LoginButtonProgressRing"
-                            Width="20"
-                            Height="20"
-                            Margin="0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            IsActive="False" />
                         <TextBlock
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"

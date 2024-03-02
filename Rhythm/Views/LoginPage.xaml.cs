@@ -78,9 +78,11 @@ public sealed partial class LoginPage : Page
 
     private async void LoginButton_Click(object sender, RoutedEventArgs e)
     {
-        LoginButtonProgressRing.IsActive = true;
-        LoginButtonProgressRing.Visibility = Visibility.Visible;
-        LoginButtonProgressRing.Margin = new Thickness(0, 0, 10, 0);
+        ProgressRing p = new ProgressRing();
+        p.IsActive = true;
+        p.Width = p.Height = 20;
+        p.Margin = new Thickness(0, 0, 10, 0);
+        LoginButtonStackPanel.Children.Insert(0, p);
         LoginButton.IsEnabled = false;
         var username = Username.Text;
         var password = Password.Password;
@@ -99,9 +101,8 @@ public sealed partial class LoginPage : Page
         {
             await App.MainWindow.ShowMessageDialogAsync("Invalid username or password", "Login Failed");
         }
-        LoginButtonProgressRing.IsActive = false;
-        LoginButtonProgressRing.Visibility = Visibility.Collapsed;
-        LoginButtonProgressRing.Margin = new Thickness(0, 0, 0, 0);
+        LoginButtonStackPanel.Children.RemoveAt(0);
+        LoginButton.IsEnabled = true;
     }
 
     private void RegisterButton_Click(object sender, RoutedEventArgs e)

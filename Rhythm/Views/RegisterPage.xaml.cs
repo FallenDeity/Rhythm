@@ -81,17 +81,17 @@ public sealed partial class RegisterPage : Page
             await App.MainWindow.ShowMessageDialogAsync("Passwords do not match", "Error");
             return;
         }
-        RegisterButtonProgressRing.IsActive = true;
-        RegisterButtonProgressRing.Visibility = Visibility.Visible;
-        RegisterButtonProgressRing.Margin = new Thickness(0, 0, 10, 0);
+        ProgressRing p = new ProgressRing();
+        p.IsActive = true;
+        p.Width = p.Height = 20;
+        p.Margin = new Thickness(0, 0, 10, 0);
+        RegisterButtonStackPanel.Children.Insert(0, p);
         RegisterButton.IsEnabled = false;
         var username = Username.Text;
         var password = Password.Password;
         await Task.Run(() => Register(username, password));
         await App.MainWindow.ShowMessageDialogAsync("User registered successfully", "Success");
-        RegisterButtonProgressRing.IsActive = false;
-        RegisterButtonProgressRing.Visibility = Visibility.Collapsed;
-        RegisterButtonProgressRing.Margin = new Thickness(0, 0, 0, 0);
+        RegisterButtonStackPanel.Children.RemoveAt(0);
         RegisterButton.IsEnabled = true;
         App.MainWindow.Content = App.GetService<LoginPage>();
     }
