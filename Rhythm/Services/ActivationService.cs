@@ -25,10 +25,21 @@ public class ActivationService : IActivationService
         // Execute tasks before activation.
         await InitializeAsync();
 
+        // Connect to database
+        App.GetService<IDatabaseService>().ConnectToOracle();
+
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
-            _shell = App.GetService<ShellPage>();
+            Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            if (localSettings.Values["IsAuthenticated"] != null && bool.Parse(localSettings.Values["IsAuthenticated"].ToString() ?? "false"))
+            {
+                _shell = App.GetService<ShellPage>();
+            }
+            else
+            {
+                _shell = App.GetService<LoginPage>();
+            }
             App.MainWindow.Content = _shell ?? new Frame();
         }
 

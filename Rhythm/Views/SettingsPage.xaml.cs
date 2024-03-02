@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Rhythm.Contracts.Services;
 using Rhythm.ViewModels;
 
 namespace Rhythm.Views;
@@ -51,6 +52,12 @@ public sealed partial class SettingsPage : Page
                 ThemeComboBox.SelectedIndex = 2;
                 break;
         }
+    }
+
+    private void LogoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        App.GetService<ILocalSettingsService>().ClearAll();
+        App.MainWindow.Content = App.GetService<LoginPage>();
     }
 
 }

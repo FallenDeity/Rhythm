@@ -10,6 +10,7 @@
     xmlns:win="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:xaml="using:Microsoft.UI.Xaml"
     Loaded="OnLoaded"
+    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Page.Resources>
         <!--  These styles can be referenced to create a consistent SettingsPage layout  -->
@@ -71,7 +72,7 @@
                 <controls:SettingsCard
                     Description="Choose your preferred theme"
                     Header="Theme"
-                    HeaderIcon="{ui:FontIcon Glyph=&#xE799;}">
+                    HeaderIcon="{ui:FontIcon Glyph=&#xF08C;}">
                     <ComboBox
                         x:Name="ThemeComboBox"
                         PlaceholderText="{x:Bind ViewModel.ElementTheme}"
@@ -93,10 +94,14 @@
                 </controls:SettingsCard>
 
                 <controls:SettingsCard
-                    Description="Another card to show grouping of cards"
-                    Header="Yet another SettingsCard"
-                    HeaderIcon="{ui:FontIcon Glyph=&#xE768;}">
-                    <Button Content="Content" />
+                    Description="Log out of your account"
+                    Header="Log out"
+                    HeaderIcon="{ui:FontIcon Glyph=&#xE8AB;}">
+                    <Button
+                        x:Name="LogoutButton"
+                        Click="LogoutButton_Click"
+                        Content="Log out"
+                        Style="{StaticResource AccentButtonStyle}" />
                 </controls:SettingsCard>
 
                 <!--  Example 'About' section  -->
