@@ -51,6 +51,14 @@ repos:
         pass_filenames: false
         description: "Restore the application"
 
+      - id: Build arm64
+        name: Build arm64
+        entry: dotnet
+        language: system
+        args: [msbuild, Rhythm.sln, '/p:Configuration=Release', '/p:Platform=arm64', '/p:UapAppxPackageBuildMode=SideloadOnly', '/p:AppxBundle=Never', '/p:PackageCertificateKeyFile=Rhythm_TemporaryKey.pfx', '/p:AppxPackageDir="../build/"', '/p:GenerateAppxPackageOnBuild=true']
+        pass_filenames: false
+        description: "Build the application"
+
       - id: Build x86
         name: Build x86
         entry: dotnet
