@@ -35,7 +35,7 @@
         <Border
             x:Name="LoginFormBorder"
             Width="450"
-            Height="500"
+            Height="450"
             Margin="0,0,0,0"
             Padding="10"
             HorizontalAlignment="Center"
@@ -101,7 +101,7 @@
                         Margin="20,0,0,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Text="Remember me" />
+                        Text="Remember Me" />
                 </Grid>
                 <Button
                     x:Name="LoginButton"
@@ -124,7 +124,7 @@
                 <HyperlinkButton
                     x:Name="RegisterButton"
                     Grid.Row="6"
-                    Margin="0,0,0,10"
+                    Margin="0,20,0,0"
                     HorizontalAlignment="Center"
                     Click="RegisterButton_Click"
                     Content="Don't have an account? Register here." />

@@ -35,7 +35,7 @@
         <Border
             x:Name="LoginFormBorder"
             Width="450"
-            Height="500"
+            Height="520"
             Margin="0,0,0,0"
             Padding="10"
             HorizontalAlignment="Center"
@@ -56,6 +56,10 @@
                     <RowDefinition Height="Auto" />
                     <!--  Username  -->
                     <RowDefinition Height="Auto" />
+                    <!--  Gender  -->
+                    <RowDefinition Height="Auto" />
+                    <!--  Country  -->
+                    <RowDefinition Height="Auto" />
                     <!--  Password  -->
                     <RowDefinition Height="Auto" />
                     <!--  Confirm Password  -->
@@ -68,7 +72,7 @@
                 <TextBlock
                     x:Name="Title"
                     Grid.Row="0"
-                    Margin="0,0,0,20"
+                    Margin="0,10,0,10"
                     HorizontalAlignment="Center"
                     Style="{StaticResource TitleTextBlockStyle}"
                     Text="Register" />
@@ -77,30 +81,59 @@
                     Grid.Row="1"
                     Width="100"
                     Height="100"
-                    Margin="0,0,0,20"
+                    Margin="0,10,0,10"
                     HorizontalAlignment="Center"
                     Source="/Assets/LockScreenLogo.scale-200.png" />
                 <TextBox
                     x:Name="Username"
                     Grid.Row="2"
-                    Margin="0,0,0,10"
+                    Margin="0,10,0,10"
                     PlaceholderText="Username"
                     TextChanged="Username_TextChanged" />
+                <Grid Grid.Row="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ComboBox
+                        x:Name="Gender"
+                        Grid.Column="0"
+                        MinWidth="150"
+                        Margin="0,0,5,0"
+                        VerticalAlignment="Center"
+                        PlaceholderText="Select Gender"
+                        SelectionChanged="Gender_SelectionChanged">
+                        <ComboBoxItem Content="Male" />
+                        <ComboBoxItem Content="Female" />
+                    </ComboBox>
+                    <AutoSuggestBox
+                        x:Name="Country"
+                        Grid.Column="1"
+                        MinWidth="240"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        AutomationProperties.Name="Basic AutoSuggestBox"
+                        MaxSuggestionListHeight="200"
+                        PlaceholderText="Select Country"
+                        SuggestionChosen="AutoSuggestBox_SuggestionChosen"
+                        TextChanged="AutoSuggestBox_TextChanged" />
+                </Grid>
                 <PasswordBox
                     x:Name="Password"
-                    Grid.Row="3"
-                    Margin="0,0,0,10"
+                    Grid.Row="4"
+                    Margin="0,10,0,10"
                     PasswordChanged="Password_PasswordChanged"
                     PlaceholderText="Password" />
                 <PasswordBox
                     x:Name="ConfirmPassword"
-                    Grid.Row="4"
-                    Margin="0,0,0,10"
+                    Grid.Row="5"
+                    Margin="0,10,0,10"
                     PasswordChanged="ConfirmPassword_PasswordChanged"
                     PlaceholderText="Confirm Password" />
                 <Button
                     x:Name="RegisterButton"
-                    Grid.Row="5"
+                    Grid.Row="6"
                     Width="Auto"
                     Margin="0,10,0,10"
                     HorizontalAlignment="Stretch"
@@ -118,8 +151,8 @@
                 </Button>
                 <HyperlinkButton
                     x:Name="LoginButton"
-                    Grid.Row="6"
-                    Margin="0,0,0,10"
+                    Grid.Row="7"
+                    Margin="0,20,0,0"
                     HorizontalAlignment="Center"
                     Click="LoginButton_Click"
                     Content="Already have an account? Login" />
