@@ -1,5 +1,3 @@
-using System.Diagnostics.Metrics;
-using System.Reflection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Oracle.ManagedDataAccess.Client;
@@ -16,50 +14,6 @@ namespace Rhythm.Views;
 /// </summary>
 public sealed partial class RegisterPage : Page
 {
-    public RegisterPage()
-    {
-        this.InitializeComponent();
-
-        App.MainWindow.ExtendsContentIntoTitleBar = true;
-        App.MainWindow.SetTitleBar(AppTitleBar);
-        App.MainWindow.Activated += MainWindow_Activated;
-        AppTitleBarText.Text = "Rhythm - Register";
-    }
-
-    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        TitleBarHelper.UpdateTitleBar(RequestedTheme);
-        ValidateDetails();
-    }
-
-    private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
-    {
-        App.AppTitlebar = AppTitleBarText as UIElement;
-    }
-    private void ValidateDetails()
-    {
-        if (string.IsNullOrEmpty(Username.Text) || string.IsNullOrEmpty(Password.Password) || string.IsNullOrEmpty(ConfirmPassword.Password) || string.IsNullOrEmpty(Gender.SelectedValue.ToString()) || string.IsNullOrEmpty(Country.Text))
-        {
-            RegisterButton.IsEnabled = false;
-        }
-        else
-        {
-            RegisterButton.IsEnabled = true;
-        }
-    }
-
-    private void Username_TextChanged(object sender, TextChangedEventArgs e)
-    {
-        ValidateDetails();
-    }
-
-    private void Gender_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        ValidateDetails();
-
-        //System.Diagnostics.Debug.WriteLine("Gender " + selectedGender);
-    }
-
     private readonly List<string> Countries = new()
     {
         "Afghanistan",
@@ -261,11 +215,50 @@ public sealed partial class RegisterPage : Page
         "Zimbabwe"
     };
 
-    // Handle text change and present suitable items
+    public RegisterPage()
+    {
+        this.InitializeComponent();
+
+        App.MainWindow.ExtendsContentIntoTitleBar = true;
+        App.MainWindow.SetTitleBar(AppTitleBar);
+        App.MainWindow.Activated += MainWindow_Activated;
+        AppTitleBarText.Text = "Rhythm - Register";
+    }
+
+    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        TitleBarHelper.UpdateTitleBar(RequestedTheme);
+        ValidateDetails();
+    }
+
+    private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
+    {
+        App.AppTitlebar = AppTitleBarText as UIElement;
+    }
+    private void ValidateDetails()
+    {
+        if (string.IsNullOrEmpty(Username.Text) || string.IsNullOrEmpty(Password.Password) || string.IsNullOrEmpty(ConfirmPassword.Password) || string.IsNullOrEmpty(Gender.SelectedValue.ToString()) || string.IsNullOrEmpty(Country.Text))
+        {
+            RegisterButton.IsEnabled = false;
+        }
+        else
+        {
+            RegisterButton.IsEnabled = true;
+        }
+    }
+
+    private void Username_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        ValidateDetails();
+    }
+
+    private void Gender_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        ValidateDetails();
+    }
+
     private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
-        // Since selecting an item will also change the text,
-        // only listen to changes caused by user entering text.
         if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
         {
             var suitableItems = new List<string>();
@@ -289,10 +282,8 @@ public sealed partial class RegisterPage : Page
         }
     }
 
-    // Handle user selecting an item, in our case just output the selected item.
     private void AutoSuggestBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
-
         Country.Text = args.SelectedItem.ToString();
     }
 
@@ -308,8 +299,6 @@ public sealed partial class RegisterPage : Page
 
     private void Register(string username, string password, string gender, string country)
     {
-
-
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = connection.CreateCommand();
         command.CommandText = "INSERT INTO users (username, password, gender, country, user_image) VALUES (:username, :password, :gender, :country, EMPTY_BLOB())";
@@ -322,7 +311,8 @@ public sealed partial class RegisterPage : Page
 
     private async void RegisterButton_Click(object sender, RoutedEventArgs e)
     {
-        var genderSelected = Gender.SelectedValue.ToString();
+        var genderSelected = ((ComboBoxItem)Gender.SelectedItem).Content.ToString();
+        var countrySelected = Country.Text.ToString();
         if (Password.Password != ConfirmPassword.Password)
         {
             await App.MainWindow.ShowMessageDialogAsync("Passwords do not match", "Error");
@@ -333,17 +323,22 @@ public sealed partial class RegisterPage : Page
             await App.MainWindow.ShowMessageDialogAsync("Pick a valid gender", "Error");
             return;
         }
-        ProgressRing p = new ProgressRing();
-        p.IsActive = true;
+        if (!Countries.Contains(countrySelected))
+        {
+            await App.MainWindow.ShowMessageDialogAsync("Pick a valid country", "Error");
+            return;
+        }
+        ProgressRing p = new ProgressRing
+        {
+            IsActive = true
+        };
         p.Width = p.Height = 20;
         p.Margin = new Thickness(0, 0, 10, 0);
         RegisterButtonStackPanel.Children.Insert(0, p);
         RegisterButton.IsEnabled = false;
         var username = Username.Text;
         var password = Password.Password;
-        var countrySelected = Country.Text.ToString();
-
-        await Task.Run(() => Register(username, password, genderSelected, countrySelected));
+        await Task.Run(() => Register(username, password, genderSelected.ToLower(), countrySelected));
         await App.MainWindow.ShowMessageDialogAsync("User registered successfully", "Success");
         RegisterButtonStackPanel.Children.RemoveAt(0);
         RegisterButton.IsEnabled = true;

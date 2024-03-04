@@ -33,37 +33,104 @@
         <Grid>
             <StackPanel
                 x:Name="ContentArea"
-                MaxWidth="1000"
+                MaxWidth="900"
                 HorizontalAlignment="Stretch"
                 Spacing="{StaticResource SettingsCardSpacing}">
                 <win:StackPanel.ChildrenTransitions>
                     <win:EntranceThemeTransition FromVerticalOffset="50" />
                     <win:RepositionThemeTransition IsStaggeringEnabled="False" />
                 </win:StackPanel.ChildrenTransitions>
-                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="Section 1" />
+                <Grid Width="Auto" VerticalAlignment="Center">
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                        <Grid CornerRadius="10">
+                            <Image
+                                x:Name="UserImage"
+                                Width="100"
+                                Height="100"
+                                Source="/Assets/user.png"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Margin="20,0,0,10"
+                            VerticalAlignment="Bottom"
+                            Orientation="Vertical">
+                            <TextBlock
+                                x:Name="Username"
+                                Style="{StaticResource TitleTextBlockStyle}"
+                                Text="Rhythm" />
+                            <TextBlock
+                                x:Name="CreatedAt"
+                                Style="{StaticResource BodyTextBlockStyle}"
+                                Text="joined just now" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom"
+                        Orientation="Horizontal">
+                        <Button
+                            Margin="5,0,10,10"
+                            VerticalAlignment="Center"
+                            Click="CopyButton_Click"
+                            ToolTipService.ToolTip="Copy User ID">
+                            <FontIcon Glyph="&#xE8C8;" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="Edit profile" />
                 <controls:SettingsCard
-                    Description="This is a default card, with the Header, HeaderIcon, Description and Content set"
-                    Header="This is the Header"
+                    Description="Pick a new profile picture, for your account"
+                    Header="Edit Profile Image"
                     HeaderIcon="{ui:FontIcon Glyph=&#xE716;}">
-                    <ToggleSwitch IsOn="True" />
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <Button
+                            x:Name="PickAPhotoButton"
+                            Click="PickAPhotoButton_Click"
+                            Content="Open a picture" />
+                    </StackPanel>
                 </controls:SettingsCard>
 
                 <controls:SettingsExpander
-                    Description="The SettingsExpander has the same properties as a SettingsCard"
-                    Header="SettingsExpander"
+                    Description="Personalize your profile information"
+                    Header="Personalization"
                     HeaderIcon="{ui:FontIcon Glyph=&#xE91B;}">
-                    <Button Content="Content" Style="{StaticResource AccentButtonStyle}" />
                     <controls:SettingsExpander.Items>
-                        <controls:SettingsCard Header="A basic SettingsCard within an SettingsExpander">
-                            <Button Content="Button" />
+                        <controls:SettingsCard Description="Change your username" Header="Edit Username">
+                            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                                <TextBox
+                                    x:Name="UsernameTextBox"
+                                    MinWidth="200"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    PlaceholderText="Username"
+                                    Text="{x:Bind ViewModel.currentUser.UserName, Mode=TwoWay}" />
+                                <Button
+                                    x:Name="SaveUsernameButton"
+                                    Margin="5,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Click="SaveUsernameButton_Click"
+                                    Content="Save"
+                                    Style="{StaticResource AccentButtonStyle}" />
+                            </StackPanel>
                         </controls:SettingsCard>
-                        <controls:SettingsCard
-                            Description="SettingsCard within an Expander can be made clickable too!"
-                            Header="This item can be clicked"
-                            IsClickEnabled="True" />
-
-                        <controls:SettingsCard ContentAlignment="Left">
-                            <CheckBox Content="Here the ContentAlignment is set to Left. This is great for e.g. CheckBoxes or RadioButtons" />
+                        <controls:SettingsCard Description="Change your password, to keep your account secure" Header="Edit Password">
+                            <StackPanel HorizontalAlignment="Stretch" Orientation="Horizontal">
+                                <PasswordBox
+                                    x:Name="NewPasswordBox"
+                                    MinWidth="200"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    PlaceholderText="New Password" />
+                                <Button
+                                    x:Name="SavePasswordButton"
+                                    Margin="5,0,0,0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Click="SavePasswordButton_Click"
+                                    Content="Save"
+                                    Style="{StaticResource AccentButtonStyle}" />
+                            </StackPanel>
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
@@ -135,7 +202,7 @@
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
-                <HyperlinkButton Margin="0,8,0,0" Content="Send feedback" />
+                <HyperlinkButton Margin="0,8,0,8" Content="Send feedback" />
             </StackPanel>
         </Grid>
     </ScrollViewer>
