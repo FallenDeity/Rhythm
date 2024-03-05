@@ -237,7 +237,7 @@ public sealed partial class RegisterPage : Page
     }
     private void ValidateDetails()
     {
-        if (string.IsNullOrEmpty(Username.Text) || string.IsNullOrEmpty(Password.Password) || string.IsNullOrEmpty(ConfirmPassword.Password) || string.IsNullOrEmpty(Gender.SelectedValue.ToString()) || string.IsNullOrEmpty(Country.Text))
+        if (string.IsNullOrEmpty(Gender.SelectedValue?.ToString()) || string.IsNullOrEmpty(Country.Text) || PasswordStatus.Text.Contains("invalid") || ConfirmPasswordStatus.Text.Contains("do not match") || RhythmUserStatus.Text.Contains("invalid"))
         {
             RegisterButton.IsEnabled = false;
         }
@@ -250,6 +250,8 @@ public sealed partial class RegisterPage : Page
     private void Username_TextChanged(object sender, TextChangedEventArgs e)
     {
         ValidateDetails();
+        if (RhythmUserStatus.Text.Contains("invalid"))
+            RhythmUserStatus.Visibility = Visibility.Visible;
     }
 
     private void Gender_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -290,11 +292,15 @@ public sealed partial class RegisterPage : Page
     private void Password_PasswordChanged(object sender, RoutedEventArgs e)
     {
         ValidateDetails();
+        if (PasswordStatus.Text.Contains("invalid"))
+            PasswordStatus.Visibility = Visibility.Visible;
     }
 
     private void ConfirmPassword_PasswordChanged(object sender, RoutedEventArgs e)
     {
         ValidateDetails();
+        if (ConfirmPasswordStatus.Text.Contains("do not match"))
+            ConfirmPasswordStatus.Visibility = Visibility.Visible;
     }
 
     private void Register(string username, string password, string gender, string country)
@@ -313,11 +319,6 @@ public sealed partial class RegisterPage : Page
     {
         var genderSelected = ((ComboBoxItem)Gender.SelectedItem).Content.ToString();
         var countrySelected = Country.Text.ToString();
-        if (Password.Password != ConfirmPassword.Password)
-        {
-            await App.MainWindow.ShowMessageDialogAsync("Passwords do not match", "Error");
-            return;
-        }
         if (genderSelected is null)
         {
             await App.MainWindow.ShowMessageDialogAsync("Pick a valid gender", "Error");

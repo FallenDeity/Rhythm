@@ -9,6 +9,7 @@
     xmlns:local="using:Rhythm.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxm="using:Microsoft.UI.Xaml.Media"
+    xmlns:triggers="using:CommunityToolkit.WinUI"
     Loaded="OnLoaded"
     mc:Ignorable="d">
     <Grid>
@@ -84,12 +85,23 @@
                     Margin="0,10,0,10"
                     HorizontalAlignment="Center"
                     Source="/Assets/LockScreenLogo.scale-200.png" />
-                <TextBox
-                    x:Name="Username"
+                <StackPanel
                     Grid.Row="2"
                     Margin="0,10,0,10"
-                    PlaceholderText="Username"
-                    TextChanged="Username_TextChanged" />
+                    VerticalAlignment="Center"
+                    Orientation="Vertical">
+                    <TextBox
+                        x:Name="Username"
+                        PlaceholderText="Username"
+                        TextChanged="Username_TextChanged" />
+                    <TextBlock
+                        x:Name="RhythmUserStatus"
+                        Margin="0,4,0,0"
+                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Username is invalid"
+                        Visibility="Collapsed" />
+                </StackPanel>
                 <Grid Grid.Row="3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -119,18 +131,40 @@
                         SuggestionChosen="AutoSuggestBox_SuggestionChosen"
                         TextChanged="AutoSuggestBox_TextChanged" />
                 </Grid>
-                <PasswordBox
-                    x:Name="Password"
+                <StackPanel
                     Grid.Row="4"
-                    Margin="0,10,0,10"
-                    PasswordChanged="Password_PasswordChanged"
-                    PlaceholderText="Password" />
-                <PasswordBox
-                    x:Name="ConfirmPassword"
+                    Margin="0,10,0,0"
+                    VerticalAlignment="Center"
+                    Orientation="Vertical">
+                    <PasswordBox
+                        x:Name="Password"
+                        PasswordChanged="Password_PasswordChanged"
+                        PlaceholderText="Password" />
+                    <TextBlock
+                        x:Name="PasswordStatus"
+                        Margin="0,4,0,0"
+                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Password is invalid"
+                        Visibility="Collapsed" />
+                </StackPanel>
+                <StackPanel
                     Grid.Row="5"
-                    Margin="0,10,0,10"
-                    PasswordChanged="ConfirmPassword_PasswordChanged"
-                    PlaceholderText="Confirm Password" />
+                    Margin="0,10,0,0"
+                    VerticalAlignment="Center"
+                    Orientation="Vertical">
+                    <PasswordBox
+                        x:Name="ConfirmPassword"
+                        PasswordChanged="ConfirmPassword_PasswordChanged"
+                        PlaceholderText="Confirm Password" />
+                    <TextBlock
+                        x:Name="ConfirmPasswordStatus"
+                        Margin="0,4,0,0"
+                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                        Style="{StaticResource CaptionTextBlockStyle}"
+                        Text="Passwords do not match"
+                        Visibility="Collapsed" />
+                </StackPanel>
                 <Button
                     x:Name="RegisterButton"
                     Grid.Row="6"
@@ -158,5 +192,46 @@
                     Content="Already have an account? Login" />
             </Grid>
         </Border>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="validPassword">
+                    <VisualState.StateTriggers>
+                        <triggers:RegexStateTrigger Expression="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$" Value="{Binding Password, ElementName=Password, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="PasswordStatus.Text" Value="This is a valid password" />
+                        <Setter Target="PasswordStatus.Foreground" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+                        <Setter Target="PasswordStatus.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+            <VisualStateGroup>
+                <VisualState x:Name="validConfirmPassword">
+                    <VisualState.StateTriggers>
+                        <triggers:CompareStateTrigger
+                            Comparison="Equal"
+                            Value="{Binding Password, ElementName=Password, Mode=OneWay}"
+                            To="{Binding Password, ElementName=ConfirmPassword, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ConfirmPasswordStatus.Text" Value="Passwords match" />
+                        <Setter Target="ConfirmPasswordStatus.Foreground" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+                        <Setter Target="ConfirmPasswordStatus.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+            <VisualStateGroup>
+                <VisualState x:Name="validUsername">
+                    <VisualState.StateTriggers>
+                        <triggers:RegexStateTrigger Expression="^[a-zA-Z0-9_]{3,}$" Value="{Binding Text, ElementName=Username, Mode=OneWay}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="RhythmUserStatus.Text" Value="This is a valid username" />
+                        <Setter Target="RhythmUserStatus.Foreground" Value="{ThemeResource SystemFillColorSuccessBrush}" />
+                        <Setter Target="RhythmUserStatus.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>
