@@ -10,6 +10,7 @@ using Windows.Storage.Pickers;
 
 namespace Rhythm.Views;
 
+
 // TODO: Set the URL for your privacy policy by updating SettingsPage_PrivacyTermsLink.NavigateUri in Resources.resw.
 public sealed partial class SettingsPage : Page
 {
@@ -141,12 +142,12 @@ public sealed partial class SettingsPage : Page
         {
             if (ViewModel.currentUser.UserImage.Length > 0)
             {
-
                 var bitmap = await BitmapHelper.GetBitmapAsync(ViewModel.currentUser.UserImage);
                 UserImage.Source = bitmap;
             }
             Username.Text = ViewModel.currentUser.UserName;
             CreatedAt.Text = "joined " + relativize(ViewModel.currentUser.CreatedAt);
+            ViewModel.UserLoaded = true;
         }
     }
 

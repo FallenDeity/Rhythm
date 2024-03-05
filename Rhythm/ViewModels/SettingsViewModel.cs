@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -22,6 +23,8 @@ public partial class SettingsViewModel : ObservableRecipient
     [ObservableProperty]
     private string _versionDescription;
 
+    private bool _userLoaded;
+
     public ICommand SwitchThemeCommand
     {
         get;
@@ -31,6 +34,12 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         get;
         set;
+    }
+
+    public bool UserLoaded
+    {
+        get => _userLoaded;
+        set => SetProperty(ref _userLoaded, value);
     }
 
     public SettingsViewModel(IThemeSelectorService themeSelectorService)
@@ -136,7 +145,7 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = new OracleCommand($"UPDATE USERS SET PASSWORD = :password WHERE USER_ID = :userId", connection);
-        command.Parameters.Add(new OracleParameter("password", password));
+        command.Parameters.Add(new OracleParameter("password", BCrypt.Net.BCrypt.HashPassword(password)));
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
         command.ExecuteNonQuery();
     }
