@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
 using Rhythm.Helpers;
+using Rhythm.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -96,6 +97,7 @@ public sealed partial class LoginPage : Page
         {
             await App.GetService<ILocalSettingsService>().SaveSettingAsync("UserId", result);
             App.MainWindow.Content = App.GetService<ShellPage>();
+            App.GetService<INavigationService>().NavigateTo(typeof(MainViewModel).FullName!);
         }
         else
         {
