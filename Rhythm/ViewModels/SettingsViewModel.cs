@@ -23,6 +23,7 @@ public partial class SettingsViewModel : ObservableRecipient
     [ObservableProperty]
     private string _versionDescription;
 
+    [ObservableProperty]
     private bool _userLoaded;
 
     public ICommand SwitchThemeCommand
@@ -34,12 +35,6 @@ public partial class SettingsViewModel : ObservableRecipient
     {
         get;
         set;
-    }
-
-    public bool UserLoaded
-    {
-        get => _userLoaded;
-        set => SetProperty(ref _userLoaded, value);
     }
 
     public SettingsViewModel(IThemeSelectorService themeSelectorService)
@@ -85,7 +80,7 @@ public partial class SettingsViewModel : ObservableRecipient
         return $"{"AppDisplayName".GetLocalized()} - {version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
     }
 
-    public void LoadUser()
+    public async Task LoadUserAsync()
     {
         Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
         var userId = localSettings.Values["UserId"].ToString();
@@ -93,9 +88,9 @@ public partial class SettingsViewModel : ObservableRecipient
         {
             var uid = userId.Replace("\"", "");
             var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-            var command = new OracleCommand($"SELECT * FROM USERS WHERE USER_ID = :userId", connection);
+            var command = new OracleCommand($"SELECT user_id, username, password, gender, country, playlist_count, favorite_songs_count, created_at, updated_at FROM users WHERE user_id = :userId", connection);
             command.Parameters.Add(new OracleParameter("userId", uid));
-            var reader = command.ExecuteReader();
+            var reader = await command.ExecuteReaderAsync();
             if (reader.Read())
             {
                 currentUser = new RhythmUser
@@ -105,7 +100,6 @@ public partial class SettingsViewModel : ObservableRecipient
                     Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
                     Gender = reader.GetString(reader.GetOrdinal("GENDER")),
                     Country = reader.GetString(reader.GetOrdinal("COUNTRY")),
-                    UserImage = reader.GetValue(reader.GetOrdinal("USER_IMAGE")) as byte[],
                     PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
                     FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
@@ -123,30 +117,57 @@ public partial class SettingsViewModel : ObservableRecipient
         }
     }
 
-    public void UpdateUserImage(byte[] image)
+    public async Task LoadUserImage()
+    {
+        if (UserLoaded)
+        {
+            var userId = currentUser?.UserId;
+            if (userId is not null && currentUser is not null)
+            {
+                var connection = App.GetService<IDatabaseService>().GetOracleConnection();
+                var command = new OracleCommand($"SELECT user_image FROM users WHERE user_id = :userId", connection);
+                command.Parameters.Add(new OracleParameter("userId", userId));
+                var reader = await command.ExecuteReaderAsync();
+                if (reader.Read())
+                {
+                    currentUser.UserImage = reader.GetValue(reader.GetOrdinal("USER_IMAGE")) as byte[];
+                }
+            }
+        }
+    }
+
+    public async Task UpdateUserImage(byte[] image)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-        var command = new OracleCommand($"UPDATE USERS SET USER_IMAGE = :image WHERE USER_ID = :userId", connection);
+        var command = new OracleCommand($"UPDATE users SET user_image = :image WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("image", image));
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
     }
 
-    public void UpdateUserName(string name)
+    public async Task UpdateUserName(string name)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-        var command = new OracleCommand($"UPDATE USERS SET USERNAME = :name WHERE USER_ID = :userId", connection);
+        var command = new OracleCommand($"UPDATE users SET username = :name WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("name", name));
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
     }
 
-    public void UpdateUserPassword(string password)
+    public async Task UpdateUserPassword(string password)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-        var command = new OracleCommand($"UPDATE USERS SET PASSWORD = :password WHERE USER_ID = :userId", connection);
+        var command = new OracleCommand($"UPDATE users SET password = :password WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("password", BCrypt.Net.BCrypt.HashPassword(password)));
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
+    }
+
+    public async Task DeleteAccount()
+    {
+        var connection = App.GetService<IDatabaseService>().GetOracleConnection();
+        var command = new OracleCommand($"DELETE FROM users WHERE user_id = :userId", connection);
+        command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
+        await command.ExecuteNonQueryAsync();
     }
 }

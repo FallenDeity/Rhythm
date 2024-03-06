@@ -59,13 +59,13 @@ public sealed partial class LoginPage : Page
         ValidateDetails();
     }
 
-    private string? Login(string username, string password)
+    private async Task<string?> Login(string username, string password)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM USERS WHERE USERNAME = :username";
         command.Parameters.Add(new OracleParameter("username", username));
-        var reader = command.ExecuteReader();
+        var reader = await command.ExecuteReaderAsync();
         if (reader.Read())
         {
             var storedPassword = reader.GetString(reader.GetOrdinal("PASSWORD"));
@@ -88,7 +88,7 @@ public sealed partial class LoginPage : Page
         var username = Username.Text;
         var password = Password.Password;
         var rememberMe = RememberMe.IsChecked;
-        var result = await Task.Run(() => Login(username, password));
+        var result = await Login(username, password);
         if (result is not null && rememberMe == true)
         {
             await App.GetService<ILocalSettingsService>().SaveSettingAsync("IsAuthenticated", true);

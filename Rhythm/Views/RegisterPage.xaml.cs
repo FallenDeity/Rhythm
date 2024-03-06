@@ -280,7 +280,7 @@ public sealed partial class RegisterPage : Page
             {
                 suitableItems.Add("No results found");
             }
-            sender.ItemsSource = suitableItems;
+            CVS.Source = suitableItems;
         }
     }
 
@@ -303,7 +303,7 @@ public sealed partial class RegisterPage : Page
             ConfirmPasswordStatus.Visibility = Visibility.Visible;
     }
 
-    private void Register(string username, string password, string gender, string country)
+    private async Task Register(string username, string password, string gender, string country)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = connection.CreateCommand();
@@ -312,7 +312,7 @@ public sealed partial class RegisterPage : Page
         command.Parameters.Add(new OracleParameter("password", BCrypt.Net.BCrypt.HashPassword(password)));
         command.Parameters.Add(new OracleParameter("gender", gender));
         command.Parameters.Add(new OracleParameter("country", country));
-        command.ExecuteNonQuery();
+        await command.ExecuteNonQueryAsync();
     }
 
     private async void RegisterButton_Click(object sender, RoutedEventArgs e)
@@ -339,7 +339,7 @@ public sealed partial class RegisterPage : Page
         RegisterButton.IsEnabled = false;
         var username = Username.Text;
         var password = Password.Password;
-        await Task.Run(() => Register(username, password, genderSelected.ToLower(), countrySelected));
+        await Register(username, password, genderSelected.ToLower(), countrySelected);
         await App.MainWindow.ShowMessageDialogAsync("User registered successfully", "Success");
         RegisterButtonStackPanel.Children.RemoveAt(0);
         RegisterButton.IsEnabled = true;

@@ -31,7 +31,6 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 TextWrapping="NoWrap" />
         </Grid>
-        <!--  Login Form  -->
         <Border
             x:Name="LoginFormBorder"
             Width="450"

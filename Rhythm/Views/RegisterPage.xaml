@@ -3,15 +3,14 @@
     x:Class="Rhythm.Views.RegisterPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="using:Rhythm.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:i="using:Microsoft.Xaml.Interactivity"
-    xmlns:local="using:Rhythm.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:muxm="using:Microsoft.UI.Xaml.Media"
     xmlns:triggers="using:CommunityToolkit.WinUI"
     Loaded="OnLoaded"
     mc:Ignorable="d">
+    <Page.Resources>
+        <CollectionViewSource x:Name="CVS" />
+    </Page.Resources>
     <Grid>
         <Grid
             x:Name="AppTitleBar"
@@ -32,9 +31,8 @@
                 Style="{StaticResource CaptionTextBlockStyle}"
                 TextWrapping="NoWrap" />
         </Grid>
-        <!--  Login Form  -->
         <Border
-            x:Name="LoginFormBorder"
+            x:Name="RegisterFormBorder"
             Width="450"
             Height="520"
             Margin="0,0,0,0"
@@ -45,7 +43,7 @@
             BorderThickness="0.4"
             CornerRadius="15">
             <Grid
-                x:Name="LoginForm"
+                x:Name="RegisterForm"
                 Width="400"
                 Margin="0,0,0,0"
                 HorizontalAlignment="Center"
@@ -125,7 +123,9 @@
                         Margin="5,0,0,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
+                        AutoMaximizeSuggestionArea="False"
                         AutomationProperties.Name="Basic AutoSuggestBox"
+                        ItemsSource="{x:Bind CVS.View, Mode=OneWay}"
                         MaxSuggestionListHeight="200"
                         PlaceholderText="Select Country"
                         SuggestionChosen="AutoSuggestBox_SuggestionChosen"

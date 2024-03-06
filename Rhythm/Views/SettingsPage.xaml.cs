@@ -58,6 +58,8 @@ public sealed partial class SettingsPage : Page
                 ThemeComboBox.SelectedIndex = 2;
                 break;
         }
+        SaveUsernameButton.IsEnabled = false;
+        SavePasswordButton.IsEnabled = false;
     }
 
     private void LogoutButton_Click(object sender, RoutedEventArgs e)
@@ -80,7 +82,6 @@ public sealed partial class SettingsPage : Page
         var file = await openPicker.PickSingleFileAsync();
         if (file != null)
         {
-            // read file as byte array
             var buffer = await FileIO.ReadBufferAsync(file);
             var dataReader = Windows.Storage.Streams.DataReader.FromBuffer(buffer);
             var bytes = new byte[buffer.Length];
@@ -90,7 +91,7 @@ public sealed partial class SettingsPage : Page
             {
 
                 ViewModel.currentUser.UserImage = bytes;
-                await Task.Run(() => ViewModel.UpdateUserImage(bytes));
+                await ViewModel.UpdateUserImage(bytes);
             }
         }
     }
@@ -137,17 +138,19 @@ public sealed partial class SettingsPage : Page
 
     private async Task LoadUserData()
     {
-        await Task.Run(() => ViewModel.LoadUser());
+        await ViewModel.LoadUserAsync();
         if (ViewModel.currentUser is not null)
         {
+            Username.Text = ViewModel.currentUser.UserName;
+            CreatedAt.Text = "joined " + relativize(ViewModel.currentUser.CreatedAt);
+            UsernameTextBox.Text = ViewModel.currentUser.UserName;
+            ViewModel.UserLoaded = true;
+            await ViewModel.LoadUserImage();
             if (ViewModel.currentUser.UserImage.Length > 0)
             {
                 var bitmap = await BitmapHelper.GetBitmapAsync(ViewModel.currentUser.UserImage);
                 UserImage.Source = bitmap;
             }
-            Username.Text = ViewModel.currentUser.UserName;
-            CreatedAt.Text = "joined " + relativize(ViewModel.currentUser.CreatedAt);
-            ViewModel.UserLoaded = true;
         }
     }
 
@@ -174,18 +177,12 @@ public sealed partial class SettingsPage : Page
 
     private async void SaveUsernameButton_Click(object sender, RoutedEventArgs e)
     {
-        if (UsernameTextBox.Text.Length == 0)
-        {
-            await App.MainWindow.ShowMessageDialogAsync("Username cannot be empty");
-            return;
-        }
         if (ViewModel.currentUser is not null)
         {
             var name = UsernameTextBox.Text;
-            await Task.Run(() => ViewModel.UpdateUserName(name));
-            ViewModel.currentUser.UserName = UsernameTextBox.Text;
+            await ViewModel.UpdateUserName(name);
             Username.Text = ViewModel.currentUser.UserName;
-            UsernameTextBox.Text = "";
+            await App.MainWindow.ShowMessageDialogAsync("Username updated successfully");
         }
     }
 
@@ -194,16 +191,46 @@ public sealed partial class SettingsPage : Page
         if (ViewModel.currentUser is not null)
         {
             var password = NewPasswordBox.Password;
-            await Task.Run(() => ViewModel.UpdateUserPassword(password));
-            ViewModel.currentUser.Password = NewPasswordBox.Password;
-            NewPasswordBox.Password = "";
+            await ViewModel.UpdateUserPassword(password);
             await App.MainWindow.ShowMessageDialogAsync("Password updated successfully");
 
         }
-        else
-        {
+    }
 
-            await App.MainWindow.ShowMessageDialogAsync("User not found");
+    private void UsernameTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (UsernameStatus.Text.Contains("invalid"))
+        {
+            UsernameStatus.Visibility = Visibility.Visible;
+            SaveUsernameButton.IsEnabled = false;
+        }
+    }
+
+    private void PasswordContentChanged(object sender, RoutedEventArgs e)
+    {
+        if (PasswordStatus.Text.Contains("invalid"))
+        {
+            PasswordStatus.Visibility = Visibility.Visible;
+            SavePasswordButton.IsEnabled = false;
+        }
+    }
+
+    private async void DeleteAccountButton_Click(object sender, RoutedEventArgs e)
+    {
+        ContentDialog deleteAccountDialog = new ContentDialog
+        {
+            XamlRoot = this.XamlRoot,
+            Title = "Delete Account",
+            Content = "Are you sure you want to delete your account? This action cannot be undone.",
+            PrimaryButtonText = "Delete",
+            CloseButtonText = "Cancel"
+        };
+        ContentDialogResult result = await deleteAccountDialog.ShowAsync();
+        if (result == ContentDialogResult.Primary && ViewModel.currentUser is not null)
+        {
+            await ViewModel.DeleteAccount();
+            await App.GetService<ILocalSettingsService>().ClearAll();
+            App.MainWindow.Content = App.GetService<LoginPage>();
         }
     }
 }

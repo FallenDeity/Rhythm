@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Oracle.ManagedDataAccess.Client;
 using Rhythm.Activation;
 using Rhythm.Contracts.Services;
 using Rhythm.Views;
@@ -32,8 +33,23 @@ public class ActivationService : IActivationService
         if (App.MainWindow.Content == null)
         {
             Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-            if (localSettings.Values["IsAuthenticated"] != null && bool.Parse(localSettings.Values["IsAuthenticated"].ToString() ?? "false"))
+            if (localSettings.Values["IsAuthenticated"] != null && bool.Parse(localSettings.Values["IsAuthenticated"].ToString() ?? "false") && localSettings.Values["UserId"] != null)
             {
+                var userId = localSettings.Values["UserId"].ToString().Replace("\"", "");
+                var connection = App.GetService<IDatabaseService>().GetOracleConnection();
+                var command = connection.CreateCommand();
+                command.CommandText = "SELECT * FROM users WHERE user_id = :userId";
+                command.Parameters.Add(new OracleParameter("userId", userId));
+                var reader = await command.ExecuteReaderAsync();
+                if (reader.Read())
+                {
+                    _shell = App.GetService<ShellPage>();
+                }
+                else
+                {
+                    await App.GetService<ILocalSettingsService>().ClearAll();
+                    _shell = App.GetService<LoginPage>();
+                }
                 _shell = App.GetService<ShellPage>();
             }
             else
