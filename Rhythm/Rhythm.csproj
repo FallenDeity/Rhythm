@@ -19,6 +19,10 @@
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Never</AppxBundle>
+	<RestoreAdditionalProjectSources>
+		https://api.nuget.org/v3/index.json;
+		https://pkgs.dev.azure.com/dotnet/CommunityToolkit/_packaging/CommunityToolkit-PullRequests/nuget/v3/index.json
+	</RestoreAdditionalProjectSources>
   </PropertyGroup>
 
   <ItemGroup>
