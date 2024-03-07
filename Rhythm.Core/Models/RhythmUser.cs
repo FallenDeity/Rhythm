@@ -17,12 +17,12 @@ public class RhythmUser
         get; set;
     }
 
-    public string Country
+    public string? Country
     {
         get; set;
     }
 
-    public string Gender
+    public string? Gender
     {
         get; set;
     }
