@@ -14,7 +14,7 @@ public class DatabaseNullException : Exception
 public class DatabaseService : IDatabaseService
 {
 
-    private readonly string connectionString = "ORACLE_CONNECTION_STRING";
+    private readonly string connectionString = "ORACLE_DB_CONNECTION_STRING";
 
     public OracleConnection? Connection
     {

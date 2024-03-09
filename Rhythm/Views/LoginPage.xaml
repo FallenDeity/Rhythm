@@ -97,10 +97,16 @@
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center" />
                     <TextBlock
-                        Margin="20,0,0,0"
-                        HorizontalAlignment="Right"
+                        Margin="30,0,0,0"
+                        HorizontalAlignment="Left"
                         VerticalAlignment="Center"
                         Text="Remember Me" />
+                    <HyperlinkButton
+                        x:Name="RegisterButton"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Right"
+                        Click="RegisterButton_Click"
+                        Content="Sign up for an Account" />
                 </Grid>
                 <Button
                     x:Name="LoginButton"
@@ -120,13 +126,25 @@
                             Text="Login" />
                     </StackPanel>
                 </Button>
-                <HyperlinkButton
-                    x:Name="RegisterButton"
+                <StackPanel
                     Grid.Row="6"
-                    Margin="0,20,0,0"
+                    Margin="0,10,0,0"
                     HorizontalAlignment="Center"
-                    Click="RegisterButton_Click"
-                    Content="Don't have an account? Register here." />
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <HyperlinkButton
+                        x:Uid="TOS_Button"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Content="Terms and Services" />
+                    <HyperlinkButton
+                        x:Uid="PP_Button"
+                        Margin="0,0,0,0"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Content="Privacy Policy" />
+                </StackPanel>
             </Grid>
         </Border>
     </Grid>

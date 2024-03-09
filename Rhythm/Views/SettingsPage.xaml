@@ -238,21 +238,28 @@
                     <controls:SettingsExpander.Items>
                         <controls:SettingsCard
                             x:Uid="Settings_AboutDescription"
-                            Header="App description"
+                            Header="About Us"
                             HeaderIcon="{ui:FontIcon Glyph=&#xE946;}">
-                            <HyperlinkButton Content="Learn more" />
+                            <HyperlinkButton x:Uid="LearnMore" Content="Learn more" />
                         </controls:SettingsCard>
                         <controls:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Left">
                             <StackPanel Margin="-12,0,0,0" Orientation="Vertical">
-                                <HyperlinkButton x:Uid="SettingsPage_PrivacyTermsLink" Margin="{StaticResource SettingsPageHyperlinkButtonMargin}" />
-                                <HyperlinkButton Content="Link 1" />
-                                <HyperlinkButton Content="Link 2" />
-                                <HyperlinkButton Content="Link 3" />
+                                <HyperlinkButton
+                                    x:Uid="TOS_Button"
+                                    Margin="{StaticResource SettingsPageHyperlinkButtonMargin}"
+                                    Content="Terms Of Service" />
+                                <HyperlinkButton
+                                    x:Uid="PP_Button"
+                                    Margin="{StaticResource SettingsPageHyperlinkButtonMargin}"
+                                    Content="Privacy Policy" />
                             </StackPanel>
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
-                <HyperlinkButton Margin="0,8,0,8" Content="Send feedback" />
+                <HyperlinkButton
+                    x:Uid="FeedBack_Link"
+                    Margin="0,8,0,8"
+                    Content="Send feedback" />
             </StackPanel>
         </Grid>
         <VisualStateManager.VisualStateGroups>
