@@ -157,7 +157,7 @@
     <value>About this application</value>
   </data>
   <data name="Settings_AboutDescription.Description" xml:space="preserve">
-    <value>TODO: Replace with your app description.</value>
+    <value>Rhythm is more than just a music app—it's a paradigm shift in how we experience and engage with music. With a sleek interface and intuitive design, Rhythm simplifies the entire process of discovering, organizing, and enjoying music.</value>
   </data>
   <data name="SettingsPage_PrivacyTermsLink.Content" xml:space="preserve">
     <value>Privacy Statement</value>
@@ -194,5 +194,17 @@
     &lt;/binding&gt;
   &lt;/visual&gt;
 &lt;/toast&gt;</value>
+  </data>
+  <data name="PP_Button.NavigateUri" xml:space="preserve">
+    <value>https://github.com/FallenDeity/WinUiAppDemo/blob/main/PrivacyPolicy.md</value>
+  </data>
+  <data name="TOS_Button.NavigateUri" xml:space="preserve">
+    <value>https://github.com/FallenDeity/WinUiAppDemo/blob/main/TermsAndConditions.md</value>
+  </data>
+  <data name="FeedBack_Link.NavigateUri" xml:space="preserve">
+    <value>https://github.com/FallenDeity/WinUiAppDemo/issues</value>
+  </data>
+  <data name="LearnMore.NavigateUri" xml:space="preserve">
+    <value>https://github.com/FallenDeity/WinUiAppDemo</value>
   </data>
 </root>
