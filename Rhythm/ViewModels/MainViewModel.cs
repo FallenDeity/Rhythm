@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Rhythm.Contracts.ViewModels;
 
 namespace Rhythm.ViewModels;
 

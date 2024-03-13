@@ -9,4 +9,6 @@ public interface ILocalSettingsService
     Task ClearAll();
 
     string GetFilePath();
+
+    string GetFolderPath();
 }

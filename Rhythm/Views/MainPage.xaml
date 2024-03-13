@@ -4,11 +4,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Grid x:Name="ContentArea">
-        <Image Height="400" Source="/Assets/LargeTile.scale-400.png" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Image
+            Grid.Row="0"
+            Height="400"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Source="/Assets/LargeTile.scale-400.png" />
         <Button
             x:Name="myButton"
+            Grid.Row="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
             Click="Button_ClickAsync"
             Content="Standard XAML button" />
     </Grid>

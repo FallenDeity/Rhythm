@@ -27,15 +27,24 @@ public class ActivationService : IActivationService
         await InitializeAsync();
 
         // Connect to database
-        App.GetService<IDatabaseService>().ConnectToOracle();
+        var connected = App.GetService<IDatabaseService>().ConnectToOracle();
+        if (!connected)
+        {
+            App.MainWindow.Content = App.GetService<LoginPage>();
+            App.MainWindow.Activate();
+            await StartupAsync();
+            return;
+        }
 
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
             Windows.Storage.ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
-            if (localSettings.Values["IsAuthenticated"] != null && bool.Parse(localSettings.Values["IsAuthenticated"].ToString() ?? "false") && localSettings.Values["UserId"] != null)
+            var user = localSettings.Values["UserId"];
+            var auth = localSettings.Values["IsAuthenticated"];
+            if (auth != null && bool.Parse(auth.ToString() ?? "false") && user != null)
             {
-                var userId = localSettings.Values["UserId"].ToString().Replace("\"", "");
+                var userId = user.ToString()?.Replace("\"", "");
                 var connection = App.GetService<IDatabaseService>().GetOracleConnection();
                 var command = connection.CreateCommand();
                 command.CommandText = "SELECT * FROM users WHERE user_id = :userId";

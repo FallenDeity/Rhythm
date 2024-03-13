@@ -3,18 +3,20 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="using:Rhythm.Behaviors"
+    xmlns:controls="using:Rhythm.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="using:Rhythm.Helpers"
     xmlns:i="using:Microsoft.Xaml.Interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:muxm="using:Microsoft.UI.Xaml.Media"
-    Loaded="OnLoaded">
+    Loaded="OnLoaded"
+    NavigationCacheMode="Enabled">
     <Grid>
         <Grid.Resources>
             <ResourceDictionary>
                 <ResourceDictionary.ThemeDictionaries>
                     <ResourceDictionary x:Key="Light">
-                        <SolidColorBrush x:Key="myBrush" Color="{StaticResource SystemBaseHighColor}" />
+                        <SolidColorBrush x:Key="myBrush" Color="{StaticResource SystemAltLowColor}" />
                         <AcrylicBrush
                             x:Key="NavigationViewDefaultPaneBackground"
                             FallbackColor="#F2F2F2"
@@ -56,7 +58,7 @@
         <NavigationView
             x:Name="NavigationViewControl"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            ExpandedModeThresholdWidth="800"
+            ExpandedModeThresholdWidth="1000"
             Header="{x:Bind ((ContentControl)ViewModel.Selected).Content, Mode=OneWay}"
             IsBackButtonVisible="Visible"
             IsBackEnabled="{x:Bind ViewModel.IsBackEnabled, Mode=OneWay}"
@@ -141,8 +143,19 @@
                     </behaviors:NavigationViewHeaderBehavior.DefaultHeaderTemplate>
                 </behaviors:NavigationViewHeaderBehavior>
             </i:Interaction.Behaviors>
-            <Grid Margin="{StaticResource NavigationViewPageContentMargin}">
-                <Frame x:Name="NavigationFrame" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0" Margin="{StaticResource NavigationViewPageContentMargin}">
+                    <Frame x:Name="NavigationFrame" />
+                </Grid>
+                <controls:RhythmMediaPlayer
+                    x:Name="MediaPlayer"
+                    Grid.Row="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom" />
             </Grid>
         </NavigationView>
     </Grid>

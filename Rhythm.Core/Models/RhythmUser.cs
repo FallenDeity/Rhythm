@@ -1,18 +1,20 @@
-﻿namespace Rhythm.Core.Models;
+﻿#nullable enable
+
+namespace Rhythm.Core.Models;
 
 public class RhythmUser
 {
-    public string UserId
+    public required string UserId
     {
         get; set;
     }
 
-    public string UserName
+    public required string UserName
     {
         get; set;
     }
 
-    public string Password
+    public required string Password
     {
         get; set;
     }
@@ -27,7 +29,7 @@ public class RhythmUser
         get; set;
     }
 
-    public byte[] UserImage
+    public required byte[] UserImage
     {
         get; set;
     }

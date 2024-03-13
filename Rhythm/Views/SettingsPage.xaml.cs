@@ -11,7 +11,6 @@ using Windows.Storage.Pickers;
 namespace Rhythm.Views;
 
 
-// TODO: Set the URL for your privacy policy by updating SettingsPage_PrivacyTermsLink.NavigateUri in Resources.resw.
 public sealed partial class SettingsPage : Page
 {
     public static readonly string PageName = "Settings";
@@ -86,66 +85,43 @@ public sealed partial class SettingsPage : Page
             var dataReader = Windows.Storage.Streams.DataReader.FromBuffer(buffer);
             var bytes = new byte[buffer.Length];
             dataReader.ReadBytes(bytes);
+            if (bytes.Length > 3000000)
+            {
+                await App.MainWindow.ShowMessageDialogAsync("Image size must be less than 3MB");
+                return;
+            }
             UserImage.Source = await BitmapHelper.GetBitmapAsync(bytes);
             if (ViewModel.currentUser is not null)
             {
-
                 ViewModel.currentUser.UserImage = bytes;
-                await ViewModel.UpdateUserImage(bytes);
+                await Task.Run(() => ViewModel.UpdateUserImage(bytes));
             }
         }
     }
 
-    public static string relativize(DateTime date)
+    public static string Relativize(DateTime date)
     {
         var span = DateTime.Now - date;
-        if (span.Days > 365)
-        {
-            var years = span.Days / 365;
-            if (span.Days % 365 != 0)
-            {
-                years += 1;
-            }
-            return $"about {years} {(years == 1 ? "year" : "years")} ago";
-        }
-        if (span.Days > 30)
-        {
-            var months = span.Days / 30;
-            if (span.Days % 31 != 0)
-            {
-                months += 1;
-            }
-            return $"about {months} {(months == 1 ? "month" : "months")} ago";
-        }
-        if (span.Days > 0)
-        {
-            return $"about {span.Days} {(span.Days == 1 ? "day" : "days")} ago";
-        }
-        if (span.Hours > 0)
-        {
-            return $"about {span.Hours} {(span.Hours == 1 ? "hour" : "hours")} ago";
-        }
-        if (span.Minutes > 0)
-        {
-            return $"about {span.Minutes} {(span.Minutes == 1 ? "minute" : "minutes")} ago";
-        }
-        if (span.Seconds > 5)
-        {
-            return $"about {span.Seconds} seconds ago";
-        }
-        return "just now";
+
+        if (span.Days > 365) return $"about {span.Days / 365} year{(span.Days / 365 == 1 ? "" : "s")} ago";
+        if (span.Days > 30) return $"about {span.Days / 30} month{(span.Days / 30 == 1 ? "" : "s")} ago";
+        if (span.Days > 0) return $"about {span.Days} day{(span.Days == 1 ? "" : "s")} ago";
+        if (span.Hours > 0) return $"about {span.Hours} hour{(span.Hours == 1 ? "" : "s")} ago";
+        if (span.Minutes > 0) return $"about {span.Minutes} minute{(span.Minutes == 1 ? "" : "s")} ago";
+        return span.Seconds > 5 ? $"about {span.Seconds} seconds ago" : "just now";
     }
+
 
     private async Task LoadUserData()
     {
-        await ViewModel.LoadUserAsync();
+        await Task.Run(() => ViewModel.LoadUserAsync());
         if (ViewModel.currentUser is not null)
         {
             Username.Text = ViewModel.currentUser.UserName;
-            CreatedAt.Text = "joined " + relativize(ViewModel.currentUser.CreatedAt);
+            CreatedAt.Text = "joined " + Relativize(ViewModel.currentUser.CreatedAt);
             UsernameTextBox.Text = ViewModel.currentUser.UserName;
             ViewModel.UserLoaded = true;
-            await ViewModel.LoadUserImage();
+            await Task.Run(() => ViewModel.LoadUserImage());
             if (ViewModel.currentUser.UserImage.Length > 0)
             {
                 var bitmap = await BitmapHelper.GetBitmapAsync(ViewModel.currentUser.UserImage);
@@ -180,7 +156,7 @@ public sealed partial class SettingsPage : Page
         if (ViewModel.currentUser is not null)
         {
             var name = UsernameTextBox.Text;
-            await ViewModel.UpdateUserName(name);
+            await Task.Run(() => ViewModel.UpdateUserName(name));
             Username.Text = ViewModel.currentUser.UserName;
             await App.MainWindow.ShowMessageDialogAsync("Username updated successfully");
         }
@@ -191,7 +167,7 @@ public sealed partial class SettingsPage : Page
         if (ViewModel.currentUser is not null)
         {
             var password = NewPasswordBox.Password;
-            await ViewModel.UpdateUserPassword(password);
+            await Task.Run(() => ViewModel.UpdateUserPassword(password));
             await App.MainWindow.ShowMessageDialogAsync("Password updated successfully");
 
         }
@@ -228,7 +204,7 @@ public sealed partial class SettingsPage : Page
         ContentDialogResult result = await deleteAccountDialog.ShowAsync();
         if (result == ContentDialogResult.Primary && ViewModel.currentUser is not null)
         {
-            await ViewModel.DeleteAccount();
+            await Task.Run(() => ViewModel.DeleteAccount());
             await App.GetService<ILocalSettingsService>().ClearAll();
             App.MainWindow.Content = App.GetService<LoginPage>();
         }

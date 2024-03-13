@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
+using Rhythm.Contracts.ViewModels;
 using Rhythm.Core.Models;
 using Rhythm.Helpers;
 using Rhythm.Views;
@@ -13,7 +14,7 @@ using Windows.ApplicationModel;
 
 namespace Rhythm.ViewModels;
 
-public partial class SettingsViewModel : ObservableRecipient
+public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 {
     private readonly IThemeSelectorService _themeSelectorService;
 
@@ -98,6 +99,7 @@ public partial class SettingsViewModel : ObservableRecipient
                     UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
                     UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
                     Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
+                    UserImage = new byte[0],
                     Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
                     Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
                     PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
@@ -126,11 +128,12 @@ public partial class SettingsViewModel : ObservableRecipient
             {
                 var connection = App.GetService<IDatabaseService>().GetOracleConnection();
                 var command = new OracleCommand($"SELECT user_image FROM users WHERE user_id = :userId", connection);
+                command.InitialLOBFetchSize = -1;
                 command.Parameters.Add(new OracleParameter("userId", userId));
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read())
                 {
-                    currentUser.UserImage = reader.GetValue(reader.GetOrdinal("USER_IMAGE")) as byte[];
+                    currentUser.UserImage = (byte[])reader.GetValue(reader.GetOrdinal("USER_IMAGE"));
                 }
             }
         }
@@ -169,5 +172,17 @@ public partial class SettingsViewModel : ObservableRecipient
         var command = new OracleCommand($"DELETE FROM users WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
         await command.ExecuteNonQueryAsync();
+    }
+
+    public void OnNavigatedTo(object parameter)
+    {
+        ShellPage page = (ShellPage)App.MainWindow.Content;
+        page.RhythmPlayer.Visibility = Visibility.Collapsed;
+    }
+
+    public void OnNavigatedFrom()
+    {
+        ShellPage page = (ShellPage)App.MainWindow.Content;
+        page.RhythmPlayer.Visibility = Visibility.Visible;
     }
 }

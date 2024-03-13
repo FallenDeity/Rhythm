@@ -339,7 +339,7 @@ public sealed partial class RegisterPage : Page
         RegisterButton.IsEnabled = false;
         var username = Username.Text;
         var password = Password.Password;
-        await Register(username, password, genderSelected.ToLower(), countrySelected);
+        await Task.Run(() => Register(username, password, genderSelected.ToLower(), countrySelected));
         await App.MainWindow.ShowMessageDialogAsync("User registered successfully", "Success");
         RegisterButtonStackPanel.Children.RemoveAt(0);
         RegisterButton.IsEnabled = true;

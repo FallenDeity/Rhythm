@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="Rhythm.Controls.RhythmQueueControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:Rhythm.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Loaded="UserControl_Loaded"
+    mc:Ignorable="d">
+    <Grid MinWidth="310">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock
+            Grid.Row="0"
+            Margin="10,0,0,10"
+            Style="{StaticResource SubtitleTextBlockStyle}"
+            Text="Now Playing" />
+        <StackPanel
+            Grid.Row="1"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Orientation="Horizontal">
+            <Grid
+                Width="64"
+                Height="64"
+                Margin="10,0,10,10"
+                Background="{ThemeResource LayerOnAcrylicFillColorDefault}"
+                CornerRadius="6">
+                <Image
+                    x:Name="NowPlayingCover"
+                    Width="64"
+                    Height="64" />
+            </Grid>
+            <StackPanel
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Orientation="Vertical">
+                <TextBlock
+                    x:Name="NowPlayingTitle"
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Title"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    x:Name="NowPlayingArtist"
+                    FontSize="12"
+                    Text="Artist"
+                    TextWrapping="Wrap" />
+            </StackPanel>
+        </StackPanel>
+        <Border
+            x:Name="QueueSeparator"
+            Grid.Row="2"
+            Height="0.5"
+            Margin="0,0,0,10"
+            Background="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
+        <TextBlock
+            x:Name="UpcomingTitle"
+            Grid.Row="3"
+            Margin="10,0,0,10"
+            Style="{StaticResource SubtitleTextBlockStyle}"
+            Text="Upcoming" />
+        <ScrollViewer
+            x:Name="QueueScrollViewer"
+            Grid.Row="4"
+            Width="300"
+            MaxHeight="250"
+            HorizontalScrollBarVisibility="Disabled"
+            HorizontalScrollMode="Disabled"
+            VerticalScrollBarVisibility="Auto"
+            ZoomMode="Disabled" />
+    </Grid>
+</UserControl>

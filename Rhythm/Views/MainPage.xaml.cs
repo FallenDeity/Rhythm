@@ -1,4 +1,6 @@
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
 using Rhythm.ViewModels;
@@ -22,14 +24,11 @@ public sealed partial class MainPage : Page
         InitializeComponent();
     }
 
-    private void Button_ClickAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void Button_ClickAsync(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var stopwatch = new System.Diagnostics.Stopwatch();
-        stopwatch.Start();
-        var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-        var command = new OracleCommand("SELECT 1 FROM DUAL", connection);
-        command.ExecuteNonQuery();
-        stopwatch.Stop();
-        App.MainWindow.ShowMessageDialogAsync($"Elapsed Time: {stopwatch.ElapsedMilliseconds}ms", "Database Connection Test");
+        var page = (ShellPage)App.MainWindow.Content;
+        // page.RhythmPlayer.PlayTrack("24daa65d-0a78-427c-9533-8d14f7ca9c17");
+        await page.RhythmPlayer.PlayAlbum("a01f3cb4-6165-4669-8d0c-c48c1bbcff5f");
+        // page.RhythmPlayer.TrackId = "24daa65d-0a78-427c-9533-8d14f7ca9c17";
     }
 }

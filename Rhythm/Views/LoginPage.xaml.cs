@@ -25,10 +25,23 @@ public sealed partial class LoginPage : Page
         AppTitleBarText.Text = "Rhythm - Login";
     }
 
-    private void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private async void OnLoaded(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         TitleBarHelper.UpdateTitleBar(RequestedTheme);
         ValidateDetails();
+        var db = App.GetService<IDatabaseService>();
+        if (!db.IsConnected())
+        {
+            ContentDialog dialog = new ContentDialog
+            {
+                Title = "Database Connection Error",
+                Content = "There was an error connecting to the database. Please check your internet connection and try again.",
+                CloseButtonText = "Ok",
+                XamlRoot = this.XamlRoot
+            };
+            dialog.CloseButtonClick += (s, e) => { App.MainWindow.Close(); };
+            await dialog.ShowAsync();
+        }
     }
 
     private void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -88,7 +101,7 @@ public sealed partial class LoginPage : Page
         var username = Username.Text;
         var password = Password.Password;
         var rememberMe = RememberMe.IsChecked;
-        var result = await Login(username, password);
+        var result = await Task.Run(() => Login(username, password));
         if (result is not null && rememberMe == true)
         {
             await App.GetService<ILocalSettingsService>().SaveSettingAsync("IsAuthenticated", true);

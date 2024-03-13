@@ -106,4 +106,9 @@ public class LocalSettingsService : ILocalSettingsService
     {
         return Path.Combine(_applicationDataFolder, _localsettingsFile);
     }
+
+    public string GetFolderPath()
+    {
+        return _applicationDataFolder;
+    }
 }

@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Rhythm.Contracts.Services;
+using Rhythm.Controls;
 using Rhythm.Helpers;
 using Rhythm.ViewModels;
 using Windows.System;
@@ -122,4 +123,6 @@ public sealed partial class ShellPage : Page
     {
         controlsSearchBox.Focus(FocusState.Programmatic);
     }
+
+    public RhythmMediaPlayer RhythmPlayer => MediaPlayer;
 }
