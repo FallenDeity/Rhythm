@@ -27,6 +27,8 @@ public class DatabaseService : IDatabaseService
 
     private readonly Dictionary<string, RhythmAlbum> albums = new();
 
+    private readonly Dictionary<string, RhythmPlaylist> playlists = new();
+
     public OracleConnection? Connection
     {
         get;
@@ -223,7 +225,7 @@ public class DatabaseService : IDatabaseService
     public async Task<RhythmAlbum?> GetAlbum(string albumId)
     {
         if (albums.ContainsKey(albumId)) return albums[albumId];
-        var cmd = new OracleCommand("SELECT album_id, album_name, album_image_url, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
+        var cmd = new OracleCommand("SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
         cmd.Parameters.Add(new OracleParameter("albumId", albumId));
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
@@ -233,7 +235,6 @@ public class DatabaseService : IDatabaseService
                 AlbumId = reader.GetString(reader.GetOrdinal("ALBUM_ID")),
                 AlbumName = reader.GetString(reader.GetOrdinal("ALBUM_NAME")),
                 AlbumImage = Array.Empty<byte>(),
-                AlbumImageUrl = reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL")),
                 ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
                 TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
@@ -249,7 +250,7 @@ public class DatabaseService : IDatabaseService
     public async Task<RhythmAlbum[]> GetAlbums(string[] albumIds)
     {
         var _albums = new List<RhythmAlbum>();
-        var cmd = new OracleCommand("SELECT album_id, album_name, album_image_url, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
+        var cmd = new OracleCommand("SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
         cmd.Parameters.Add(new OracleParameter("albumId", OracleDbType.Varchar2));
         foreach (var albumId in albumIds)
         {
@@ -267,7 +268,6 @@ public class DatabaseService : IDatabaseService
                     AlbumId = reader.GetString(reader.GetOrdinal("ALBUM_ID")),
                     AlbumName = reader.GetString(reader.GetOrdinal("ALBUM_NAME")),
                     AlbumImage = Array.Empty<byte>(),
-                    AlbumImageUrl = reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL")),
                     ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
@@ -279,6 +279,70 @@ public class DatabaseService : IDatabaseService
             }
         }
         return _albums.ToArray();
+    }
+
+    public async Task<RhythmPlaylist?> GetPlaylist(string playlistId)
+    {
+        if (playlists.ContainsKey(playlistId)) return playlists[playlistId];
+        var cmd = new OracleCommand("SELECT * FROM playlists WHERE playlist_id = :playlistId", GetOracleConnection());
+        cmd.Parameters.Add(new OracleParameter("playlistId", playlistId));
+        var reader = await cmd.ExecuteReaderAsync();
+        if (reader.Read())
+        {
+            var playlist = new RhythmPlaylist
+            {
+                PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
+                PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
+                PlaylistImage = Array.Empty<byte>(),
+                PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
+                PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
+                TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
+                FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
+                LikesCount = reader.GetInt32(reader.GetOrdinal("LIKES_COUNT")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+            };
+            if (!playlists.ContainsKey(playlistId)) playlists.Add(playlistId, playlist);
+            return playlist;
+        }
+        return null;
+    }
+
+    public async Task<RhythmPlaylist[]> GetPlaylists(string[] playlistIds)
+    {
+
+        var _playlists = new List<RhythmPlaylist>();
+        var cmd = new OracleCommand("SELECT * FROM playlists WHERE playlist_id = :playlistId", GetOracleConnection());
+        cmd.Parameters.Add(new OracleParameter("playlistId", OracleDbType.Varchar2));
+        foreach (var playlistId in playlistIds)
+        {
+            if (playlists.ContainsKey(playlistId))
+            {
+                _playlists.Add(playlists[playlistId]);
+                continue;
+            }
+            cmd.Parameters[0].Value = playlistId;
+            var reader = await cmd.ExecuteReaderAsync();
+            if (reader.Read())
+            {
+                var playlist = new RhythmPlaylist
+                {
+                    PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
+                    PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
+                    PlaylistImage = Array.Empty<byte>(),
+                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
+                    PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
+                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
+                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
+                    LikesCount = reader.GetInt32(reader.GetOrdinal("LIKES_COUNT")),
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                };
+                _playlists.Add(playlist);
+                if (!playlists.ContainsKey(playlistId)) playlists.Add(playlistId, playlist);
+            }
+        }
+        return _playlists.ToArray();
     }
 
     public bool IsConnected() => _connected;

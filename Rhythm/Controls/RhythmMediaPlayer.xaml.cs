@@ -32,6 +32,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private InMemoryRandomAccessStream? _trackStream;
 
     private string _albumId = "";
+    private string _playlistId = "";
     private string _trackId = "";
 
     private readonly LinkedList<string> _original = new();
@@ -252,6 +253,28 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         }
     }
 
+    public async Task LoadPlaylistTracks()
+    {
+        if (string.IsNullOrEmpty(_playlistId)) return;
+        System.Diagnostics.Debug.WriteLine("Loading Playlist Tracks");
+        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("SELECT track_id FROM playlist_tracks WHERE playlist_id = :playlistId", conn);
+        cmd.Parameters.Add(new OracleParameter("playlistId", _playlistId));
+        var reader = await cmd.ExecuteReaderAsync();
+        while (reader.Read())
+        {
+            var trackId = reader.GetString(reader.GetOrdinal("TRACK_ID"));
+            _trackQueue.AddLast(trackId);
+            _original.AddLast(trackId);
+        }
+        System.Diagnostics.Debug.WriteLine("Track Queue: " + string.Join(", ", _trackQueue));
+        if (_shuffle)
+        {
+            var r = new Random();
+            _trackQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
+        }
+    }
+
     public async Task PlayCurrentTrack()
     {
         if (_track is null || !_track.TrackId.Equals(TrackId))
@@ -289,6 +312,20 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         await Task.Run(() => LoadAlbumTracks());
         if (_trackQueue.Count > 0 && _trackQueue.First is not null)
         {
+            TrackId = _trackQueue.First.Value;
+        }
+    }
+
+    public async Task PlayPlaylist(string playlistId)
+    {
+        _trackQueue.Clear();
+        _original.Clear();
+        _playlistId = playlistId;
+        System.Diagnostics.Debug.WriteLine("Playlist ID: " + playlistId);
+        await Task.Run(() => LoadPlaylistTracks());
+        if (_trackQueue.Count > 0 && _trackQueue.First is not null)
+        {
+            System.Diagnostics.Debug.WriteLine("Playing Playlist Track: " + _trackQueue.First.Value);
             TrackId = _trackQueue.First.Value;
         }
     }

@@ -30,5 +30,9 @@ internal interface IDatabaseService
 
     Task<RhythmArtist[]> GetArtists(string[] artistIds);
 
+    Task<RhythmPlaylist[]> GetPlaylists(string[] playlistIds);
+
+    Task<RhythmPlaylist?> GetPlaylist(string playlistId);
+
     bool IsConnected();
 }

@@ -17,11 +17,6 @@ public class RhythmAlbum
         get; set;
     }
 
-    public string AlbumImageUrl
-    {
-        get; set;
-    }
-
     public DateTime ReleaseDate
     {
         get; set;

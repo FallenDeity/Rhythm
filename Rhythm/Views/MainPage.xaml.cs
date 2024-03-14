@@ -28,7 +28,8 @@ public sealed partial class MainPage : Page
     {
         var page = (ShellPage)App.MainWindow.Content;
         // page.RhythmPlayer.PlayTrack("24daa65d-0a78-427c-9533-8d14f7ca9c17");
-        await page.RhythmPlayer.PlayAlbum("a01f3cb4-6165-4669-8d0c-c48c1bbcff5f");
+        // await page.RhythmPlayer.PlayAlbum("a01f3cb4-6165-4669-8d0c-c48c1bbcff5f");
         // page.RhythmPlayer.TrackId = "24daa65d-0a78-427c-9533-8d14f7ca9c17";
+        await page.RhythmPlayer.PlayPlaylist("64c30c7e-b35c-4a51-a58a-ecc1cc7eb473");
     }
 }
