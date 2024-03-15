@@ -80,9 +80,8 @@ public class DatabaseService : IDatabaseService
     public async Task<byte[]> GetAlbumCover(string albumId)
     {
         if (albumCovers.ContainsKey(albumId)) return albumCovers[albumId];
-        var command = new OracleCommand("SELECT album_image FROM albums WHERE album_id = :albumId", GetOracleConnection());
-        command.Parameters.Add(new OracleParameter("albumId", albumId));
-        command.InitialLOBFetchSize = -1;
+        var command = new OracleCommand($"SELECT album_image FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
+        command.AddToStatementCache = true;
         var reader = await command.ExecuteReaderAsync();
         if (reader.Read())
         {
@@ -97,9 +96,12 @@ public class DatabaseService : IDatabaseService
 
     public async Task<RhythmTrack?> GetTrack(string trackId)
     {
+        System.Diagnostics.Debug.WriteLine($"Getting track {trackId}");
         if (tracks.ContainsKey(trackId)) return tracks[trackId];
-        var cmd = new OracleCommand("SELECT track_id, track_name, track_duration, track_album_id, release_date, streams, like_count, created_at, updated_at, lyrics FROM tracks WHERE track_id = :trackId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("trackId", trackId));
+        System.Diagnostics.Debug.WriteLine($"Track {trackId} not found in cache");
+        var cmd = new OracleCommand($"SELECT * FROM tracks WHERE track_id = '{trackId}'", GetOracleConnection());
+        cmd.FetchSize *= 2;
+        cmd.AddToStatementCache = true;
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
         {
@@ -107,7 +109,6 @@ public class DatabaseService : IDatabaseService
             {
                 TrackId = reader.GetString(reader.GetOrdinal("TRACK_ID")),
                 TrackName = reader.GetString(reader.GetOrdinal("TRACK_NAME")),
-                TrackAudio = Array.Empty<byte>(),
                 TrackDuration = reader.GetString(reader.GetOrdinal("TRACK_DURATION")),
                 TrackAlbumId = reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID")),
                 ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
@@ -115,7 +116,6 @@ public class DatabaseService : IDatabaseService
                 Likes = reader.GetInt32(reader.GetOrdinal("LIKE_COUNT")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                 UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
-                Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS"))
             };
             if (!tracks.ContainsKey(trackId)) tracks.Add(trackId, track);
             return track;
@@ -125,46 +125,24 @@ public class DatabaseService : IDatabaseService
 
     public async Task<RhythmTrack[]> GetTracks(string[] trackIds)
     {
-        var _tracks = new List<RhythmTrack>();
-        var cmd = new OracleCommand("SELECT track_id, track_name, track_duration, track_album_id, release_date, streams, like_count, created_at, updated_at, lyrics FROM tracks WHERE track_id = :trackId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("trackId", OracleDbType.Varchar2));
+        var tasks = new List<Task<RhythmTrack?>>();
         foreach (var trackId in trackIds)
         {
-            if (tracks.ContainsKey(trackId))
-            {
-                _tracks.Add(tracks[trackId]);
-                continue;
-            }
-            cmd.Parameters[0].Value = trackId;
-            var reader = await cmd.ExecuteReaderAsync();
-            if (reader.Read())
-            {
-                var track = new RhythmTrack
-                {
-                    TrackId = reader.GetString(reader.GetOrdinal("TRACK_ID")),
-                    TrackName = reader.GetString(reader.GetOrdinal("TRACK_NAME")),
-                    TrackAudio = Array.Empty<byte>(),
-                    TrackDuration = reader.GetString(reader.GetOrdinal("TRACK_DURATION")),
-                    TrackAlbumId = reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID")),
-                    ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
-                    Streams = reader.GetInt32(reader.GetOrdinal("STREAMS")),
-                    Likes = reader.GetInt32(reader.GetOrdinal("LIKE_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
-                    Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS"))
-                };
-                _tracks.Add(track);
-                if (!tracks.ContainsKey(trackId)) tracks.Add(trackId, track);
-            }
+            tasks.Add(GetTrack(trackId));
         }
-        return _tracks.ToArray();
+        var results = await Task.WhenAll(tasks);
+        if (results is null) return Array.Empty<RhythmTrack>();
+        return results.Where(x => x is not null).Select(x => x!).ToArray();
     }
 
     public async Task<RhythmArtist?> GetArtist(string artistId)
     {
+        System.Diagnostics.Debug.WriteLine($"Getting artist {artistId}");
         if (artists.ContainsKey(artistId)) return artists[artistId];
-        var cmd = new OracleCommand("SELECT * FROM artists WHERE artist_id = :artistId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("artistId", artistId));
+        System.Diagnostics.Debug.WriteLine($"Artist {artistId} not found in cache");
+        var cmd = new OracleCommand($"SELECT * FROM artists WHERE artist_id = '{artistId}'", GetOracleConnection());
+        cmd.AddToStatementCache = true;
+        cmd.FetchSize *= 2;
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
         {
@@ -188,45 +166,24 @@ public class DatabaseService : IDatabaseService
 
     public async Task<RhythmArtist[]> GetArtists(string[] artistIds)
     {
-
-        var _artists = new List<RhythmArtist>();
-        var cmd = new OracleCommand("SELECT * FROM artists WHERE artist_id = :artistId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("artistId", OracleDbType.Varchar2));
+        var tasks = new List<Task<RhythmArtist?>>();
         foreach (var artistId in artistIds)
         {
-            if (artists.ContainsKey(artistId))
-            {
-                _artists.Add(artists[artistId]);
-                continue;
-            }
-            cmd.Parameters[0].Value = artistId;
-            var reader = await cmd.ExecuteReaderAsync();
-            if (reader.Read())
-            {
-                var artist = new RhythmArtist
-                {
-                    ArtistId = reader.GetString(reader.GetOrdinal("ARTIST_ID")),
-                    UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
-                    ArtistName = reader.GetString(reader.GetOrdinal("ARTIST_NAME")),
-                    ArtistBio = reader.GetString(reader.GetOrdinal("ARTIST_BIO")),
-                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
-                    AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
-                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
-                };
-                _artists.Add(artist);
-                if (!artists.ContainsKey(artistId)) artists.Add(artistId, artist);
-            }
+            tasks.Add(GetArtist(artistId));
         }
-        return _artists.ToArray();
+        var results = await Task.WhenAll(tasks);
+        if (results is null) return Array.Empty<RhythmArtist>();
+        return results.Where(x => x is not null).Select(x => x!).ToArray();
     }
 
     public async Task<RhythmAlbum?> GetAlbum(string albumId)
     {
+        System.Diagnostics.Debug.WriteLine($"Getting album {albumId}");
         if (albums.ContainsKey(albumId)) return albums[albumId];
-        var cmd = new OracleCommand("SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("albumId", albumId));
+        System.Diagnostics.Debug.WriteLine($"Album {albumId} not found in cache");
+        var cmd = new OracleCommand($"SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
+        cmd.FetchSize *= 2;
+        cmd.AddToStatementCache = true;
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
         {
@@ -249,43 +206,24 @@ public class DatabaseService : IDatabaseService
 
     public async Task<RhythmAlbum[]> GetAlbums(string[] albumIds)
     {
-        var _albums = new List<RhythmAlbum>();
-        var cmd = new OracleCommand("SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type FROM albums WHERE album_id = :albumId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("albumId", OracleDbType.Varchar2));
+        var tasks = new List<Task<RhythmAlbum?>>();
         foreach (var albumId in albumIds)
         {
-            if (albums.ContainsKey(albumId))
-            {
-                _albums.Add(albums[albumId]);
-                continue;
-            }
-            cmd.Parameters[0].Value = albumId;
-            var reader = await cmd.ExecuteReaderAsync();
-            if (reader.Read())
-            {
-                var album = new RhythmAlbum
-                {
-                    AlbumId = reader.GetString(reader.GetOrdinal("ALBUM_ID")),
-                    AlbumName = reader.GetString(reader.GetOrdinal("ALBUM_NAME")),
-                    AlbumImage = Array.Empty<byte>(),
-                    ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
-                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
-                    AlbumType = reader.GetString(reader.GetOrdinal("ALBUM_TYPE"))
-                };
-                _albums.Add(album);
-                if (!albums.ContainsKey(albumId)) albums.Add(albumId, album);
-            }
+            tasks.Add(GetAlbum(albumId));
         }
-        return _albums.ToArray();
+        var results = await Task.WhenAll(tasks);
+        if (results is null) return Array.Empty<RhythmAlbum>();
+        return results.Where(x => x is not null).Select(x => x!).ToArray();
     }
 
     public async Task<RhythmPlaylist?> GetPlaylist(string playlistId)
     {
+        System.Diagnostics.Debug.WriteLine($"Getting playlist {playlistId}");
         if (playlists.ContainsKey(playlistId)) return playlists[playlistId];
-        var cmd = new OracleCommand("SELECT * FROM playlists WHERE playlist_id = :playlistId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("playlistId", playlistId));
+        System.Diagnostics.Debug.WriteLine($"Playlist {playlistId} not found in cache");
+        var cmd = new OracleCommand($"SELECT * FROM playlists WHERE playlist_id = '{playlistId}'", GetOracleConnection());
+        cmd.FetchSize *= 2;
+        cmd.AddToStatementCache = true;
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
         {
@@ -310,39 +248,14 @@ public class DatabaseService : IDatabaseService
 
     public async Task<RhythmPlaylist[]> GetPlaylists(string[] playlistIds)
     {
-
-        var _playlists = new List<RhythmPlaylist>();
-        var cmd = new OracleCommand("SELECT * FROM playlists WHERE playlist_id = :playlistId", GetOracleConnection());
-        cmd.Parameters.Add(new OracleParameter("playlistId", OracleDbType.Varchar2));
+        var tasks = new List<Task<RhythmPlaylist?>>();
         foreach (var playlistId in playlistIds)
         {
-            if (playlists.ContainsKey(playlistId))
-            {
-                _playlists.Add(playlists[playlistId]);
-                continue;
-            }
-            cmd.Parameters[0].Value = playlistId;
-            var reader = await cmd.ExecuteReaderAsync();
-            if (reader.Read())
-            {
-                var playlist = new RhythmPlaylist
-                {
-                    PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
-                    PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
-                    PlaylistImage = Array.Empty<byte>(),
-                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
-                    PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
-                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
-                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
-                    LikesCount = reader.GetInt32(reader.GetOrdinal("LIKES_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
-                };
-                _playlists.Add(playlist);
-                if (!playlists.ContainsKey(playlistId)) playlists.Add(playlistId, playlist);
-            }
+            tasks.Add(GetPlaylist(playlistId));
         }
-        return _playlists.ToArray();
+        var results = await Task.WhenAll(tasks);
+        if (results is null) return Array.Empty<RhythmPlaylist>();
+        return results.Where(x => x is not null).Select(x => x!).ToArray();
     }
 
     public bool IsConnected() => _connected;

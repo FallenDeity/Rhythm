@@ -4,6 +4,7 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Rhythm.Contracts.Services;
 using Rhythm.Helpers;
 using Rhythm.Views;
@@ -36,7 +37,6 @@ public sealed partial class RhythmQueueControl : UserControl
         UpcomingTitle.Visibility = queue.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
         var listBox = new ListBox
         {
-            Padding = new Thickness(0, 0, 10, 0),
             Background = new SolidColorBrush(Colors.Transparent),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
@@ -46,7 +46,7 @@ public sealed partial class RhythmQueueControl : UserControl
         {
             Setters =
             {
-                new Setter(ListBoxItem.AllowFocusOnInteractionProperty, false)
+                new Setter(ListBoxItem.AllowFocusOnInteractionProperty, false),
             }
         };
         if (queue.Length > 0)
@@ -58,7 +58,7 @@ public sealed partial class RhythmQueueControl : UserControl
             }
             QueueScrollViewer.Content = listBox;
         }
-        _ = await Task.Run(() => App.GetService<IDatabaseService>().GetTracks(queue));
+        // await App.GetService<IDatabaseService>().GetTracks(queue);
         var idx = 0;
         foreach (var track in queue)
         {
@@ -89,6 +89,7 @@ public sealed partial class RhythmQueueControl : UserControl
             Height = 64
         };
         var imgSource = await BitmapHelper.GetBitmapAsync(img);
+        // var imgSource = new BitmapImage(new Uri("ms-appx:///Assets/track.jpeg"));
         var imgControl = new Image
         {
             Source = imgSource,
@@ -111,7 +112,7 @@ public sealed partial class RhythmQueueControl : UserControl
             TextWrapping = TextWrapping.Wrap,
         };
         var duration = Regex.Match(trackData.TrackDuration, @"(\d+):(\d+):(\d+).(\d+)").Groups;
-        var dText = $"{duration[2]}:{duration[3]} - 4{albumData.AlbumName}";
+        var dText = $"{duration[2]}:{duration[3]} - {albumData.AlbumName}";
         var durationText = new TextBlock
         {
             Text = dText,

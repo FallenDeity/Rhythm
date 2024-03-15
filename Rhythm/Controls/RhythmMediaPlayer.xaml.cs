@@ -19,6 +19,47 @@ using Windows.Storage.Streams;
 
 namespace Rhythm.Controls;
 
+public class TrackQueue : IOracleCustomType
+{
+    private string[]? _array;
+
+    [OracleArrayMapping()]
+    public string[] Array
+    {
+        get => _array ?? new string[0];
+        set => _array = value;
+    }
+
+    public void FromCustomObject(OracleConnection con, object udt)
+    {
+        OracleUdt.SetValue(con, udt, "TRACKS_QUEUE_TABLE", _array);
+    }
+    public void ToCustomObject(OracleConnection con, object udt)
+    {
+        _array = (string[])OracleUdt.GetValue(con, udt, "TRACKS_QUEUE_TABLE");
+    }
+}
+
+[OracleCustomTypeMapping("MUSIC.QUEUE_TYPE")]
+public class TrackQueueFactory : IOracleCustomTypeFactory, IOracleArrayTypeFactory
+{
+    public IOracleCustomType CreateObject()
+    {
+        return new TrackQueue();
+    }
+
+    public Array CreateArray(int numElems)
+    {
+        return new string[numElems];
+    }
+
+    public Array CreateStatusArray(int numElems)
+    {
+        return new OracleUdtStatus[numElems];
+    }
+}
+
+
 public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChanged
 {
     public static readonly MediaPlayer mediaPlayer = new();
@@ -26,6 +67,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private DispatcherQueue? dispatcherQueue;
     private readonly DispatcherTimer? progressTimer;
 
+    private RhythmPlayState? _playState;
     private RhythmTrack? _track;
     private RhythmAlbum? _album;
     private RhythmArtist[] _artists = [];
@@ -43,6 +85,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private bool _shuffle;
     private bool _loaded;
     private bool _isPlaying;
+    private bool _cacheDirty;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -97,6 +140,94 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         };
     }
 
+    private async Task UpdatePlayState()
+    {
+        var user = App.currentUser?.UserId;
+        if (user is null) return;
+        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("UPDATE play_state SET tracks_queue = :current_queue, current_track = :current_track, loop = :is_loop, shuffle = :is_shuffle, updated_at = CURRENT_TIMESTAMP WHERE user_id = :userId", conn);
+        cmd.Parameters.Add(new OracleParameter("current_queue", OracleDbType.Array, ParameterDirection.Input)
+        {
+            UdtTypeName = "MUSIC.QUEUE_TYPE",
+            Value = new TrackQueue { Array = _trackQueue.ToArray() }
+        });
+        cmd.Parameters.Add(new OracleParameter("current_track", _trackId));
+        cmd.Parameters.Add(new OracleParameter("is_loop", _loop));
+        cmd.Parameters.Add(new OracleParameter("is_shuffle", _shuffle));
+        cmd.Parameters.Add(new OracleParameter("userId", user));
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    private async Task CacheDataBatch()
+    {
+        var queueCopy = new LinkedList<string>(_trackQueue);
+        var offset = 0;
+        var batchSize = 5;
+        var count = queueCopy.Count;
+        while (offset < count)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Caching batch {offset} to {offset + batchSize}");
+                var next = offset + batchSize > count ? count - offset : batchSize;
+                var batch = queueCopy.Skip(offset).Take(next);
+                var tasks = batch.Select(async track =>
+                           {
+                               var t = await App.GetService<IDatabaseService>().GetTrack(track);
+                               if (t is not null)
+                               {
+                                   _ = Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(t.TrackAlbumId));
+                                   _ = Task.Run(() => App.GetService<IDatabaseService>().GetAlbumCover(t.TrackAlbumId));
+                               }
+                           });
+                await Task.WhenAll(tasks);
+                System.Diagnostics.Debug.WriteLine($"Batch {offset} to {offset + batchSize} complete");
+                offset += batchSize;
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+            }
+        }
+    }
+
+    private async Task GetPlayState()
+    {
+        var user = App.currentUser?.UserId;
+        if (user is null) return;
+        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("SELECT * FROM play_state WHERE user_id = :userId", conn);
+        cmd.Parameters.Add(new OracleParameter("userId", user));
+        var reader = await cmd.ExecuteReaderAsync();
+        if (reader.Read())
+        {
+            var queue = (TrackQueue)reader.GetValue(reader.GetOrdinal("TRACKS_QUEUE"));
+            var current = reader.IsDBNull(reader.GetOrdinal("CURRENT_TRACK")) ? null : reader.GetString(reader.GetOrdinal("CURRENT_TRACK"));
+            var loop = reader.GetBoolean(reader.GetOrdinal("LOOP"));
+            var shuffle = reader.GetBoolean(reader.GetOrdinal("SHUFFLE"));
+            _playState = new RhythmPlayState
+            {
+                UserId = user,
+                TracksQueue = queue.Array.ToList(),
+                CurrentTrack = current,
+                Loop = loop,
+                Shuffle = shuffle
+            };
+            _loop = loop;
+            _shuffle = shuffle;
+            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
+                       {
+                           RepeatIcon.Glyph = _loop ? "\uE8ED" : "\uE8EE";
+                           VisualStateManager.GoToState(this, _loop ? "RepeatStateOn" : "RepeatStateOff", true);
+                           VisualStateManager.GoToState(this, _shuffle ? "ShuffleStateOn" : "ShuffleStateOff", true);
+                       });
+            _trackQueue = new LinkedList<string>(_playState.TracksQueue);
+            if (_playState.CurrentTrack is not null) TrackId = _playState.CurrentTrack;
+            _cacheDirty = true;
+        }
+
+    }
+
     private async Task LoadTrack()
     {
         var prevAlbum = _track?.TrackAlbumId;
@@ -109,9 +240,17 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var duration = Regex.Match(_track.TrackDuration, @"(\d+):(\d+):(\d+).(\d+)").Groups;
             page.RhythmPlayer.TrackDuration.Text = $"{duration[2]}:{duration[3]}";
         });
-        _ = Task.Run(() => StreamTrack(Complete: false));
+        Thread streamThread = new(async () => await StreamTrack(Complete: false));
+        streamThread.Priority = ThreadPriority.Highest;
+        streamThread.Start();
         _ = Task.Run(() => LoadArtists());
         _ = Task.Run(() => LoadAlbum(prevAlbum));
+        if (_cacheDirty)
+        {
+            while (!_loaded) await Task.Delay(100);
+            _cacheDirty = false;
+            _ = Task.Run(() => CacheDataBatch());
+        }
     }
 
     private async Task LoadArtists()
@@ -119,8 +258,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         if (_track is null) return;
         _artists = Array.Empty<RhythmArtist>();
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT artist_id FROM track_artists WHERE track_id = :trackId FETCH NEXT 1 ROWS ONLY", conn);
-        cmd.Parameters.Add(new OracleParameter("trackId", _track.TrackId));
+        var cmd = new OracleCommand($"SELECT artist_id FROM track_artists WHERE track_id = '{_track.TrackId}' FETCH NEXT 1 ROWS ONLY", conn);
         var reader = await cmd.ExecuteReaderAsync();
         var idx = 0;
         while (reader.Read())
@@ -174,7 +312,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         }
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
         var trackId = _track.TrackId;
-        var cmd = new OracleCommand("SELECT track_audio FROM tracks WHERE track_id = :trackId", conn);
+        var cmd = new OracleCommand("SELECT track_audio FROM track_audio WHERE track_id = :trackId", conn);
         cmd.Parameters.Add(new OracleParameter("trackId", trackId));
         _trackStream = new InMemoryRandomAccessStream();
         var dataWriter = new DataWriter(_trackStream.GetOutputStreamAt(0));
@@ -183,8 +321,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var r = await cmd.ExecuteReaderAsync();
             if (r.Read())
             {
-                _track.TrackAudio = r.GetOracleBlob(r.GetOrdinal("TRACK_AUDIO")).Value;
-                dataWriter.WriteBytes(_track.TrackAudio);
+                dataWriter.WriteBytes(r.GetOracleBlob(r.GetOrdinal("TRACK_AUDIO")).Value);
                 await dataWriter.StoreAsync();
                 dataWriter.DetachStream();
             }
@@ -195,7 +332,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         if (reader.Read())
         {
             OracleBlob oracleBlob = reader.GetOracleBlob(reader.GetOrdinal("TRACK_AUDIO"));
-            var bufferSize = 65536;
+            var bufferSize = 131072;
             var buffer = new byte[bufferSize];
             var count = 0;
             while (await oracleBlob.ReadAsync(buffer, 0, bufferSize) > 0)
@@ -205,7 +342,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                 await dataWriter.StoreAsync();
                 dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                                           {
-                                              if (count % 15 == 0 || count == 3)
+                                              if (count % 7 == 0 || (count <= 10 && count % 3 == 0))
                                               {
                                                   // mediaPlayer.Pause();
                                                   var current = mediaPlayer.PlaybackSession.Position.Ticks + 1;
@@ -216,6 +353,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                                               }
                                           });
                 count += 1;
+                System.Diagnostics.Debug.WriteLine($"Buffer {count} complete - Read {buffer.Length}");
             }
             dataWriter.DetachStream();
             dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
@@ -226,10 +364,6 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                 mediaPlayer.PlaybackSession.Position = new TimeSpan(current);
                 if (_isPlaying) mediaPlayer.Play();
             });
-            _track.TrackAudio = new byte[_trackStream.Size];
-            var dataReader = new DataReader(_trackStream.GetInputStreamAt(0));
-            await dataReader.LoadAsync((uint)_trackStream.Size);
-            dataReader.ReadBytes(_track.TrackAudio);
         }
     }
 
@@ -251,12 +385,12 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var r = new Random();
             _trackQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
         }
+        _cacheDirty = true;
     }
 
     public async Task LoadPlaylistTracks()
     {
         if (string.IsNullOrEmpty(_playlistId)) return;
-        System.Diagnostics.Debug.WriteLine("Loading Playlist Tracks");
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
         var cmd = new OracleCommand("SELECT track_id FROM playlist_tracks WHERE playlist_id = :playlistId", conn);
         cmd.Parameters.Add(new OracleParameter("playlistId", _playlistId));
@@ -267,12 +401,12 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             _trackQueue.AddLast(trackId);
             _original.AddLast(trackId);
         }
-        System.Diagnostics.Debug.WriteLine("Track Queue: " + string.Join(", ", _trackQueue));
         if (_shuffle)
         {
             var r = new Random();
             _trackQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
         }
+        _cacheDirty = true;
     }
 
     public async Task PlayCurrentTrack()
@@ -286,20 +420,21 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         {
             while (!_loaded) await Task.Delay(100);
             mediaPlayer.Source = MediaSource.CreateFromStream(_trackStream?.CloneStream(), "audio/webm");
-            dispatcherQueue?.TryEnqueue(() =>
+            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                        {
                            var page = (ShellPage)App.MainWindow.Content;
                            page.RhythmPlayer.PlayPauseIcon.Glyph = "\uE769";
                            mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(0);
+                           mediaPlayer.Play();
+                           progressTimer?.Start();
                        });
-            mediaPlayer.Play();
-            progressTimer?.Start();
             IsPlaying = true;
             var current = _trackQueue.First?.Value;
             if (current is not null)
             {
                 _history.Push(current);
                 _trackQueue.RemoveFirst();
+                _ = Task.Run(() => UpdatePlayState());
             }
         }
     }
@@ -321,11 +456,9 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         _trackQueue.Clear();
         _original.Clear();
         _playlistId = playlistId;
-        System.Diagnostics.Debug.WriteLine("Playlist ID: " + playlistId);
         await Task.Run(() => LoadPlaylistTracks());
         if (_trackQueue.Count > 0 && _trackQueue.First is not null)
         {
-            System.Diagnostics.Debug.WriteLine("Playing Playlist Track: " + _trackQueue.First.Value);
             TrackId = _trackQueue.First.Value;
         }
     }
@@ -391,6 +524,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     {
         dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         UpdateComponent();
+        _ = Task.Run(() => GetPlayState());
     }
 
     private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -435,6 +569,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         RepeatIcon.Glyph = _loop ? "\uE8ED" : "\uE8EE";
         VisualStateManager.GoToState(this, _loop ? "RepeatStateOn" : "RepeatStateOff", true);
         mediaPlayer.IsLoopingEnabled = _loop;
+        _ = Task.Run(() => UpdatePlayState());
     }
 
     private void ShuffleButton_Click(object sender, RoutedEventArgs e)
@@ -455,13 +590,14 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var newQueue = new LinkedList<string>(rest);
             _trackQueue = newQueue;
         }
+        _ = Task.Run(() => UpdatePlayState());
     }
 
     public string? GetTrackName() => _track?.TrackName;
 
     public string? GetTrackArtist() => _artists.Length > 0 ? _artists[0].ArtistName : null;
 
-    public string? GetTrackLyrics() => _track?.Lyrics;
+    public string? GetTrackLyrics() => null;
 
     public string[] GetQueue() => _trackQueue.ToArray();
 }

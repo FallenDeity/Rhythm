@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Activation;
 using Rhythm.Contracts.Services;
+using Rhythm.Core.Models;
 using Rhythm.Views;
 
 namespace Rhythm.Services;
@@ -52,6 +53,20 @@ public class ActivationService : IActivationService
                 var reader = await command.ExecuteReaderAsync();
                 if (reader.Read())
                 {
+                    var userData = new RhythmUser
+                    {
+                        UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
+                        UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
+                        Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
+                        UserImage = new byte[0],
+                        Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
+                        Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
+                        PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
+                        FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
+                        CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                        UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                    };
+                    App.currentUser = userData;
                     _shell = App.GetService<ShellPage>();
                 }
                 else

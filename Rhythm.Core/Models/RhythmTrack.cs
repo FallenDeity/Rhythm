@@ -14,11 +14,6 @@ public class RhythmTrack
         get; set;
     }
 
-    public required byte[] TrackAudio
-    {
-        get; set;
-    }
-
     public required string TrackDuration
     {
         get; set;
@@ -54,11 +49,6 @@ public class RhythmTrack
         get; set;
     }
 
-    public string? Lyrics
-    {
-        get; set;
-    }
-
     public override string ToString()
     {
 
@@ -70,8 +60,7 @@ public class RhythmTrack
             $"Streams: {Streams}\n" +
             $"Likes: {Likes}\n" +
             $"Created At: {CreatedAt}\n" +
-            $"Updated At: {UpdatedAt}\n" +
-            $"Lyrics: {Lyrics}\n";
+            $"Updated At: {UpdatedAt}\n";
         return trackString;
     }
 }

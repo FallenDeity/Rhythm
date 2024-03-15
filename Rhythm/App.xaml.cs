@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Rhythm.Activation;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Contracts.Services;
+using Rhythm.Core.Models;
 using Rhythm.Core.Services;
 using Rhythm.Helpers;
 using Rhythm.Models;
@@ -26,6 +27,12 @@ public partial class App : Application
     public IHost Host
     {
         get;
+    }
+
+    public static RhythmUser? currentUser
+    {
+        get;
+        set;
     }
 
     public static T GetService<T>()
