@@ -18,6 +18,8 @@ internal interface IDatabaseService
 
     Task<byte[]> GetAlbumCover(string albumId);
 
+    Task<List<byte[]>> GetAlbumCovers(string[] albumIds);
+
     Task<RhythmAlbum?> GetAlbum(string albumId);
 
     Task<RhythmTrack?> GetTrack(string trackId);
@@ -33,6 +35,8 @@ internal interface IDatabaseService
     Task<RhythmPlaylist[]> GetPlaylists(string[] playlistIds);
 
     Task<RhythmPlaylist?> GetPlaylist(string playlistId);
+
+    Task<RhythmArtist[]> GetTrackArtists(string trackId);
 
     bool IsConnected();
 }

@@ -42,6 +42,11 @@ public class RhythmAlbum
         get; set;
     }
 
+    public string? AlbumImageURL
+    {
+        get; set;
+    }
+
     public override string ToString()
     {
         var AlbumString = $"Album ID: {AlbumId}\n" +
@@ -50,7 +55,8 @@ public class RhythmAlbum
             $"Track Count: {TrackCount}\n" +
             $"Created At: {CreatedAt}\n" +
             $"Updated At: {UpdatedAt}\n" +
-            $"Album Type: {AlbumType}\n";
+            $"Album Type: {AlbumType}\n" +
+            $"Album Image URL: {AlbumImageURL}\n";
         return AlbumString;
     }
 }

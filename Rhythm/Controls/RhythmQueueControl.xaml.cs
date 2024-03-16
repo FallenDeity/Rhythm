@@ -27,8 +27,8 @@ public sealed partial class RhythmQueueControl : UserControl
         var currentTrack = page.RhythmPlayer.TrackId;
         var trackData = await Task.Run(() => App.GetService<IDatabaseService>().GetTrack(currentTrack));
         if (trackData is null) return;
-        var img = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId));
-        NowPlayingCover.Source = await BitmapHelper.GetBitmapAsync(img);
+        var album = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(trackData.TrackAlbumId));
+        NowPlayingCover.Source = album?.AlbumImageURL is null ? null : new BitmapImage(new Uri(album.AlbumImageURL));
         NowPlayingTitle.Text = trackData.TrackName;
         NowPlayingArtist.Text = page.RhythmPlayer.GetTrackArtist();
         var queue = page.RhythmPlayer.GetQueue();
@@ -78,7 +78,8 @@ public sealed partial class RhythmQueueControl : UserControl
         if (trackData is null) return null;
         var albumData = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(trackData.TrackAlbumId));
         if (albumData is null) return null;
-        var img = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId));
+        // var cover = await App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId, true);
+        // var img = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId));
         var color = (Color)Application.Current.Resources["LayerOnAcrylicFillColorDefault"];
         var imgGrid = new Grid
         {
@@ -88,8 +89,8 @@ public sealed partial class RhythmQueueControl : UserControl
             Width = 64,
             Height = 64
         };
-        var imgSource = await BitmapHelper.GetBitmapAsync(img);
-        // var imgSource = new BitmapImage(new Uri("ms-appx:///Assets/track.jpeg"));
+        var imgSource = albumData.AlbumImageURL is null ? null : new BitmapImage(new Uri(albumData.AlbumImageURL));
+        // new BitmapImage(new Uri("ms-appx:///Assets/track.jpeg"));
         var imgControl = new Image
         {
             Source = imgSource,

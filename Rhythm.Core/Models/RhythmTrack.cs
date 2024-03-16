@@ -49,6 +49,16 @@ public class RhythmTrack
         get; set;
     }
 
+    public string? TrackAudioURL
+    {
+        get; set;
+    }
+
+    public bool AudioAvailable
+    {
+        get; set;
+    }
+
     public override string ToString()
     {
 
@@ -60,7 +70,9 @@ public class RhythmTrack
             $"Streams: {Streams}\n" +
             $"Likes: {Likes}\n" +
             $"Created At: {CreatedAt}\n" +
-            $"Updated At: {UpdatedAt}\n";
+            $"Updated At: {UpdatedAt}\n" +
+            $"Track Audio URL: {TrackAudioURL}\n" +
+            $"Audio Available: {AudioAvailable}\n";
         return trackString;
     }
 }
