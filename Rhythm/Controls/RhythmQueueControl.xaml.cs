@@ -58,7 +58,6 @@ public sealed partial class RhythmQueueControl : UserControl
             }
             QueueScrollViewer.Content = listBox;
         }
-        // await App.GetService<IDatabaseService>().GetTracks(queue);
         var idx = 0;
         foreach (var track in queue)
         {
@@ -78,8 +77,6 @@ public sealed partial class RhythmQueueControl : UserControl
         if (trackData is null) return null;
         var albumData = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(trackData.TrackAlbumId));
         if (albumData is null) return null;
-        // var cover = await App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId, true);
-        // var img = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbumCover(trackData.TrackAlbumId));
         var color = (Color)Application.Current.Resources["LayerOnAcrylicFillColorDefault"];
         var imgGrid = new Grid
         {
@@ -90,7 +87,6 @@ public sealed partial class RhythmQueueControl : UserControl
             Height = 64
         };
         var imgSource = albumData.AlbumImageURL is null ? null : new BitmapImage(new Uri(albumData.AlbumImageURL));
-        // new BitmapImage(new Uri("ms-appx:///Assets/track.jpeg"));
         var imgControl = new Image
         {
             Source = imgSource,

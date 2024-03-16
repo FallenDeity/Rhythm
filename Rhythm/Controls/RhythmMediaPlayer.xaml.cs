@@ -13,6 +13,8 @@ using Rhythm.Views;
 using Windows.Media.Core;
 using Windows.Media.Playback;
 using Windows.Storage.Streams;
+using YoutubeExplode.Videos;
+using YoutubeExplode.Videos.Streams;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -63,6 +65,7 @@ public class TrackQueueFactory : IOracleCustomTypeFactory, IOracleArrayTypeFacto
 public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChanged
 {
     public static readonly MediaPlayer mediaPlayer = new();
+    private static readonly YoutubeExplode.YoutubeClient yt = new();
 
     private DispatcherQueue? dispatcherQueue;
     private readonly DispatcherTimer? progressTimer;
@@ -77,6 +80,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private string _playlistId = "";
     private string _trackId = "";
 
+    private readonly Dictionary<string, StreamManifest> _manifestCache = new();
     private readonly LinkedList<string> _original = new();
     private LinkedList<string> _trackQueue = new();
     private readonly Stack<string> _history = new();
@@ -85,7 +89,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private bool _shuffle;
     private bool _loaded;
     private bool _isPlaying;
-    private bool _cacheDirty;
+    private CancellationTokenSource? _cts;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -166,13 +170,30 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private async Task CacheDataBatch()
+    private async Task CacheDataBatch(CancellationToken token)
     {
         var queueCopy = new LinkedList<string>(_trackQueue);
         var t = await App.GetService<IDatabaseService>().GetTracks(queueCopy.ToArray());
         var albumIds = t.Select(x => x.TrackAlbumId).Distinct().ToArray();
         await App.GetService<IDatabaseService>().GetAlbums(albumIds);
-        // await App.GetService<IDatabaseService>().GetAlbumCovers(albumIds);
+        foreach (var track in t)
+        {
+            if (token.IsCancellationRequested)
+            {
+                System.Diagnostics.Debug.WriteLine("Caching cancelled");
+                return;
+            }
+            if (string.IsNullOrEmpty(track.TrackAudioURL)) continue;
+            var vidId = VideoId.TryParse(track.TrackAudioURL)?.Value;
+            if (vidId is null || _manifestCache.ContainsKey(vidId)) continue;
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            var streamInfo = await yt.Videos.Streams.GetManifestAsync(vidId);
+            stopWatch.Stop();
+            System.Diagnostics.Debug.WriteLine($"Took {stopWatch.ElapsedMilliseconds}ms to cache {track.TrackName}");
+            _manifestCache.Add(vidId, streamInfo);
+            System.Diagnostics.Debug.WriteLine($"Cached {track.TrackName}");
+        }
     }
 
     private async Task GetPlayState()
@@ -199,17 +220,30 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             };
             _loop = loop;
             _shuffle = shuffle;
-            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
-                       {
-                           RepeatIcon.Glyph = _loop ? "\uE8ED" : "\uE8EE";
-                           VisualStateManager.GoToState(this, _loop ? "RepeatStateOn" : "RepeatStateOff", true);
-                           VisualStateManager.GoToState(this, _shuffle ? "ShuffleStateOn" : "ShuffleStateOff", true);
-                       });
             _trackQueue = new LinkedList<string>(_playState.TracksQueue);
             _original.Clear();
             foreach (var track in _trackQueue) _original.AddLast(track);
+            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
+            {
+                if (_loop) mediaPlayer.IsLoopingEnabled = true;
+                if (_shuffle)
+                {
+                    var r = new Random();
+                    var newQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
+                    _trackQueue = newQueue;
+                }
+                RepeatIcon.Glyph = _loop ? "\uE8ED" : "\uE8EE";
+                VisualStateManager.GoToState(this, _loop ? "RepeatStateOn" : "RepeatStateOff", true);
+                VisualStateManager.GoToState(this, _shuffle ? "ShuffleStateOn" : "ShuffleStateOff", true);
+            });
             if (_playState.CurrentTrack is not null) TrackId = _playState.CurrentTrack;
-            _cacheDirty = true;
+            if (_cts is not null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
+            _cts = new CancellationTokenSource();
+            _ = Task.Run(() => CacheDataBatch(_cts.Token), _cts.Token);
         }
 
     }
@@ -226,16 +260,9 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var duration = Regex.Match(_track.TrackDuration, @"(\d+):(\d+):(\d+).(\d+)").Groups;
             page.RhythmPlayer.TrackDuration.Text = $"{duration[2]}:{duration[3]}";
         });
-        Thread streamThread = new(async () => await StreamTrack());
-        streamThread.Priority = ThreadPriority.Highest;
-        streamThread.Start();
+        _ = Task.Run(() => StreamTrack());
         _ = Task.Run(() => LoadArtists());
         _ = Task.Run(() => LoadAlbum(prevAlbum));
-        if (_cacheDirty)
-        {
-            _cacheDirty = false;
-            _ = Task.Run(() => CacheDataBatch());
-        }
     }
 
     private async Task LoadArtists()
@@ -271,62 +298,31 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             _trackStream.Dispose();
             _trackStream = null;
         }
-        if (!_track.AudioAvailable)
+        var yt = new YoutubeExplode.YoutubeClient();
+        var vidUrl = _track.TrackAudioURL;
+        var vidId = VideoId.TryParse(vidUrl)?.Value;
+        if (vidUrl is null || vidId is null)
         {
-            System.Diagnostics.Debug.WriteLine("Using preview URL");
-            var url = _track.TrackAudioURL;
+            var empty = MediaSource.CreateFromStream(new InMemoryRandomAccessStream(), "audio/mpeg");
             dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                        {
-                           var source = url is null ? null : MediaSource.CreateFromUri(new Uri(url));
-                           mediaPlayer.Source = source;
+
+                           mediaPlayer.Source = empty;
                            mediaPlayer.Play();
                            _loaded = true;
                        });
             return;
         }
-        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var trackId = _track.TrackId;
-        var cmd = new OracleCommand("SELECT track_audio FROM track_audio WHERE track_id = :trackId", conn);
-        cmd.Parameters.Add(new OracleParameter("trackId", trackId));
-        _trackStream = new InMemoryRandomAccessStream();
-        var dataWriter = new DataWriter(_trackStream.GetOutputStreamAt(0));
-        var reader = await cmd.ExecuteReaderAsync(CommandBehavior.SequentialAccess);
-        if (reader.Read())
-        {
-            OracleBlob oracleBlob = reader.GetOracleBlob(reader.GetOrdinal("TRACK_AUDIO"));
-            var bufferSize = 65536 * 2;
-            var buffer = new byte[bufferSize];
-            var count = 0;
-            while (await oracleBlob.ReadAsync(buffer, 0, bufferSize) > 0)
-            {
-                if (trackId != _track.TrackId) return;
-                dataWriter.WriteBytes(buffer);
-                await dataWriter.StoreAsync();
-                dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
-                                          {
-                                              if (count % 8 == 0 || (count <= 10 && count % 3 == 0))
-                                              {
-                                                  // mediaPlayer.Pause();
-                                                  var current = mediaPlayer.PlaybackSession.Position.Ticks + 1;
-                                                  mediaPlayer.SetStreamSource(_trackStream.CloneStream());
-                                                  mediaPlayer.PlaybackSession.Position = new TimeSpan(current);
-                                                  if (_isPlaying) mediaPlayer.Play();
-                                                  _loaded = true;
-                                              }
-                                          });
-                count += 1;
-                System.Diagnostics.Debug.WriteLine($"Buffer {count} complete - Read {buffer.Length}");
-            }
-            dataWriter.DetachStream();
-            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
-            {
-                // mediaPlayer.Pause();
-                var current = mediaPlayer.PlaybackSession.Position.Ticks + 1;
-                mediaPlayer.SetStreamSource(_trackStream.CloneStream());
-                mediaPlayer.PlaybackSession.Position = new TimeSpan(current);
-                if (_isPlaying) mediaPlayer.Play();
-            });
-        }
+        var streamInfo = _manifestCache.ContainsKey(vidId) ? _manifestCache[vidId] : await yt.Videos.Streams.GetManifestAsync(vidId);
+        var stream = streamInfo.GetAudioOnlyStreams().GetWithHighestBitrate();
+        var streamUrl = stream.Url;
+        dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
+               {
+                   var source = streamUrl is null ? null : MediaSource.CreateFromUri(new Uri(streamUrl));
+                   mediaPlayer.Source = source;
+                   mediaPlayer.Play();
+                   _loaded = true;
+               });
     }
 
     private async Task LoadAlbumTracks()
@@ -347,7 +343,13 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var r = new Random();
             _trackQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
         }
-        _cacheDirty = true;
+        if (_cts is not null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+        }
+        _cts = new CancellationTokenSource();
+        _ = Task.Run(() => CacheDataBatch(_cts.Token), _cts.Token);
     }
 
     public async Task LoadPlaylistTracks()
@@ -368,7 +370,13 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var r = new Random();
             _trackQueue = new LinkedList<string>(_trackQueue.OrderBy(x => r.Next()));
         }
-        _cacheDirty = true;
+        if (_cts is not null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+        }
+        _cts = new CancellationTokenSource();
+        _ = Task.Run(() => CacheDataBatch(_cts.Token), _cts.Token);
     }
 
     public async Task PlayCurrentTrack()
@@ -376,6 +384,16 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         if (_track is null || !_track.TrackId.Equals(TrackId))
         {
             _loaded = false;
+            dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
+            {
+                var page = (ShellPage)App.MainWindow.Content;
+                mediaPlayer.PlaybackSession.Position = TimeSpan.FromSeconds(0);
+                mediaPlayer.Pause();
+                page.RhythmPlayer.TrackTime.Text = "00:00";
+                page.RhythmPlayer.TrackSeek.Value = 0;
+                page.RhythmPlayer.PlayPauseIcon.Glyph = "\uE768";
+                progressTimer?.Stop();
+            });
             await Task.Run(() => LoadTrack());
         }
         if (_track != null)
@@ -398,7 +416,6 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                                progressTimer?.Stop();
                            }
                        });
-            // IsPlaying = true;
             var current = _trackQueue.First?.Value;
             if (current is not null)
             {
