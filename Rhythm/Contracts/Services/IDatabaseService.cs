@@ -16,10 +16,6 @@ internal interface IDatabaseService
 
     OracleConnection GetOracleConnection();
 
-    Task<byte[]> GetAlbumCover(string albumId);
-
-    Task<List<byte[]>> GetAlbumCovers(string[] albumIds);
-
     Task<RhythmAlbum?> GetAlbum(string albumId);
 
     Task<RhythmTrack?> GetTrack(string trackId);

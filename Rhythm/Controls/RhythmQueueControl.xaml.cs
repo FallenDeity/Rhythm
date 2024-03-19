@@ -86,7 +86,8 @@ public sealed partial class RhythmQueueControl : UserControl
             Width = 64,
             Height = 64
         };
-        var imgSource = albumData.AlbumImageURL is null ? null : new BitmapImage(new Uri(albumData.AlbumImageURL));
+        var url = albumData.AlbumImageURL is not null ? albumData.AlbumImageURL : "ms-appx:///Assets/Track.jpeg";
+        var imgSource = new BitmapImage(new Uri(url));
         var imgControl = new Image
         {
             Source = imgSource,

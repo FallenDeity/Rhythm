@@ -21,8 +21,6 @@ public class DatabaseService : IDatabaseService
 
     private bool _connected = false;
 
-    private readonly Dictionary<string, byte[]> albumCovers = new();
-
     private readonly Dictionary<string, RhythmTrack> tracks = new();
 
     private readonly Dictionary<string, RhythmArtist> artists = new();
@@ -77,54 +75,6 @@ public class DatabaseService : IDatabaseService
             throw new DatabaseNullException("Oracle Connection is null");
         }
         return Connection;
-    }
-
-    public async Task<byte[]> GetAlbumCover(string albumId)
-    {
-        if (albumCovers.ContainsKey(albumId)) return albumCovers[albumId];
-        var command = new OracleCommand($"SELECT album_image FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
-        command.AddToStatementCache = true;
-        var reader = await command.ExecuteReaderAsync();
-        reader.FetchSize = reader.RowSize * 2;
-        if (reader.Read())
-        {
-            var blob = (byte[])reader.GetValue(0);
-            if (!albumCovers.ContainsKey(albumId)) albumCovers.Add(albumId, blob);
-            return blob;
-        }
-        return Array.Empty<byte>();
-    }
-
-    public async Task<List<byte[]>> GetAlbumCovers(string[] albumIds)
-    {
-        try
-        {
-            var sql = new StringBuilder();
-            sql.Append("SELECT album_image FROM albums WHERE album_id IN (");
-            foreach (var albumId in albumIds)
-            {
-                if (albumCovers.ContainsKey(albumId)) continue;
-                sql.Append($"'{albumId}',");
-            }
-            sql.Remove(sql.Length - 1, 1);
-            sql.Append(")");
-            var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
-            var reader = await cmd.ExecuteReaderAsync();
-            var blobs = new Dictionary<string, byte[]>();
-            var i = 0;
-            while (reader.Read())
-            {
-                blobs.Add(albumIds[i], (byte[])reader.GetValue(0));
-                if (!albumCovers.ContainsKey(albumIds[i])) albumCovers.Add(albumIds[i], blobs[albumIds[i]]);
-                i++;
-            }
-            return albumIds.Where(albumCovers.ContainsKey).Select(album => albumCovers[album]).ToList();
-        }
-        catch (Exception e)
-        {
-            System.Diagnostics.Debug.WriteLine("Error getting album covers" + e.Message);
-            return new List<byte[]>();
-        }
     }
 
     public async Task<RhythmTrack?> GetTrack(string trackId)
@@ -304,7 +254,7 @@ public class DatabaseService : IDatabaseService
             System.Diagnostics.Debug.WriteLine($"Getting album {albumId}");
             if (albums.ContainsKey(albumId)) return albums[albumId];
             System.Diagnostics.Debug.WriteLine($"Album {albumId} not found in cache");
-            var cmd = new OracleCommand($"SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type, album_image_url FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
+            var cmd = new OracleCommand($"SELECT * FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
             var reader = await cmd.ExecuteReaderAsync();
@@ -314,7 +264,6 @@ public class DatabaseService : IDatabaseService
                 {
                     AlbumId = reader.GetString(reader.GetOrdinal("ALBUM_ID")),
                     AlbumName = reader.GetString(reader.GetOrdinal("ALBUM_NAME")),
-                    AlbumImage = Array.Empty<byte>(),
                     ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
@@ -339,7 +288,7 @@ public class DatabaseService : IDatabaseService
         try
         {
             var sql = new StringBuilder();
-            sql.Append("SELECT album_id, album_name, release_date, track_count, created_at, updated_at, album_type, album_image_url FROM albums WHERE album_id IN (");
+            sql.Append("SELECT * FROM albums WHERE album_id IN (");
             var added = false;
             foreach (var albumId in albumIds)
             {
@@ -360,7 +309,6 @@ public class DatabaseService : IDatabaseService
                 {
                     AlbumId = reader.GetString(reader.GetOrdinal("ALBUM_ID")),
                     AlbumName = reader.GetString(reader.GetOrdinal("ALBUM_NAME")),
-                    AlbumImage = Array.Empty<byte>(),
                     ReleaseDate = reader.GetDateTime(reader.GetOrdinal("RELEASE_DATE")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),

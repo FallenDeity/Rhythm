@@ -12,11 +12,6 @@ public class RhythmAlbum
         get; set;
     }
 
-    public byte[] AlbumImage
-    {
-        get; set;
-    }
-
     public DateTime ReleaseDate
     {
         get; set;

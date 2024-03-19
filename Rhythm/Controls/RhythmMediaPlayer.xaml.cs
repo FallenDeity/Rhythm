@@ -74,7 +74,6 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private RhythmTrack? _track;
     private RhythmAlbum? _album;
     private RhythmArtist[] _artists = [];
-    private InMemoryRandomAccessStream? _trackStream;
 
     private string _albumId = "";
     private string _playlistId = "";
@@ -223,6 +222,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             _trackQueue = new LinkedList<string>(_playState.TracksQueue);
             _original.Clear();
             foreach (var track in _trackQueue) _original.AddLast(track);
+            if (current is not null) _trackQueue.AddFirst(current);
             dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
             {
                 if (_loop) mediaPlayer.IsLoopingEnabled = true;
@@ -284,21 +284,15 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                        {
                            if (_album is null) return;
-                           var img = _album.AlbumImageURL is not null ? new BitmapImage(new Uri(_album.AlbumImageURL)) : null;
+                           var url = _album.AlbumImageURL is not null ? _album.AlbumImageURL : "ms-appx:///Assets/Track.jpeg";
                            var page = (ShellPage)App.MainWindow.Content;
-                           page.RhythmPlayer.TrackImage.Source = img;
+                           page.RhythmPlayer.TrackImage.Source = new BitmapImage(new Uri(url));
                        });
     }
 
     private async Task StreamTrack()
     {
         if (_track is null) return;
-        if (_trackStream is not null)
-        {
-            _trackStream.Dispose();
-            _trackStream = null;
-        }
-        var yt = new YoutubeExplode.YoutubeClient();
         var vidUrl = _track.TrackAudioURL;
         var vidId = VideoId.TryParse(vidUrl)?.Value;
         if (vidUrl is null || vidId is null)
@@ -306,11 +300,11 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var empty = MediaSource.CreateFromStream(new InMemoryRandomAccessStream(), "audio/mpeg");
             dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                        {
-
                            mediaPlayer.Source = empty;
                            mediaPlayer.Play();
                            _loaded = true;
                        });
+            _ = Task.Run(() => UpdateStreams(TrackId));
             return;
         }
         var streamInfo = _manifestCache.ContainsKey(vidId) ? _manifestCache[vidId] : await yt.Videos.Streams.GetManifestAsync(vidId);
@@ -323,6 +317,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                    mediaPlayer.Play();
                    _loaded = true;
                });
+        _ = Task.Run(() => UpdateStreams(TrackId));
     }
 
     private async Task LoadAlbumTracks()
@@ -473,7 +468,6 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
                       page.RhythmPlayer.TrackSeek.Value = 0;
                       page.RhythmPlayer.PlayPauseIcon.Glyph = "\uE768";
                       progressTimer?.Stop();
-                      _ = Task.Run(() => UpdateStreams(TrackId));
                       if (_trackQueue.Count > 0 && _trackQueue.First is not null)
                       {
                           TrackId = _trackQueue.First.Value;
