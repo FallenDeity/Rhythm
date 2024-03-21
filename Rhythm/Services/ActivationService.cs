@@ -37,6 +37,16 @@ public class ActivationService : IActivationService
             return;
         }
 
+        // Connect to storage
+        connected = await App.GetService<IStorageService>().ConnectToSupabase();
+        if (!connected)
+        {
+            App.MainWindow.Content = App.GetService<LoginPage>();
+            App.MainWindow.Activate();
+            await StartupAsync();
+            return;
+        }
+
         // Set the MainWindow Content.
         if (App.MainWindow.Content == null)
         {
@@ -58,7 +68,7 @@ public class ActivationService : IActivationService
                         UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
                         UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
                         Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
-                        UserImage = new byte[0],
+                        UserImageURL = reader.IsDBNull(reader.GetOrdinal("USER_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("USER_IMAGE_URL")),
                         Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
                         Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
                         PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),

@@ -27,7 +27,6 @@ public static class BitmapHelper
 
     public static async Task<string> GetBase64Async(byte[] data)
     {
-
         return await Task.Run(() => Convert.ToBase64String(data));
     }
 }

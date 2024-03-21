@@ -269,7 +269,7 @@ public sealed partial class RegisterPage : Page
             {
                 var found = splitText.All((key) =>
                 {
-                    return country.ToLower().Contains(key);
+                    return country.ToLower().StartsWith(key);
                 });
                 if (found)
                 {
@@ -280,7 +280,7 @@ public sealed partial class RegisterPage : Page
             {
                 suitableItems.Add("No results found");
             }
-            CVS.Source = suitableItems;
+            sender.ItemsSource = suitableItems;
         }
     }
 
@@ -307,7 +307,7 @@ public sealed partial class RegisterPage : Page
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO users (username, password, gender, country, user_image) VALUES (:username, :password, :gender, :country, EMPTY_BLOB())";
+        command.CommandText = "INSERT INTO users (username, password, gender, country) VALUES (:username, :password, :gender, :country)";
         command.Parameters.Add(new OracleParameter("username", username));
         command.Parameters.Add(new OracleParameter("password", BCrypt.Net.BCrypt.HashPassword(password)));
         command.Parameters.Add(new OracleParameter("gender", gender));

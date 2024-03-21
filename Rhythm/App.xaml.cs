@@ -82,6 +82,7 @@ public partial class App : Application
             services.AddSingleton<ISampleDataService, SampleDataService>();
             services.AddSingleton<IFileService, FileService>();
             services.AddSingleton<IDatabaseService, DatabaseService>();
+            services.AddSingleton<IStorageService, StorageService>();
 
             // Views and ViewModels
             services.AddTransient<SettingsViewModel>();

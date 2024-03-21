@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Helpers;
@@ -78,6 +79,8 @@ public sealed partial class SettingsPage : Page
         openPicker.FileTypeFilter.Add(".jpg");
         openPicker.FileTypeFilter.Add(".jpeg");
         openPicker.FileTypeFilter.Add(".png");
+        openPicker.FileTypeFilter.Add(".tiff");
+        openPicker.FileTypeFilter.Add(".bmp");
         var file = await openPicker.PickSingleFileAsync();
         if (file != null)
         {
@@ -85,16 +88,26 @@ public sealed partial class SettingsPage : Page
             var dataReader = Windows.Storage.Streams.DataReader.FromBuffer(buffer);
             var bytes = new byte[buffer.Length];
             dataReader.ReadBytes(bytes);
-            if (bytes.Length > 3000000)
+            if (bytes.Length > 5000000)
             {
-                await App.MainWindow.ShowMessageDialogAsync("Image size must be less than 3MB");
+                await App.MainWindow.ShowMessageDialogAsync("Image size must be less than 5MB");
                 return;
             }
-            UserImage.Source = await BitmapHelper.GetBitmapAsync(bytes);
+            var format = ImageHelper.GetImageFormat(file.FileType);
+            if (format != null)
+            {
+                var compressed = ImageHelper.CompressImage(bytes, 92, format);
+                bytes = bytes.Length > compressed.Length ? compressed : bytes;
+            }
             if (ViewModel.currentUser is not null)
             {
-                ViewModel.currentUser.UserImage = bytes;
-                await Task.Run(() => ViewModel.UpdateUserImage(bytes));
+                var oldName = ViewModel.currentUser.UserImageFileName;
+                var name = $"{ViewModel.currentUser.UserId}{file.FileType}";
+                if (!string.IsNullOrEmpty(oldName) && !oldName.Equals(name)) await Task.Run(() => App.GetService<IStorageService>().DeleteAvatar(oldName));
+                var url = await Task.Run(() => App.GetService<IStorageService>().UploadAvatar(bytes, name));
+                ViewModel.currentUser.UserImageURL = url;
+                await Task.Run(() => ViewModel.UpdateUserImage(url));
+                UserImage.Source = new BitmapImage(new Uri(url));
             }
         }
     }
@@ -102,7 +115,6 @@ public sealed partial class SettingsPage : Page
     public static string Relativize(DateTime date)
     {
         var span = DateTime.Now - date;
-
         if (span.Days > 365) return $"about {span.Days / 365} year{(span.Days / 365 == 1 ? "" : "s")} ago";
         if (span.Days > 30) return $"about {span.Days / 30} month{(span.Days / 30 == 1 ? "" : "s")} ago";
         if (span.Days > 0) return $"about {span.Days} day{(span.Days == 1 ? "" : "s")} ago";
@@ -121,12 +133,8 @@ public sealed partial class SettingsPage : Page
             CreatedAt.Text = "joined " + Relativize(ViewModel.currentUser.CreatedAt);
             UsernameTextBox.Text = ViewModel.currentUser.UserName;
             ViewModel.UserLoaded = true;
-            await Task.Run(() => ViewModel.LoadUserImage());
-            if (ViewModel.currentUser.UserImage.Length > 0)
-            {
-                var bitmap = await BitmapHelper.GetBitmapAsync(ViewModel.currentUser.UserImage);
-                UserImage.Source = bitmap;
-            }
+            var url = ViewModel.currentUser.UserImageURL is null ? "ms-appx:///Assets/User.png" : ViewModel.currentUser.UserImageURL;
+            UserImage.Source = new BitmapImage(new Uri(url));
         }
     }
 

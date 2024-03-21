@@ -89,7 +89,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         {
             var uid = userId.Replace("\"", "");
             var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-            var command = new OracleCommand($"SELECT user_id, username, password, gender, country, playlist_count, favorite_songs_count, created_at, updated_at FROM users WHERE user_id = :userId", connection);
+            var command = new OracleCommand($"SELECT * FROM users WHERE user_id = :userId", connection);
             command.Parameters.Add(new OracleParameter("userId", uid));
             var reader = await command.ExecuteReaderAsync();
             if (reader.Read())
@@ -98,8 +98,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                 {
                     UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
                     UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
+                    UserImageURL = reader.IsDBNull(reader.GetOrdinal("USER_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("USER_IMAGE_URL")),
                     Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
-                    UserImage = new byte[0],
                     Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
                     Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
                     PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
@@ -119,30 +119,10 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
         }
     }
 
-    public async Task LoadUserImage()
-    {
-        if (UserLoaded)
-        {
-            var userId = currentUser?.UserId;
-            if (userId is not null && currentUser is not null)
-            {
-                var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-                var command = new OracleCommand($"SELECT user_image FROM users WHERE user_id = :userId", connection);
-                command.InitialLOBFetchSize = -1;
-                command.Parameters.Add(new OracleParameter("userId", userId));
-                var reader = await command.ExecuteReaderAsync();
-                if (reader.Read())
-                {
-                    currentUser.UserImage = (byte[])reader.GetValue(reader.GetOrdinal("USER_IMAGE"));
-                }
-            }
-        }
-    }
-
-    public async Task UpdateUserImage(byte[] image)
+    public async Task UpdateUserImage(string image)
     {
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-        var command = new OracleCommand($"UPDATE users SET user_image = :image WHERE user_id = :userId", connection);
+        var command = new OracleCommand($"UPDATE users SET user_image_url = :image WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("image", image));
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));
         await command.ExecuteNonQueryAsync();
@@ -168,6 +148,8 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
 
     public async Task DeleteAccount()
     {
+        var supabase = App.GetService<IStorageService>();
+        if (currentUser?.UserImageURL is not null) await supabase.DeleteAvatar(currentUser.UserImageFileName);
         var connection = App.GetService<IDatabaseService>().GetOracleConnection();
         var command = new OracleCommand($"DELETE FROM users WHERE user_id = :userId", connection);
         command.Parameters.Add(new OracleParameter("userId", currentUser?.UserId));

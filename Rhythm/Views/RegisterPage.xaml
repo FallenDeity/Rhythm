@@ -8,9 +8,6 @@
     xmlns:triggers="using:CommunityToolkit.WinUI"
     Loaded="OnLoaded"
     mc:Ignorable="d">
-    <Page.Resources>
-        <CollectionViewSource x:Name="CVS" />
-    </Page.Resources>
     <Grid>
         <Grid
             x:Name="AppTitleBar"
@@ -125,7 +122,6 @@
                         VerticalAlignment="Center"
                         AutoMaximizeSuggestionArea="False"
                         AutomationProperties.Name="Basic AutoSuggestBox"
-                        ItemsSource="{x:Bind CVS.View, Mode=OneWay}"
                         MaxSuggestionListHeight="200"
                         PlaceholderText="Select Country"
                         SuggestionChosen="AutoSuggestBox_SuggestionChosen"

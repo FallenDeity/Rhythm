@@ -1,6 +1,5 @@
 using System.Text;
 using Oracle.ManagedDataAccess.Client;
-using Oracle.ManagedDataAccess.Types;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Models;
 
@@ -35,11 +34,6 @@ public class DatabaseService : IDatabaseService
         private set;
     }
 
-    public DatabaseService()
-    {
-        ConnectToOracle();
-    }
-
     public bool ConnectToOracle()
     {
         if (!_connected)
@@ -47,6 +41,7 @@ public class DatabaseService : IDatabaseService
             try
             {
                 Connection = new OracleConnection(connectionString);
+                Connection.KeepAlive = true;
                 Connection.Open();
                 _connected = true;
                 return true;
@@ -64,7 +59,10 @@ public class DatabaseService : IDatabaseService
     {
         if (Connection != null)
         {
+            Connection.Close();
             Connection.Dispose();
+            Connection = null;
+            _connected = false;
         }
     }
 
@@ -81,9 +79,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"Getting track {trackId}");
             if (tracks.ContainsKey(trackId)) return tracks[trackId];
-            System.Diagnostics.Debug.WriteLine($"Track {trackId} not found in cache");
             var cmd = new OracleCommand($"SELECT * FROM tracks WHERE track_id = '{trackId}'", GetOracleConnection());
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
@@ -168,9 +164,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"Getting artist {artistId}");
             if (artists.ContainsKey(artistId)) return artists[artistId];
-            System.Diagnostics.Debug.WriteLine($"Artist {artistId} not found in cache");
             var cmd = new OracleCommand($"SELECT * FROM artists WHERE artist_id = '{artistId}'", GetOracleConnection());
             cmd.AddToStatementCache = true;
             cmd.FetchSize *= 2;
@@ -251,9 +245,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"Getting album {albumId}");
             if (albums.ContainsKey(albumId)) return albums[albumId];
-            System.Diagnostics.Debug.WriteLine($"Album {albumId} not found in cache");
             var cmd = new OracleCommand($"SELECT * FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
@@ -333,9 +325,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
-            System.Diagnostics.Debug.WriteLine($"Getting playlist {playlistId}");
             if (playlists.ContainsKey(playlistId)) return playlists[playlistId];
-            System.Diagnostics.Debug.WriteLine($"Playlist {playlistId} not found in cache");
             var cmd = new OracleCommand($"SELECT * FROM playlists WHERE playlist_id = '{playlistId}'", GetOracleConnection());
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
@@ -346,7 +336,7 @@ public class DatabaseService : IDatabaseService
                 {
                     PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
                     PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
-                    PlaylistImage = Array.Empty<byte>(),
+                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
                     PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
                     PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
@@ -393,7 +383,7 @@ public class DatabaseService : IDatabaseService
                 {
                     PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
                     PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
-                    PlaylistImage = Array.Empty<byte>(),
+                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
                     PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
                     PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),

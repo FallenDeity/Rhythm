@@ -4,55 +4,46 @@ public class RhythmArtist
 {
     public string ArtistId
     {
-
         get; set;
     }
 
     public string UserId
     {
-
         get; set;
     }
 
     public string ArtistName
     {
-
         get; set;
     }
 
     public string ArtistBio
     {
-
         get; set;
     }
 
     public int TrackCount
     {
-
         get; set;
     }
 
     public int AlbumCount
     {
-
         get; set;
     }
 
     public int FollowerCount
     {
-
         get; set;
     }
 
     public DateTime CreatedAt
     {
-
         get; set;
     }
 
     public DateTime UpdatedAt
     {
-
         get; set;
     }
 
