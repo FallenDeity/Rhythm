@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
+using Oracle.ManagedDataAccess.Client;
 using Rhythm.Activation;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Contracts.Services;
@@ -110,6 +111,30 @@ public partial class App : Application
         App.GetService<IAppNotificationService>().Initialize();
 
         UnhandledException += App_UnhandledException;
+    }
+
+    public static async Task LoadUser(string userId)
+    {
+        var db = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("SELECT * FROM USERS WHERE USER_ID = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        var reader = await cmd.ExecuteReaderAsync();
+        if (reader.Read())
+        {
+            currentUser = new RhythmUser
+            {
+                UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
+                UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
+                Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
+                UserImageURL = reader.IsDBNull(reader.GetOrdinal("USER_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("USER_IMAGE_URL")),
+                Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
+                Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
+                PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
+                FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
+                CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+            };
+        }
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

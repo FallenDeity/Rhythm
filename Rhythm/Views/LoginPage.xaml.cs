@@ -108,6 +108,7 @@ public sealed partial class LoginPage : Page
         }
         if (result is not null)
         {
+            await Task.Run(() => App.LoadUser(result));
             await App.GetService<ILocalSettingsService>().SaveSettingAsync("UserId", result);
             App.MainWindow.Content = App.GetService<ShellPage>();
             App.GetService<INavigationService>().NavigateTo(typeof(MainViewModel).FullName!);

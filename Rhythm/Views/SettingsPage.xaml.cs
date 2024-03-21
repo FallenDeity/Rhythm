@@ -65,6 +65,7 @@ public sealed partial class SettingsPage : Page
     private void LogoutButton_Click(object sender, RoutedEventArgs e)
     {
         App.GetService<ILocalSettingsService>().ClearAll();
+        App.currentUser = null;
         App.MainWindow.Content = App.GetService<LoginPage>();
     }
 
@@ -214,6 +215,7 @@ public sealed partial class SettingsPage : Page
         {
             await Task.Run(() => ViewModel.DeleteAccount());
             await App.GetService<ILocalSettingsService>().ClearAll();
+            App.currentUser = null;
             App.MainWindow.Content = App.GetService<LoginPage>();
         }
     }

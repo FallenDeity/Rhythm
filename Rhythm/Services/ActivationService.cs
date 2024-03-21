@@ -56,27 +56,9 @@ public class ActivationService : IActivationService
             if (auth != null && bool.Parse(auth.ToString() ?? "false") && user != null)
             {
                 var userId = user.ToString()?.Replace("\"", "");
-                var connection = App.GetService<IDatabaseService>().GetOracleConnection();
-                var command = connection.CreateCommand();
-                command.CommandText = "SELECT * FROM users WHERE user_id = :userId";
-                command.Parameters.Add(new OracleParameter("userId", userId));
-                var reader = await command.ExecuteReaderAsync();
-                if (reader.Read())
+                if (userId is not null) await App.LoadUser(userId);
+                if (App.currentUser is not null)
                 {
-                    var userData = new RhythmUser
-                    {
-                        UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
-                        UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
-                        Password = reader.GetString(reader.GetOrdinal("PASSWORD")),
-                        UserImageURL = reader.IsDBNull(reader.GetOrdinal("USER_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("USER_IMAGE_URL")),
-                        Gender = reader.GetValue(reader.GetOrdinal("GENDER")) as string,
-                        Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
-                        PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
-                        FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
-                        CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                        UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
-                    };
-                    App.currentUser = userData;
                     _shell = App.GetService<ShellPage>();
                 }
                 else
@@ -84,7 +66,6 @@ public class ActivationService : IActivationService
                     await App.GetService<ILocalSettingsService>().ClearAll();
                     _shell = App.GetService<LoginPage>();
                 }
-                _shell = App.GetService<ShellPage>();
             }
             else
             {
