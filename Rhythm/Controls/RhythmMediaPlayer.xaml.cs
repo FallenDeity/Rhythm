@@ -347,7 +347,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         _ = Task.Run(() => CacheDataBatch(_cts.Token), _cts.Token);
     }
 
-    public async Task LoadPlaylistTracks()
+    private async Task LoadPlaylistTracks()
     {
         if (string.IsNullOrEmpty(_playlistId)) return;
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
@@ -374,7 +374,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         _ = Task.Run(() => CacheDataBatch(_cts.Token), _cts.Token);
     }
 
-    public async Task PlayCurrentTrack()
+    private async Task PlayCurrentTrack()
     {
         if (_track is null || !_track.TrackId.Equals(TrackId))
         {
@@ -421,12 +421,35 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         }
     }
 
-    public async Task PlayAlbum(string albumId)
+    private void SkipToTrack(string trackId)
+    {
+        var idx = _trackQueue.Find(trackId);
+        if (idx is not null)
+        {
+            if (_shuffle)
+            {
+                var rest = _trackQueue.SkipWhile(x => x != idx.Value).Skip(1);
+                var newQueue = new LinkedList<string>(rest);
+                newQueue.AddFirst(idx.Value);
+                _trackQueue = newQueue;
+            }
+            else
+            {
+                var rest = _trackQueue.SkipWhile(x => x != idx.Value);
+                var newQueue = new LinkedList<string>(rest);
+                _trackQueue = newQueue;
+            }
+        }
+    }
+
+
+    public async Task PlayAlbum(string albumId, string? StartTrackId = null)
     {
         _trackQueue.Clear();
         _original.Clear();
         _albumId = albumId;
         await Task.Run(() => LoadAlbumTracks());
+        if (StartTrackId != null) SkipToTrack(StartTrackId);
         if (_trackQueue.Count > 0 && _trackQueue.First is not null)
         {
             IsPlaying = true;
@@ -434,12 +457,13 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         }
     }
 
-    public async Task PlayPlaylist(string playlistId)
+    public async Task PlayPlaylist(string playlistId, string? StartTrackId = null)
     {
         _trackQueue.Clear();
         _original.Clear();
         _playlistId = playlistId;
         await Task.Run(() => LoadPlaylistTracks());
+        if (StartTrackId != null) SkipToTrack(StartTrackId);
         if (_trackQueue.Count > 0 && _trackQueue.First is not null)
         {
             IsPlaying = true;

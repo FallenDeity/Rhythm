@@ -267,7 +267,7 @@ public sealed partial class RegisterPage : Page
             var splitText = sender.Text.ToLower().Split(" ");
             foreach (var country in Countries)
             {
-                var found = splitText.All((key) =>
+                var found = Array.TrueForAll(splitText, key =>
                 {
                     return country.ToLower().StartsWith(key);
                 });

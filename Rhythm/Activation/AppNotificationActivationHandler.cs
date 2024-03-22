@@ -1,7 +1,9 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using Microsoft.Windows.AppNotifications;
 using Rhythm.Contracts.Services;
+using Rhythm.ViewModels;
 
 namespace Rhythm.Activation;
 
@@ -23,26 +25,22 @@ public class AppNotificationActivationHandler : ActivationHandler<LaunchActivate
 
     protected async override Task HandleInternalAsync(LaunchActivatedEventArgs args)
     {
-        // TODO: Handle notification activations.
-
-        //// // Access the AppNotificationActivatedEventArgs.
-        //// var activatedEventArgs = (AppNotificationActivatedEventArgs)AppInstance.GetCurrent().GetActivatedEventArgs().Data;
-
-        //// // Navigate to a specific page based on the notification arguments.
-        //// if (_notificationService.ParseArguments(activatedEventArgs.Argument)["action"] == "Settings")
-        //// {
-        ////     // Queue navigation with low priority to allow the UI to initialize.
-        ////     App.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-        ////     {
-        ////         _navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
-        ////     });
-        //// }
-
-        App.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        var notificationArgs = (AppNotificationActivatedEventArgs)AppInstance.GetCurrent().GetActivatedEventArgs().Data;
+        var arguments = _notificationService.ParseArguments(notificationArgs.Argument);
+        if (arguments != null && arguments["action"] == "Settings")
         {
-            App.MainWindow.ShowMessageDialogAsync("TODO: Handle notification activations.", "Notification Activation");
-        });
-
+            App.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                           {
+                               _navigationService.NavigateTo(typeof(SettingsViewModel).FullName!);
+                           });
+        }
+        else
+        {
+            App.MainWindow.DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+                                      {
+                                          _navigationService.NavigateTo(typeof(MainViewModel).FullName!);
+                                      });
+        }
         await Task.CompletedTask;
     }
 }

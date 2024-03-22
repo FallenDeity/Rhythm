@@ -14,6 +14,7 @@ namespace Rhythm.Views;
 
 public sealed partial class SettingsPage : Page
 {
+    private const string DefaultUserImage = "ms-appx:///Assets/User.png";
     public static readonly string PageName = "Settings";
 
     public static readonly bool IsPageHidden = false;
@@ -134,7 +135,7 @@ public sealed partial class SettingsPage : Page
             CreatedAt.Text = "joined " + Relativize(ViewModel.currentUser.CreatedAt);
             UsernameTextBox.Text = ViewModel.currentUser.UserName;
             ViewModel.UserLoaded = true;
-            var url = ViewModel.currentUser.UserImageURL is null ? "ms-appx:///Assets/User.png" : ViewModel.currentUser.UserImageURL;
+            var url = ViewModel.currentUser.UserImageURL is null ? DefaultUserImage : ViewModel.currentUser.UserImageURL;
             UserImage.Source = new BitmapImage(new Uri(url));
         }
     }

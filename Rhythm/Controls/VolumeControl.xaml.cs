@@ -64,7 +64,7 @@ public sealed partial class VolumeControl : UserControl
         VolumeMuteIcon.Glyph = GetVolumeGlyph();
     }
 
-    private void OnLoading(FrameworkElement sender, object args)
+    private void UserControl_Loading(FrameworkElement sender, object args)
     {
         _volume = RhythmMediaPlayer.mediaPlayer.Volume * 100;
         VolumeSlider.Value = _volume;

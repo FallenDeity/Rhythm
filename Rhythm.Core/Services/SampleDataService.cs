@@ -46,9 +46,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10643, // Symbol Globe
-                        OrderDate = new DateTime(1997, 8, 25),
-                        RequiredDate = new DateTime(1997, 9, 22),
-                        ShippedDate = new DateTime(1997, 9, 22),
+                        OrderDate = new DateTime(1997, 8, 25, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1997, 9, 22, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1997, 9, 22, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Speedy Express",
                         ShipperPhone = "(503) 555-9831",
                         Freight = 29.46,
@@ -101,9 +101,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10835, // Symbol Music
-                        OrderDate = new DateTime(1998, 1, 15),
-                        RequiredDate = new DateTime(1998, 2, 12),
-                        ShippedDate = new DateTime(1998, 1, 21),
+                        OrderDate = new DateTime(1998, 1, 15, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1998, 2, 12, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1998, 1, 21, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Federal Shipping",
                         ShipperPhone = "(503) 555-9931",
                         Freight = 69.53,
@@ -144,9 +144,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10952, // Symbol Calendar
-                        OrderDate = new DateTime(1998, 3, 16),
-                        RequiredDate = new DateTime(1998, 4, 27),
-                        ShippedDate = new DateTime(1998, 3, 24),
+                        OrderDate = new DateTime(1998, 3, 16, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1998, 4, 27, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1998, 3, 24, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Speedy Express",
                         ShipperPhone = "(503) 555-9831",
                         Freight = 40.42,
@@ -203,9 +203,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10625, // Symbol Camera
-                        OrderDate = new DateTime(1997, 8, 8),
-                        RequiredDate = new DateTime(1997, 9, 5),
-                        ShippedDate = new DateTime(1997, 8, 14),
+                        OrderDate = new DateTime(1997, 8, 8, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1997, 9, 5, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1997, 8, 14, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Speedy Express",
                         ShipperPhone = "(503) 555-9831",
                         Freight = 43.90,
@@ -258,9 +258,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10926, // Symbol Clock
-                        OrderDate = new DateTime(1998, 3, 4),
-                        RequiredDate = new DateTime(1998, 4, 1),
-                        ShippedDate = new DateTime(1998, 3, 11),
+                        OrderDate = new DateTime(1998, 3, 4, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1998, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1998, 3, 11, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Federal Shipping",
                         ShipperPhone = "(503) 555-9931",
                         Freight = 39.92,
@@ -341,9 +341,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10507, // Symbol Contact
-                        OrderDate = new DateTime(1997, 4, 15),
-                        RequiredDate = new DateTime(1997, 5, 13),
-                        ShippedDate = new DateTime(1997, 4, 22),
+                        OrderDate = new DateTime(1997, 4, 15, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1997, 5, 13, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1997, 4, 22, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Speedy Express",
                         ShipperPhone = "(503) 555-9831",
                         Freight = 47.45,
@@ -384,9 +384,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10573, // Symbol Star
-                        OrderDate = new DateTime(1997, 6, 19),
-                        RequiredDate = new DateTime(1997, 7, 17),
-                        ShippedDate = new DateTime(1997, 6, 20),
+                        OrderDate = new DateTime(1997, 6, 19, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1997, 7, 17, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1997, 6, 20, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "Federal Shipping",
                         ShipperPhone = "(503) 555-9931",
                         Freight = 84.84,
@@ -439,9 +439,9 @@ public class SampleDataService : ISampleDataService
                     new()
                     {
                         OrderID = 10682, // Symbol Home
-                        OrderDate = new DateTime(1997, 9, 25),
-                        RequiredDate = new DateTime(1997, 10, 23),
-                        ShippedDate = new DateTime(1997, 10, 1),
+                        OrderDate = new DateTime(1997, 9, 25, 0, 0, 0, DateTimeKind.Utc),
+                        RequiredDate = new DateTime(1997, 10, 23, 0, 0, 0, DateTimeKind.Utc),
+                        ShippedDate = new DateTime(1997, 10, 1, 0, 0, 0, DateTimeKind.Utc),
                         ShipperName = "United Package",
                         ShipperPhone = "(503) 555-3199",
                         Freight = 36.13,

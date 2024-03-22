@@ -1,13 +1,15 @@
-﻿namespace Rhythm.Core.Models;
+﻿#nullable enable
+
+namespace Rhythm.Core.Models;
 
 public class RhythmAlbum
 {
-    public string AlbumId
+    public required string AlbumId
     {
         get; set;
     }
 
-    public string AlbumName
+    public required string AlbumName
     {
         get; set;
     }
@@ -32,7 +34,7 @@ public class RhythmAlbum
         get; set;
     }
 
-    public string AlbumType
+    public required string AlbumType
     {
         get; set;
     }

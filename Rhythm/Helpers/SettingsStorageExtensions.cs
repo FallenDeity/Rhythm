@@ -16,14 +16,6 @@ public static class SettingsStorageExtensions
         return appData.RoamingStorageQuota == 0;
     }
 
-    public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
-    {
-        var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
-        var fileContent = await Json.StringifyAsync(content);
-
-        await FileIO.WriteTextAsync(file, fileContent);
-    }
-
     public static async Task<T?> ReadAsync<T>(this StorageFolder folder, string name)
     {
         if (!File.Exists(Path.Combine(folder.Path, GetFileName(name))))
@@ -37,16 +29,6 @@ public static class SettingsStorageExtensions
         return await Json.ToObjectAsync<T>(fileContent);
     }
 
-    public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
-    {
-        settings.SaveString(key, await Json.StringifyAsync(value));
-    }
-
-    public static void SaveString(this ApplicationDataContainer settings, string key, string value)
-    {
-        settings.Values[key] = value;
-    }
-
     public static async Task<T?> ReadAsync<T>(this ApplicationDataContainer settings, string key)
     {
         object? obj;
@@ -57,6 +39,24 @@ public static class SettingsStorageExtensions
         }
 
         return default;
+    }
+
+    public static async Task SaveAsync<T>(this StorageFolder folder, string name, T content)
+    {
+        var file = await folder.CreateFileAsync(GetFileName(name), CreationCollisionOption.ReplaceExisting);
+        var fileContent = await Json.StringifyAsync(content);
+
+        await FileIO.WriteTextAsync(file, fileContent);
+    }
+
+    public static async Task SaveAsync<T>(this ApplicationDataContainer settings, string key, T value)
+    {
+        settings.SaveString(key, await Json.StringifyAsync(value));
+    }
+
+    public static void SaveString(this ApplicationDataContainer settings, string key, string value)
+    {
+        settings.Values[key] = value;
     }
 
     public static async Task<StorageFile> SaveFileAsync(this StorageFolder folder, byte[] content, string fileName, CreationCollisionOption options = CreationCollisionOption.ReplaceExisting)

@@ -16,6 +16,8 @@ using Windows.UI;
 namespace Rhythm.Controls;
 public sealed partial class RhythmQueueControl : UserControl
 {
+    private const string DefaultTrackImage = "ms-appx:///Assets/Track.jpeg";
+
     public RhythmQueueControl()
     {
         this.InitializeComponent();
@@ -86,7 +88,7 @@ public sealed partial class RhythmQueueControl : UserControl
             Width = 64,
             Height = 64
         };
-        var url = albumData.AlbumImageURL is not null ? albumData.AlbumImageURL : "ms-appx:///Assets/Track.jpeg";
+        var url = albumData.AlbumImageURL is not null ? albumData.AlbumImageURL : DefaultTrackImage;
         var imgSource = new BitmapImage(new Uri(url));
         var imgControl = new Image
         {

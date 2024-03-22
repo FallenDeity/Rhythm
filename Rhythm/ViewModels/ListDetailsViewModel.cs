@@ -41,6 +41,6 @@ public partial class ListDetailsViewModel : ObservableRecipient, INavigationAwar
 
     public void EnsureItemSelected()
     {
-        Selected ??= SampleItems.First();
+        Selected ??= SampleItems[0];
     }
 }
