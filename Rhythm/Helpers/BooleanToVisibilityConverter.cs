@@ -1,7 +1,8 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 
 namespace Rhythm.Helpers;
+
 public class BooleanToVisibilityConverter : IValueConverter
 {
     public BooleanToVisibilityConverter()

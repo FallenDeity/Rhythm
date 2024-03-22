@@ -1,4 +1,4 @@
-﻿using Rhythm.Contracts.Services;
+using Rhythm.Contracts.Services;
 
 namespace Rhythm.Services;
 

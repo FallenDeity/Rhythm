@@ -1,8 +1,9 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Windows.Storage.Streams;
 
 namespace Rhythm.Helpers;
+
 public static class BitmapHelper
 {
     public static async Task<BitmapImage> GetBitmapAsync(byte[] data)

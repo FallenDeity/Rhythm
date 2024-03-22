@@ -1,4 +1,5 @@
-﻿namespace Rhythm.Contracts.Services;
+namespace Rhythm.Contracts.Services;
+
 internal interface IStorageService
 {
     Supabase.Client? Client
