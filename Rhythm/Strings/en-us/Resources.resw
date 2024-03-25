@@ -124,7 +124,7 @@
     <value>Rhythm</value>
   </data>
   <data name="Shell_Main.Content" xml:space="preserve">
-    <value>Main</value>
+    <value>Home</value>
   </data>
   <data name="Shell_ContentGrid.Content" xml:space="preserve">
     <value>ContentGrid</value>

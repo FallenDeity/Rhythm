@@ -42,7 +42,9 @@ public sealed partial class RhythmQueueControl : UserControl
             Background = new SolidColorBrush(Colors.Transparent),
             HorizontalAlignment = HorizontalAlignment.Left,
             VerticalAlignment = VerticalAlignment.Top,
-            SelectionMode = (SelectionMode)ListViewSelectionMode.None
+            SelectionMode = (SelectionMode)ListViewSelectionMode.None,
+            MinWidth = 310,
+            MaxWidth = 360,
         };
         listBox.ItemContainerStyle = new Style(typeof(ListBoxItem))
         {

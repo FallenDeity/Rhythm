@@ -47,6 +47,13 @@ public class RhythmArtist
         get; set;
     }
 
+    public string ArtistImageURL
+    {
+        get; set;
+    }
+
+    public string Intro => $"This is {ArtistName}.";
+
     public override string ToString()
     {
 

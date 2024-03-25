@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
+using Microsoft.Windows.AppLifecycle;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Activation;
 using Rhythm.Contracts.Services;
@@ -102,6 +104,8 @@ public partial class App : Application
             services.AddTransient<ShellViewModel>();
             services.AddTransient<LoginPage>();
             services.AddTransient<RegisterPage>();
+            services.AddTransient<AlbumDetailViewModel>();
+            services.AddTransient<AlbumDetailPage>();
 
             // Configuration
             services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));
@@ -111,6 +115,23 @@ public partial class App : Application
         App.GetService<IAppNotificationService>().Initialize();
 
         UnhandledException += App_UnhandledException;
+    }
+
+    [STAThread]
+    static async Task Main(string[] args)
+    {
+        WinRT.ComWrappersSupport.InitializeComWrappers();
+        var isRedirect = await DecideRedirection();
+        if (!isRedirect)
+        {
+            Microsoft.UI.Xaml.Application.Start((p) =>
+            {
+                var context = new DispatcherQueueSynchronizationContext(
+                    DispatcherQueue.GetForCurrentThread());
+                SynchronizationContext.SetSynchronizationContext(context);
+                _ = new App();
+            });
+        }
     }
 
     public static async Task LoadUser(string userId)
@@ -145,12 +166,28 @@ public partial class App : Application
         App.MainWindow.ShowMessageDialogAsync(exceptionString, "Unhandled Exception");
     }
 
+    private static void OnActivated(object? sender, AppActivationArguments args)
+    {
+        App.MainWindow.BringToFront();
+    }
+
+    private static async Task<bool> DecideRedirection()
+    {
+        var instance = AppInstance.FindOrRegisterForKey("RhythmInstance");
+        if (!instance.IsCurrent)
+        {
+            var activationArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            await instance.RedirectActivationToAsync(activationArgs);
+            return true;
+        }
+        instance.Activated += OnActivated;
+        return false;
+    }
+
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-
         App.GetService<IAppNotificationService>().Show(string.Format("AppNotificationSamplePayload".GetLocalized(), AppContext.BaseDirectory));
-
         await App.GetService<IActivationService>().ActivateAsync(args);
     }
 }

@@ -1,5 +1,7 @@
 ﻿#nullable enable
 
+using System.Text.RegularExpressions;
+
 namespace Rhythm.Core.Models;
 
 public class RhythmTrack
@@ -57,6 +59,54 @@ public class RhythmTrack
     public bool AudioAvailable
     {
         get; set;
+    }
+
+    public required RhythmAlbum Album
+    {
+        get; set;
+    }
+
+    public required RhythmArtist[]? Artists
+    {
+        get; set;
+    }
+
+    public string? Lyrics
+    {
+        get; set;
+    }
+
+    public int? Count
+    {
+        get; set;
+    }
+
+    public string TrackDurationString
+    {
+
+        get
+        {
+            var pattern = @"\+00 00:(\d{2}:\d{2})";
+            var match = Regex.Match(TrackDuration, pattern);
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+            return "00:00";
+        }
+    }
+
+    public string TrackImageURL => Album.AlbumImageURL ?? "ms-appx:///Assets/Tracj.jpeg";
+
+    public string ArtistName => Artists?[0].ArtistName ?? "Unknown Artist";
+
+    public string ArtistNames
+    {
+        get
+        {
+            if (Artists is null) return "Unknown Artist";
+            return string.Join(", ", Artists.Select(artist => artist.ArtistName));
+        }
     }
 
     public override string ToString()

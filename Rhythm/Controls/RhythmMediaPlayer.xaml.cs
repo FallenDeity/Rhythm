@@ -324,7 +324,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     {
         if (string.IsNullOrEmpty(_albumId)) return;
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT track_id FROM tracks WHERE track_album_id = :albumId", conn);
+        var cmd = new OracleCommand("SELECT track_id FROM album_tracks WHERE album_id = :albumId", conn);
         cmd.Parameters.Add(new OracleParameter("albumId", _albumId));
         var reader = await cmd.ExecuteReaderAsync();
         while (reader.Read())
@@ -523,7 +523,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         VolumeSlider.Visibility = width < 750 ? Visibility.Collapsed : Visibility.Visible;
         VolumeButton.Visibility = width < 750 ? Visibility.Visible : Visibility.Collapsed;
         TrackSeek.Width = width < 1125 ? 170 : 300;
-        MediaBar.Margin = width < 800 ? new Thickness(0) : new Thickness(12, 0, 12, 12);
+        MediaBar.Margin = width < 800 ? new Thickness(0) : new Thickness(12, 0, 12, 6);
         TrackTitle.Visibility = width < 800 ? Visibility.Collapsed : Visibility.Visible;
         TrackArtist.Visibility = width < 800 ? Visibility.Collapsed : Visibility.Visible;
         TrackInfo.Width = width < 800 ? 0 : 120;

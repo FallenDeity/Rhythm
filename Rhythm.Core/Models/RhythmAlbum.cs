@@ -44,6 +44,35 @@ public class RhythmAlbum
         get; set;
     }
 
+    public RhythmArtist[]? Artists
+    {
+        get; set;
+    }
+
+    public string ArtistNames
+    {
+        get
+        {
+            if (Artists == null)
+            {
+                return string.Empty;
+            }
+            return string.Join(", ", Artists.Select(a => a.ArtistName));
+        }
+    }
+
+    public string ArtistName
+    {
+        get
+        {
+            if (Artists == null)
+            {
+                return "Unknown Artist";
+            }
+            return Artists[0].ArtistName;
+        }
+    }
+
     public override string ToString()
     {
         var AlbumString = $"Album ID: {AlbumId}\n" +

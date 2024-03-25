@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     mc:Ignorable="d">
-
     <Grid x:Name="ContentArea">
         <ScrollViewer IsTabStop="True">
             <StackPanel x:Name="contentPanel">

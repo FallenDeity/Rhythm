@@ -21,6 +21,7 @@ public class PageService : IPageService
         Configure<ListDetailsViewModel, ListDetailsPage>();
         Configure<DataGridViewModel, DataGridPage>();
         Configure<SettingsViewModel, SettingsPage>();
+        Configure<AlbumDetailViewModel, AlbumDetailPage>();
     }
 
     public Type GetPageType(string key)

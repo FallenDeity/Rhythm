@@ -20,6 +20,8 @@ public class DatabaseService : IDatabaseService
 
     private bool _connected = false;
 
+    private readonly string defaultCover = "ms-appx:///Assets/Track.jpeg";
+
     private readonly Dictionary<string, RhythmTrack> tracks = new();
 
     private readonly Dictionary<string, RhythmArtist> artists = new();
@@ -98,7 +100,10 @@ public class DatabaseService : IDatabaseService
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                     UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
                     AudioAvailable = reader.GetBoolean(reader.GetOrdinal("AUDIO_AVAILABLE")),
-                    TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL"))
+                    Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS")),
+                    TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL")),
+                    Album = (await GetAlbum(reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID"))))!,
+                    Artists = await GetTrackArtists(trackId)
                 };
                 if (!tracks.ContainsKey(trackId)) tracks.Add(trackId, track);
                 return track;
@@ -146,7 +151,10 @@ public class DatabaseService : IDatabaseService
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                     UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
                     AudioAvailable = reader.GetBoolean(reader.GetOrdinal("AUDIO_AVAILABLE")),
-                    TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL"))
+                    Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS")),
+                    TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL")),
+                    Album = (await GetAlbum(reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID"))))!,
+                    Artists = await GetTrackArtists(reader.GetString(reader.GetOrdinal("TRACK_ID")))
                 };
                 if (!tracks.ContainsKey(track.TrackId)) tracks.Add(track.TrackId, track);
                 t.Add(track);
@@ -181,7 +189,8 @@ public class DatabaseService : IDatabaseService
                     AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
                     FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
+                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL"))
                 };
                 if (!artists.ContainsKey(artistId)) artists.Add(artistId, artist);
                 return artist;
@@ -227,7 +236,8 @@ public class DatabaseService : IDatabaseService
                     AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
                     FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
+                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL"))
                 };
                 if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
                 a.Add(artist);
@@ -261,7 +271,8 @@ public class DatabaseService : IDatabaseService
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                     UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
                     AlbumType = reader.GetString(reader.GetOrdinal("ALBUM_TYPE")),
-                    AlbumImageURL = reader.IsDBNull(reader.GetOrdinal("ALBUM_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL"))
+                    AlbumImageURL = reader.IsDBNull(reader.GetOrdinal("ALBUM_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL")),
+                    Artists = await GetAlbumArtists(reader.GetString(reader.GetOrdinal("ALBUM_ID")))
                 };
                 if (!albums.ContainsKey(albumId)) albums.Add(albumId, album);
                 return album;
@@ -306,7 +317,8 @@ public class DatabaseService : IDatabaseService
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                     UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
                     AlbumType = reader.GetString(reader.GetOrdinal("ALBUM_TYPE")),
-                    AlbumImageURL = reader.IsDBNull(reader.GetOrdinal("ALBUM_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL"))
+                    AlbumImageURL = reader.IsDBNull(reader.GetOrdinal("ALBUM_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ALBUM_IMAGE_URL")),
+                    Artists = await GetAlbumArtists(reader.GetString(reader.GetOrdinal("ALBUM_ID")))
                 };
                 if (!albums.ContainsKey(album.AlbumId)) albums.Add(album.AlbumId, album);
                 a.Add(album);
@@ -336,8 +348,8 @@ public class DatabaseService : IDatabaseService
                 {
                     PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
                     PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
-                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
-                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
+                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
+                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")).Trim(),
                     PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                     FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
@@ -383,8 +395,8 @@ public class DatabaseService : IDatabaseService
                 {
                     PlaylistId = reader.GetString(reader.GetOrdinal("PLAYLIST_ID")),
                     PlaylistName = reader.GetString(reader.GetOrdinal("PLAYLIST_NAME")),
-                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? null : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
-                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")),
+                    PlaylistImageURL = reader.IsDBNull(reader.GetOrdinal("PLAYLIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("PLAYLIST_IMAGE_URL")),
+                    PlaylistDescription = reader.GetString(reader.GetOrdinal("PLAYLIST_DESCRIPTION")).Trim(),
                     PlaylistOwner = reader.GetString(reader.GetOrdinal("PLAYLIST_OWNER")),
                     TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
                     FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
@@ -429,7 +441,8 @@ public class DatabaseService : IDatabaseService
                     AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
                     FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
+                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL")),
                 };
                 if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
                 a.Add(artist);
@@ -439,6 +452,46 @@ public class DatabaseService : IDatabaseService
         catch (Exception e)
         {
             System.Diagnostics.Debug.WriteLine("Error getting track artists" + e.Message);
+            return Array.Empty<RhythmArtist>();
+        }
+    }
+
+    private async Task<RhythmArtist[]> GetAlbumArtists(string albumId)
+    {
+        try
+        {
+            var sql = new StringBuilder();
+            sql.Append("SELECT * FROM artists WHERE artist_id IN (SELECT artist_id FROM album_artists WHERE album_id = '");
+            sql.Append(albumId);
+            sql.Append("')");
+            var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
+            cmd.AddToStatementCache = true;
+            cmd.FetchSize *= 2;
+            var reader = await cmd.ExecuteReaderAsync();
+            var a = new List<RhythmArtist>();
+            while (reader.Read())
+            {
+                var artist = new RhythmArtist
+                {
+                    ArtistId = reader.GetString(reader.GetOrdinal("ARTIST_ID")),
+                    UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
+                    ArtistName = reader.GetString(reader.GetOrdinal("ARTIST_NAME")),
+                    ArtistBio = reader.GetString(reader.GetOrdinal("ARTIST_BIO")),
+                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
+                    AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
+                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
+                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL")),
+                };
+                if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
+                a.Add(artist);
+            }
+            return a.ToArray();
+        }
+        catch (Exception e)
+        {
+            System.Diagnostics.Debug.WriteLine("Error getting album artists" + e.Message);
             return Array.Empty<RhythmArtist>();
         }
     }
