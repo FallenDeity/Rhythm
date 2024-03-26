@@ -22,6 +22,7 @@ public class PageService : IPageService
         Configure<DataGridViewModel, DataGridPage>();
         Configure<SettingsViewModel, SettingsPage>();
         Configure<AlbumDetailViewModel, AlbumDetailPage>();
+        Configure<PlaylistDetailViewModel, PlaylistDetailPage>();
     }
 
     public Type GetPageType(string key)

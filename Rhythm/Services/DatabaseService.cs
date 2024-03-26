@@ -102,7 +102,7 @@ public class DatabaseService : IDatabaseService
                     AudioAvailable = reader.GetBoolean(reader.GetOrdinal("AUDIO_AVAILABLE")),
                     Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS")),
                     TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL")),
-                    Album = (await GetAlbum(reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID"))))!,
+                    TrackImageURL = reader.IsDBNull(reader.GetOrdinal("TRACK_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("TRACK_IMAGE_URL")),
                     Artists = await GetTrackArtists(trackId)
                 };
                 if (!tracks.ContainsKey(trackId)) tracks.Add(trackId, track);
@@ -121,6 +121,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
+            await GetTracksArtists(trackIds);
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM tracks WHERE track_id IN (");
             var added = false;
@@ -153,7 +154,7 @@ public class DatabaseService : IDatabaseService
                     AudioAvailable = reader.GetBoolean(reader.GetOrdinal("AUDIO_AVAILABLE")),
                     Lyrics = reader.IsDBNull(reader.GetOrdinal("LYRICS")) ? null : reader.GetString(reader.GetOrdinal("LYRICS")),
                     TrackAudioURL = reader.IsDBNull(reader.GetOrdinal("TRACK_AUDIO_URL")) ? null : reader.GetString(reader.GetOrdinal("TRACK_AUDIO_URL")),
-                    Album = (await GetAlbum(reader.GetString(reader.GetOrdinal("TRACK_ALBUM_ID"))))!,
+                    TrackImageURL = reader.IsDBNull(reader.GetOrdinal("TRACK_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("TRACK_IMAGE_URL")),
                     Artists = await GetTrackArtists(reader.GetString(reader.GetOrdinal("TRACK_ID")))
                 };
                 if (!tracks.ContainsKey(track.TrackId)) tracks.Add(track.TrackId, track);
@@ -290,6 +291,7 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
+            await GetAlbumsArtists(albumIds);
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM albums WHERE album_id IN (");
             var added = false;
@@ -325,7 +327,6 @@ public class DatabaseService : IDatabaseService
             }
             return a.ToArray();
         }
-
         catch (Exception e)
         {
             System.Diagnostics.Debug.WriteLine("Error getting albums" + e.Message);
@@ -420,34 +421,14 @@ public class DatabaseService : IDatabaseService
     {
         try
         {
-            var sql = new StringBuilder();
-            sql.Append("SELECT * FROM artists WHERE artist_id IN (SELECT artist_id FROM track_artists WHERE track_id = '");
-            sql.Append(trackId);
-            sql.Append("')");
-            var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
-            cmd.AddToStatementCache = true;
-            cmd.FetchSize *= 2;
-            var reader = await cmd.ExecuteReaderAsync();
-            var a = new List<RhythmArtist>();
+            var sql = new OracleCommand($"SELECT artist_id FROM track_artists WHERE track_id = '{trackId}'", GetOracleConnection());
+            var reader = await sql.ExecuteReaderAsync();
+            var artistIds = new List<string>();
             while (reader.Read())
             {
-                var artist = new RhythmArtist
-                {
-                    ArtistId = reader.GetString(reader.GetOrdinal("ARTIST_ID")),
-                    UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
-                    ArtistName = reader.GetString(reader.GetOrdinal("ARTIST_NAME")),
-                    ArtistBio = reader.GetString(reader.GetOrdinal("ARTIST_BIO")),
-                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
-                    AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
-                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
-                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL")),
-                };
-                if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
-                a.Add(artist);
+                artistIds.Add(reader.GetString(0));
             }
-            return a.ToArray();
+            return await GetArtists(artistIds.ToArray());
         }
         catch (Exception e)
         {
@@ -456,42 +437,88 @@ public class DatabaseService : IDatabaseService
         }
     }
 
-    private async Task<RhythmArtist[]> GetAlbumArtists(string albumId)
+    private async Task<RhythmArtist[]> GetTracksArtists(string[] trackIds)
     {
         try
         {
             var sql = new StringBuilder();
-            sql.Append("SELECT * FROM artists WHERE artist_id IN (SELECT artist_id FROM album_artists WHERE album_id = '");
-            sql.Append(albumId);
-            sql.Append("')");
+            sql.Append("SELECT artist_id FROM track_artists WHERE track_id IN (");
+            var added = false;
+            foreach (var trackId in trackIds)
+            {
+                if (artists.ContainsKey(trackId)) continue;
+                sql.Append($"'{trackId}',");
+                added = true;
+            }
+            if (!added) return trackIds.Where(artists.ContainsKey).Select(track => artists[track]).ToArray();
+            sql.Remove(sql.Length - 1, 1);
+            sql.Append(")");
             var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
-            cmd.AddToStatementCache = true;
             cmd.FetchSize *= 2;
             var reader = await cmd.ExecuteReaderAsync();
-            var a = new List<RhythmArtist>();
+            var artistIds = new List<string>();
             while (reader.Read())
             {
-                var artist = new RhythmArtist
-                {
-                    ArtistId = reader.GetString(reader.GetOrdinal("ARTIST_ID")),
-                    UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
-                    ArtistName = reader.GetString(reader.GetOrdinal("ARTIST_NAME")),
-                    ArtistBio = reader.GetString(reader.GetOrdinal("ARTIST_BIO")),
-                    TrackCount = reader.GetInt32(reader.GetOrdinal("TRACK_COUNT")),
-                    AlbumCount = reader.GetInt32(reader.GetOrdinal("ALBUM_COUNT")),
-                    FollowerCount = reader.GetInt32(reader.GetOrdinal("FOLLOWER_COUNT")),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
-                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT")),
-                    ArtistImageURL = reader.IsDBNull(reader.GetOrdinal("ARTIST_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("ARTIST_IMAGE_URL")),
-                };
-                if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
-                a.Add(artist);
+                artistIds.Add(reader.GetString(0));
             }
-            return a.ToArray();
+            return await GetArtists(artistIds.ToArray());
+        }
+        catch (Exception e)
+        {
+            System.Diagnostics.Debug.WriteLine("Error getting tracks artists" + e.Message);
+            return Array.Empty<RhythmArtist>();
+        }
+    }
+
+    private async Task<RhythmArtist[]> GetAlbumArtists(string albumId)
+    {
+        try
+        {
+            var sql = new OracleCommand($"SELECT artist_id FROM album_artists WHERE album_id = '{albumId}'", GetOracleConnection());
+            var reader = await sql.ExecuteReaderAsync();
+            var artistIds = new List<string>();
+            while (reader.Read())
+            {
+                artistIds.Add(reader.GetString(0));
+            }
+            return await GetArtists(artistIds.ToArray());
         }
         catch (Exception e)
         {
             System.Diagnostics.Debug.WriteLine("Error getting album artists" + e.Message);
+            return Array.Empty<RhythmArtist>();
+        }
+    }
+
+    private async Task<RhythmArtist[]> GetAlbumsArtists(string[] albumIds)
+    {
+        try
+        {
+            var sql = new StringBuilder();
+            sql.Append("SELECT artist_id FROM album_artists WHERE album_id IN (");
+            var added = false;
+            foreach (var albumId in albumIds)
+            {
+                if (artists.ContainsKey(albumId)) continue;
+                sql.Append($"'{albumId}',");
+                added = true;
+            }
+            if (!added) return albumIds.Where(artists.ContainsKey).Select(album => artists[album]).ToArray();
+            sql.Remove(sql.Length - 1, 1);
+            sql.Append(")");
+            var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
+            cmd.FetchSize *= 2;
+            var reader = await cmd.ExecuteReaderAsync();
+            var artistIds = new List<string>();
+            while (reader.Read())
+            {
+                artistIds.Add(reader.GetString(0));
+            }
+            return await GetArtists(artistIds.ToArray());
+        }
+        catch (Exception e)
+        {
+            System.Diagnostics.Debug.WriteLine("Error getting albums artists" + e.Message);
             return Array.Empty<RhythmArtist>();
         }
     }

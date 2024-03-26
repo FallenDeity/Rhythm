@@ -6,28 +6,28 @@ using Rhythm.Contracts.Services;
 using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
+
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace Rhythm.Views;
-
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class AlbumDetailPage : Page
+public sealed partial class PlaylistDetailPage : Page
 {
-    public static readonly string PageName = "Album Detail";
+    public static readonly string PageName = "Playlist Detail";
 
     public static readonly bool IsPageHidden = true;
 
-    public AlbumDetailViewModel ViewModel
+    public PlaylistDetailViewModel ViewModel
     {
         get;
     }
 
-    public AlbumDetailPage()
+    public PlaylistDetailPage()
     {
-        ViewModel = App.GetService<AlbumDetailViewModel>();
+        ViewModel = App.GetService<PlaylistDetailViewModel>();
         this.InitializeComponent();
     }
 
@@ -57,8 +57,14 @@ public sealed partial class AlbumDetailPage : Page
         var page = (ShellPage)App.MainWindow.Content;
         if (page.RhythmPlayer.TrackId != track.TrackId)
         {
-            await page.RhythmPlayer.PlayAlbum(track.TrackAlbumId, track.TrackId);
+            await page.RhythmPlayer.PlayPlaylist(ViewModel.Item?.PlaylistId!, track.TrackId);
         }
+    }
+
+    private void AlbumMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
+        ViewModel.NavigateToAlbum(track.TrackAlbumId);
     }
 
     private void AddToQueueMenuFlyoutItem_Click(object sender, RoutedEventArgs e)

@@ -604,6 +604,12 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         _ = Task.Run(() => UpdatePlayState());
     }
 
+    public void AddToQueue(string trackId)
+    {
+        if (_trackQueue.First is null || _trackQueue.First.Value == trackId) return;
+        _trackQueue.AddFirst(trackId);
+    }
+
     public string? GetTrackName() => _track?.TrackName;
 
     public string? GetTrackArtist() => _artists.Length > 0 ? _artists[0].ArtistName : null;

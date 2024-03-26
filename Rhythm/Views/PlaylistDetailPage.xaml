@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Page
-    x:Class="Rhythm.Views.AlbumDetailPage"
+    x:Class="Rhythm.Views.PlaylistDetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -26,7 +26,7 @@
                 Grid.Row="0"
                 Height="400"
                 VerticalAlignment="Top">
-                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.AlbumImageURL}" />
+                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.PlaylistImageURL}" />
             </Grid>
             <StackPanel Grid.Row="0">
                 <Grid VerticalAlignment="Center">
@@ -45,8 +45,8 @@
                             x:Name="HeroImage"
                             Width="128"
                             Height="128"
-                            AutomationProperties.Name="{x:Bind ViewModel.Item.AlbumName}"
-                            Source="{x:Bind ViewModel.Item.AlbumImageURL}"
+                            AutomationProperties.Name="{x:Bind ViewModel.Item.PlaylistName}"
+                            Source="{x:Bind ViewModel.Item.PlaylistImageURL}"
                             Stretch="UniformToFill" />
                     </Grid>
                     <StackPanel
@@ -59,7 +59,15 @@
                             FontSize="24"
                             FontWeight="ExtraBold"
                             Style="{ThemeResource TitleLargeTextBlockStyle}"
-                            Text="{x:Bind ViewModel.Item.AlbumName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.PlaylistName, Mode=OneWay}" />
+                        <TextBlock
+                            x:Name="Description"
+                            Margin="0,0,0,6"
+                            FontSize="16"
+                            Opacity="0.8"
+                            Text="{x:Bind ViewModel.Item.PlaylistDescription}"
+                            TextWrapping="WrapWholeWords"
+                            Visibility="Collapsed" />
                         <TextBlock
                             x:Name="Info"
                             FontSize="12"
@@ -205,6 +213,7 @@
                                                 <MenuFlyoutItem Text="Add to Playlist" />
                                                 <MenuFlyoutItem Text="Add to Library" />
                                                 <MenuFlyoutSeparator />
+                                                <MenuFlyoutItem Click="AlbumMenuFlyoutItem_Click" Text="Go to Album" />
                                                 <MenuFlyoutItem Text="Go to Artist" />
                                             </MenuFlyout>
                                         </Button.Flyout>
@@ -306,6 +315,7 @@
                         <Setter Target="itemHero.Height" Value="250" />
                         <Setter Target="HeroImage.Width" Value="256" />
                         <Setter Target="HeroImage.Height" Value="250" />
+                        <Setter Target="Description.Visibility" Value="Visible" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -319,6 +329,7 @@
                         <Setter Target="itemHero.Height" Value="192" />
                         <Setter Target="HeroImage.Width" Value="192" />
                         <Setter Target="HeroImage.Height" Value="192" />
+                        <Setter Target="Description.Visibility" Value="Visible" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

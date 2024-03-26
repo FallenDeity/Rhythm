@@ -7,11 +7,12 @@ using Rhythm.Contracts.ViewModels;
 using Rhythm.Core.Models;
 
 namespace Rhythm.ViewModels;
-
-public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAware
+public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly INavigationService _navigationService;
+
     [ObservableProperty]
-    private RhythmAlbum? item;
+    private RhythmPlaylist? item;
 
     [ObservableProperty]
     private bool isDataLoading;
@@ -19,20 +20,24 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private string? infoString;
 
+    [ObservableProperty]
+    private string? owner;
+
     public ObservableCollection<RhythmTrack> tracks { get; } = new ObservableCollection<RhythmTrack>();
 
     public ObservableCollection<string> shimmers { get; } = new ObservableCollection<string>();
 
-    public void OnNavigatedFrom()
+    public PlaylistDetailViewModel(INavigationService navigationService)
     {
+        _navigationService = navigationService;
     }
 
-    public async Task<RhythmTrack[]?> GetAlbumTracks()
+    public async Task<RhythmTrack[]?> GetPlaylistTracks()
     {
         if (Item is null) return null;
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT track_id FROM album_tracks WHERE album_id = :album_id", conn);
-        cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = Item.AlbumId;
+        var cmd = new OracleCommand("SELECT track_id FROM playlist_tracks WHERE playlist_id = :playlist_id", conn);
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = Item.PlaylistId;
         var reader = await cmd.ExecuteReaderAsync();
         var trackIds = new List<string>();
         while (await reader.ReadAsync())
@@ -43,21 +48,37 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
         return data;
     }
 
+    public async Task<string> GetPlaylistOwner()
+    {
+        if (Item is null) return "Uknown User";
+        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("SELECT username FROM users WHERE user_id = :user_id", conn);
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = Item.PlaylistOwner;
+        var reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return reader.GetString(0);
+        }
+        return "Uknown User";
+    }
+
     public async void OnNavigatedTo(object parameter)
     {
-        if (parameter is string albumID)
+        if (parameter is string playlistID)
         {
             IsDataLoading = true;
             InfoString = InfoText;
-            var data = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(albumID));
+            var data = await Task.Run(() => App.GetService<IDatabaseService>().GetPlaylist(playlistID));
             Item = data;
+            InfoString = InfoText;
+            Owner = await Task.Run(() => GetPlaylistOwner());
             InfoString = InfoText;
             if (Item is null) return;
             for (var i = 0; i < Item.TrackCount; i++)
             {
                 shimmers.Add("" + (i + 1));
             }
-            var result = await Task.Run(() => GetAlbumTracks());
+            var result = await Task.Run(() => GetPlaylistTracks());
             if (result is not null)
             {
                 tracks.Clear();
@@ -104,5 +125,14 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
 
     }
 
-    public string InfoText => $"{Item?.ArtistName} • {Item?.TrackCount} Tracks • {DurationText()}";
+    public void OnNavigatedFrom()
+    {
+    }
+
+    public void NavigateToAlbum(string albumId)
+    {
+        _navigationService.NavigateTo(typeof(AlbumDetailViewModel).FullName!, albumId);
+    }
+
+    public string InfoText => $"{Owner} • {Item?.TrackCount} Tracks • {DurationText()}";
 }

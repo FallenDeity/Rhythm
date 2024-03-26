@@ -105,7 +105,7 @@
                         FontWeight="SemiBold"
                         Text="Track Title"
                         TextAlignment="Left"
-                        TextWrapping="Wrap"
+                        TextWrapping="WrapWholeWords"
                         Visibility="Collapsed" />
                     <TextBlock
                         x:Name="TrackArtist"

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Labs.WinUI;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
 using Rhythm.Contracts.ViewModels;
@@ -13,6 +14,8 @@ namespace Rhythm.ViewModels;
 public partial class MainViewModel : ObservableRecipient, INavigationAware
 {
     private readonly INavigationService _navigationService;
+
+    private DispatcherQueue? dispatcherQueue;
 
     public ObservableCollection<Shimmer> shimmers { get; } = new ObservableCollection<Shimmer>();
 
@@ -62,6 +65,15 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
             albums.Add(reader.GetString(0));
         }
         var albumData = await App.GetService<IDatabaseService>().GetAlbums(albums.ToArray());
+        dispatcherQueue?.TryEnqueue(() =>
+        {
+            rhythmAlbums.Clear();
+            foreach (var item in albumData)
+            {
+                if (!rhythmAlbums.Contains(item)) rhythmAlbums.Add(item);
+            }
+            AlbumsLoaded = true;
+        });
         return albumData is null ? Array.Empty<RhythmAlbum>() : albumData;
     }
 
@@ -76,6 +88,15 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
             artists.Add(reader.GetString(0));
         }
         var artistData = await App.GetService<IDatabaseService>().GetArtists(artists.ToArray());
+        dispatcherQueue?.TryEnqueue(() =>
+        {
+            rhythmArtists.Clear();
+            foreach (var item in artistData)
+            {
+                if (!rhythmArtists.Contains(item)) rhythmArtists.Add(item);
+            }
+            ArtistsLoaded = true;
+        });
         return artistData is null ? Array.Empty<RhythmArtist>() : artistData;
     }
 
@@ -90,13 +111,22 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
             tracks.Add(reader.GetString(0));
         }
         var trackData = await App.GetService<IDatabaseService>().GetTracks(tracks.ToArray());
+        dispatcherQueue?.TryEnqueue(() =>
+        {
+            rhythmTracks.Clear();
+            foreach (var item in trackData)
+            {
+                if (!rhythmTracks.Contains(item)) rhythmTracks.Add(item);
+            }
+            TracksLoaded = true;
+        });
         return trackData is null ? Array.Empty<RhythmTrack>() : trackData;
     }
 
     public async Task<RhythmPlaylist[]> GetRecommendedPlaylists()
     {
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT playlist_id FROM playlists WHERE playlist_owner = :user_id ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
+        var cmd = new OracleCommand("SELECT playlist_id FROM playlists ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
         cmd.Parameters.Add(new OracleParameter("user_id", App.currentUser?.UserId!));
         var reader = await cmd.ExecuteReaderAsync();
         var playlists = new List<string>();
@@ -105,52 +135,36 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
             playlists.Add(reader.GetString(0));
         }
         var playlistData = await App.GetService<IDatabaseService>().GetPlaylists(playlists.ToArray());
-        return playlistData is null ? Array.Empty<RhythmPlaylist>() : playlistData;
-    }
-
-    public async void OnNavigatedTo(object parameter)
-    {
-        if (!TracksLoaded)
+        dispatcherQueue?.TryEnqueue(() =>
         {
-            var data = await Task.Run(() => GetRecommendedTracks());
-            rhythmTracks.Clear();
-            foreach (var item in data)
-            {
-                if (!rhythmTracks.Contains(item)) rhythmTracks.Add(item);
-            }
-            TracksLoaded = true;
-        }
-        if (!AlbumsLoaded)
-        {
-            var data = await Task.Run(() => GetRecommendedAlbums());
-            rhythmAlbums.Clear();
-            foreach (var item in data)
-            {
-                if (!rhythmAlbums.Contains(item)) rhythmAlbums.Add(item);
-            }
-            AlbumsLoaded = true;
-        }
-        if (!ArtistsLoaded)
-        {
-            var data = await Task.Run(() => GetRecommendedArtists());
-            rhythmArtists.Clear();
-            foreach (var item in data)
-            {
-                if (!rhythmArtists.Contains(item)) rhythmArtists.Add(item);
-            }
-            ArtistsLoaded = true;
-        }
-        if (!PlaylistsLoaded)
-        {
-
-            var data = await Task.Run(() => GetRecommendedPlaylists());
             rhythmPlaylists.Clear();
-            foreach (var item in data)
+            foreach (var item in playlistData)
             {
-
                 if (!rhythmPlaylists.Contains(item)) rhythmPlaylists.Add(item);
             }
             PlaylistsLoaded = true;
+        });
+        return playlistData is null ? Array.Empty<RhythmPlaylist>() : playlistData;
+    }
+
+    public void OnNavigatedTo(object parameter)
+    {
+        dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+        if (!TracksLoaded)
+        {
+            _ = Task.Run(() => GetRecommendedTracks());
+        }
+        if (!AlbumsLoaded)
+        {
+            _ = Task.Run(() => GetRecommendedAlbums());
+        }
+        if (!ArtistsLoaded)
+        {
+            _ = Task.Run(() => GetRecommendedArtists());
+        }
+        if (!PlaylistsLoaded)
+        {
+            _ = Task.Run(() => GetRecommendedPlaylists());
         }
     }
     public void OnNavigatedFrom()
@@ -186,6 +200,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private void OnPlaylistClick(RhythmPlaylist playlist)
     {
-
+        if (playlist != null)
+        {
+            _navigationService.SetListDataItemForNextConnectedAnimation(playlist);
+            _navigationService.NavigateTo(typeof(PlaylistDetailViewModel).FullName!, playlist.PlaylistId);
+        }
     }
 }

@@ -106,6 +106,8 @@ public partial class App : Application
             services.AddTransient<RegisterPage>();
             services.AddTransient<AlbumDetailViewModel>();
             services.AddTransient<AlbumDetailPage>();
+            services.AddTransient<PlaylistDetailViewModel>();
+            services.AddTransient<PlaylistDetailPage>();
 
             // Configuration
             services.Configure<LocalSettingsOptions>(context.Configuration.GetSection(nameof(LocalSettingsOptions)));

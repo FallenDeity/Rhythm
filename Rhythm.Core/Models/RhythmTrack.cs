@@ -61,7 +61,7 @@ public class RhythmTrack
         get; set;
     }
 
-    public required RhythmAlbum Album
+    public string? TrackImageURL
     {
         get; set;
     }
@@ -95,8 +95,6 @@ public class RhythmTrack
             return "00:00";
         }
     }
-
-    public string TrackImageURL => Album.AlbumImageURL ?? "ms-appx:///Assets/Tracj.jpeg";
 
     public string ArtistName => Artists?[0].ArtistName ?? "Unknown Artist";
 
