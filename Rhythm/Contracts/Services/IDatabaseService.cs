@@ -32,7 +32,7 @@ internal interface IDatabaseService
 
     Task<RhythmPlaylist?> GetPlaylist(string playlistId);
 
-    Task<RhythmArtist[]> GetTrackArtists(string trackId);
+    Task<Dictionary<string, RhythmArtist[]>> GetArtistsForTracks(string[] trackIds);
 
     Task<bool> ToggleLike(string trackId, string userId);
 

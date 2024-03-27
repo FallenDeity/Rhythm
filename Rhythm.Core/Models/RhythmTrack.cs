@@ -101,7 +101,7 @@ public class RhythmTrack
         }
     }
 
-    public string ArtistName => Artists?[0].ArtistName ?? "Unknown Artist";
+    public string ArtistName => Artists is not null && Artists.Length > 0 ? Artists[0].ArtistName : "Unknown Artist";
 
     public string ArtistNames
     {

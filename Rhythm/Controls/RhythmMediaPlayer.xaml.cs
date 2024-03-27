@@ -89,7 +89,6 @@ public class TrackQueueFactory : IOracleCustomTypeFactory, IOracleArrayTypeFacto
 public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChanged
 {
     public static readonly MediaPlayer mediaPlayer = new();
-    private static readonly YoutubeExplode.YoutubeClient yt = new();
 
     private DispatcherQueue? dispatcherQueue;
     private readonly DispatcherTimer? progressTimer;
@@ -211,6 +210,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             if (vidId is null || _manifestCache.ContainsKey(vidId)) continue;
             var stopWatch = new System.Diagnostics.Stopwatch();
             stopWatch.Start();
+            var yt = new YoutubeExplode.YoutubeClient();
             var streamInfo = await yt.Videos.Streams.GetManifestAsync(vidId);
             stopWatch.Stop();
             System.Diagnostics.Debug.WriteLine($"Took {stopWatch.ElapsedMilliseconds}ms to cache {track.TrackName}");
@@ -292,7 +292,8 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
     private async Task LoadArtists()
     {
         if (_track is null) return;
-        _artists = await App.GetService<IDatabaseService>().GetTrackArtists(_track.TrackId);
+        var a = await App.GetService<IDatabaseService>().GetArtistsForTracks(new string[] { _track.TrackId });
+        _artists = a.ContainsKey(_track.TrackId) ? a[_track.TrackId] : new RhythmArtist[0];
         dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
         {
             var page = (ShellPage)App.MainWindow.Content;
@@ -331,9 +332,11 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             _ = Task.Run(() => UpdateStreams(TrackId));
             return;
         }
+        var yt = new YoutubeExplode.YoutubeClient();
         var streamInfo = _manifestCache.ContainsKey(vidId) ? _manifestCache[vidId] : await yt.Videos.Streams.GetManifestAsync(vidId);
         var stream = streamInfo.GetAudioOnlyStreams().GetWithHighestBitrate();
         var streamUrl = stream.Url;
+        if (!_manifestCache.ContainsKey(vidId)) _manifestCache.Add(vidId, streamInfo);
         dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
                {
                    var source = streamUrl is null ? null : MediaSource.CreateFromUri(new Uri(streamUrl));
