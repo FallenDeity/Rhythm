@@ -7,8 +7,8 @@
     xmlns:helpers="using:Rhythm.Helpers"
     xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
+    xmlns:viewModels="using:Rhythm.ViewModels"
     x:Name="PlaylistDetails"
     mc:Ignorable="d">
     <Page.Resources>
@@ -118,7 +118,7 @@
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
                     ItemClick="PlaylistTracks_ItemClick"
-                    ItemsSource="{x:Bind ViewModel.tracks, Mode=OneWay}"
+                    ItemsSource="{x:Bind ViewModel.Tracks, Mode=OneWay}"
                     ScrollViewer.VerticalScrollMode="Disabled"
                     SelectionMode="None"
                     Visibility="{x:Bind ViewModel.IsDataLoading, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
@@ -130,11 +130,11 @@
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="models:RhythmTrack">
+                        <DataTemplate x:DataType="userControls:RhythmTrackItem">
                             <Grid
                                 Margin="4,2,4,2"
                                 Padding="12"
-                                Background="{Binding TrackId, Converter={StaticResource CurrentTrack}, ConverterParameter={Binding ViewModel.player.TrackId, ElementName=PlaylistDetails}, Mode=OneWay}">
+                                Background="{x:Bind GetBackground(RhythmTrack.TrackId, RhythmMediaPlayer.TrackId), Mode=OneWay}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
@@ -149,7 +149,7 @@
                                     VerticalAlignment="Center"
                                     FontSize="14"
                                     Opacity="0.7"
-                                    Text="{x:Bind Count}" />
+                                    Text="{x:Bind RhythmTrack.Count}" />
                                 <Grid
                                     Grid.Column="1"
                                     Width="48"
@@ -157,14 +157,14 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
                                     CornerRadius="6"
-                                    ToolTipService.ToolTip="{x:Bind Stats}">
+                                    ToolTipService.ToolTip="{x:Bind RhythmTrack.Stats}">
                                     <Image
                                         Width="48"
                                         Height="48"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
-                                        AutomationProperties.Name="{x:Bind TrackName}"
-                                        Source="{x:Bind TrackImageURL}"
+                                        AutomationProperties.Name="{x:Bind RhythmTrack.TrackName}"
+                                        Source="{x:Bind RhythmTrack.TrackImageURL}"
                                         Stretch="UniformToFill" />
                                 </Grid>
                                 <StackPanel
@@ -176,13 +176,13 @@
                                         FontSize="14"
                                         MaxLines="1"
                                         Style="{ThemeResource SubtitleTextBlockStyle}"
-                                        Text="{x:Bind TrackName}"
+                                        Text="{x:Bind RhythmTrack.TrackName}"
                                         TextTrimming="CharacterEllipsis" />
                                     <TextBlock
                                         Margin="{ThemeResource XXSmallTopMargin}"
                                         FontSize="12"
                                         Opacity="0.7"
-                                        Text="{x:Bind ArtistNames}" />
+                                        Text="{x:Bind RhythmTrack.ArtistNames}" />
                                 </StackPanel>
                                 <StackPanel
                                     Grid.Column="3"
@@ -202,8 +202,8 @@
                                             VerticalAlignment="Center"
                                             FontFamily="{ThemeResource SymbolThemeFontFamily}"
                                             FontSize="14"
-                                            Foreground="{x:Bind Liked, Converter={StaticResource LikedTrack}}"
-                                            Glyph="{x:Bind TrackLiked()}" />
+                                            Foreground="{x:Bind RhythmTrack.Liked, Converter={StaticResource LikedTrack}}"
+                                            Glyph="{x:Bind RhythmTrack.TrackLiked()}" />
                                     </Button>
                                     <Button
                                         Width="24"

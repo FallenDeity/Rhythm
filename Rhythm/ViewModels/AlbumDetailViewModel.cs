@@ -4,12 +4,16 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
 using Rhythm.Contracts.ViewModels;
+using Rhythm.Controls;
 using Rhythm.Core.Models;
+using Rhythm.Views;
 
 namespace Rhythm.ViewModels;
 
 public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAware
 {
+    private readonly INavigationService _navigationService;
+
     [ObservableProperty]
     private RhythmAlbum? item;
 
@@ -19,9 +23,21 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private string? infoString;
 
-    public ObservableCollection<RhythmTrack> tracks { get; } = new ObservableCollection<RhythmTrack>();
+    public RhythmMediaPlayer player
+    {
+        get; set;
+    }
+
+    public ObservableCollection<RhythmTrackItem> Tracks { get; } = new ObservableCollection<RhythmTrackItem>();
 
     public ObservableCollection<string> shimmers { get; } = new ObservableCollection<string>();
+
+    public AlbumDetailViewModel(INavigationService navigationService)
+    {
+        _navigationService = navigationService;
+        var page = (ShellPage)App.MainWindow.Content;
+        player = page.RhythmPlayer;
+    }
 
     public void OnNavigatedFrom()
     {
@@ -60,13 +76,13 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
             var result = await Task.Run(() => GetAlbumTracks());
             if (result is not null)
             {
-                tracks.Clear();
+                Tracks.Clear();
                 var count = 1;
                 foreach (var track in result)
                 {
                     track.Count = count++;
                     track.Liked = App.LikedSongIds.Contains(track.TrackId);
-                    tracks.Add(track);
+                    Tracks.Add(new RhythmTrackItem { RhythmTrack = track, RhythmMediaPlayer = player });
                 }
             }
             InfoString = InfoText;
@@ -79,9 +95,9 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
         if (Item is null) return "0 minutes";
         var regex = new Regex(@"\+00 (\d{2}:\d{2}:\d{2}\.\d{1,})");
         double totalSeconds = 0, total = 0;
-        foreach (var track in tracks)
+        foreach (var track in Tracks)
         {
-            var match = regex.Match(track.TrackDuration);
+            var match = regex.Match(track.RhythmTrack.TrackDuration);
             if (match.Success)
             {
                 var time = TimeSpan.Parse(match.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture);
@@ -108,10 +124,10 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
     public async Task ToggleLike(RhythmTrack track)
     {
         var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);
-        var idx = tracks.IndexOf(tracks.First(t => t.TrackId == track.TrackId));
+        var idx = Tracks.IndexOf(Tracks.First(t => t.RhythmTrack.TrackId == track.TrackId));
         if (idx != -1)
         {
-            tracks[idx].Liked = check;
+            Tracks[idx].RhythmTrack.Liked = check;
         }
     }
 

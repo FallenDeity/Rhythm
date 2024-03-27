@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using System.Data;
 using System.Text.RegularExpressions;
+using Microsoft.UI;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
@@ -20,6 +22,28 @@ using YoutubeExplode.Videos.Streams;
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace Rhythm.Controls;
+
+public struct RhythmTrackItem
+{
+    public RhythmTrack RhythmTrack
+    {
+        get;
+        set;
+    }
+
+    public RhythmMediaPlayer RhythmMediaPlayer
+    {
+        get;
+        set;
+    }
+
+    public SolidColorBrush GetBackground(string trackId, string currentId)
+    {
+        var selected = App.Current.Resources["ButtonPointerOverBackgroundThemeBrush"] as SolidColorBrush;
+        return trackId == currentId ? selected! : new SolidColorBrush(Colors.Transparent);
+    }
+}
+
 
 public class TrackQueue : IOracleCustomType
 {
@@ -114,7 +138,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         get => _trackId;
         set
         {
-            _trackId = value;
+            SetProperty(ref _trackId, value, nameof(TrackId));
             _ = PlayCurrentTrack();
         }
     }

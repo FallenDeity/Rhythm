@@ -4,7 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
-using Rhythm.Core.Models;
+using Rhythm.Controls;
 using Rhythm.ViewModels;
 
 
@@ -54,33 +54,33 @@ public sealed partial class PlaylistDetailPage : Page
 
     private async void PlaylistTracks_ItemClick(object sender, ItemClickEventArgs e)
     {
-        var track = (RhythmTrack)e.ClickedItem;
+        var track = (RhythmTrackItem)e.ClickedItem;
         var page = (ShellPage)App.MainWindow.Content;
-        if (page.RhythmPlayer.TrackId != track.TrackId)
+        if (page.RhythmPlayer.TrackId != track.RhythmTrack.TrackId)
         {
-            await page.RhythmPlayer.PlayPlaylist(ViewModel.Item?.PlaylistId!, track.TrackId);
+            await page.RhythmPlayer.PlayPlaylist(ViewModel.Item?.PlaylistId!, track.RhythmTrack.TrackId);
         }
     }
 
     private void AlbumMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
-        ViewModel.NavigateToAlbum(track.TrackAlbumId);
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        ViewModel.NavigateToAlbum(track.RhythmTrack.TrackAlbumId);
     }
 
     private void AddToQueueMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     {
         var page = (ShellPage)App.MainWindow.Content;
-        var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
-        page.RhythmPlayer.AddToQueue(track.TrackId);
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        page.RhythmPlayer.AddToQueue(track.RhythmTrack.TrackId);
     }
 
     private async void ToggleLikeButton_Click(object sender, RoutedEventArgs e)
     {
-        var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
-        await ViewModel.ToggleLike(track);
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        await ViewModel.ToggleLike(track.RhythmTrack);
         var button = (Button)sender;
-        var glyph = track.TrackLiked();
+        var glyph = track.RhythmTrack.TrackLiked();
         var accent = Application.Current.Resources["AccentAAFillColorDefaultBrush"] as SolidColorBrush;
         var normal = Application.Current.Resources["SystemControlForegroundBaseHighBrush"] as SolidColorBrush;
         button.Content = new FontIcon
@@ -89,7 +89,7 @@ public sealed partial class PlaylistDetailPage : Page
             VerticalAlignment = VerticalAlignment.Center,
             FontFamily = new FontFamily("Segoe MDL2 Assets"),
             FontSize = 14,
-            Foreground = (bool)track.Liked! ? accent : normal,
+            Foreground = (bool)track.RhythmTrack.Liked! ? accent : normal,
             Glyph = glyph
         };
     }
