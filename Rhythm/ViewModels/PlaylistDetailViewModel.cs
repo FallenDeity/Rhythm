@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Oracle.ManagedDataAccess.Client;
 using Rhythm.Contracts.Services;
 using Rhythm.Contracts.ViewModels;
+using Rhythm.Controls;
 using Rhythm.Core.Models;
+using Rhythm.Views;
 
 namespace Rhythm.ViewModels;
 public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationAware
@@ -23,6 +26,11 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
     [ObservableProperty]
     private string? owner;
 
+    public RhythmMediaPlayer player
+    {
+        get; set;
+    }
+
     public ObservableCollection<RhythmTrack> tracks { get; } = new ObservableCollection<RhythmTrack>();
 
     public ObservableCollection<string> shimmers { get; } = new ObservableCollection<string>();
@@ -30,6 +38,8 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
     public PlaylistDetailViewModel(INavigationService navigationService)
     {
         _navigationService = navigationService;
+        var page = (ShellPage)App.MainWindow.Content;
+        player = page.RhythmPlayer;
     }
 
     public async Task<RhythmTrack[]?> GetPlaylistTracks()
@@ -86,6 +96,7 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
                 foreach (var track in result)
                 {
                     track.Count = count++;
+                    track.Liked = App.LikedSongIds.Contains(track.TrackId);
                     tracks.Add(track);
                 }
             }
@@ -132,6 +143,16 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
     public void NavigateToAlbum(string albumId)
     {
         _navigationService.NavigateTo(typeof(AlbumDetailViewModel).FullName!, albumId);
+    }
+
+    public async Task ToggleLike(RhythmTrack track)
+    {
+        var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);
+        var idx = tracks.IndexOf(tracks.First(t => t.TrackId == track.TrackId));
+        if (idx != -1)
+        {
+            tracks[idx].Liked = check;
+        }
     }
 
     public string InfoText => $"{Owner} • {Item?.TrackCount} Tracks • {DurationText()}";

@@ -38,6 +38,12 @@ public partial class App : Application
         set;
     }
 
+    public static string[] LikedSongIds
+    {
+        get;
+        set;
+    } = Array.Empty<string>();
+
     public static T GetService<T>()
         where T : class
     {
@@ -139,7 +145,7 @@ public partial class App : Application
     public static async Task LoadUser(string userId)
     {
         var db = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT * FROM USERS WHERE USER_ID = :userId", db);
+        var cmd = new OracleCommand("SELECT * FROM users WHERE user_id = :userId", db);
         cmd.Parameters.Add(new OracleParameter("userId", userId));
         var reader = await cmd.ExecuteReaderAsync();
         if (reader.Read())
@@ -158,6 +164,15 @@ public partial class App : Application
                 UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
             };
         }
+        cmd = new OracleCommand("SELECT track_id FROM user_favorite_songs WHERE user_id = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        reader = await cmd.ExecuteReaderAsync();
+        var likedSongs = new List<string>();
+        while (reader.Read())
+        {
+            likedSongs.Add(reader.GetString(0));
+        }
+        LikedSongIds = likedSongs.ToArray();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

@@ -34,5 +34,7 @@ internal interface IDatabaseService
 
     Task<RhythmArtist[]> GetTrackArtists(string trackId);
 
+    Task<bool> ToggleLike(string trackId, string userId);
+
     bool IsConnected();
 }

@@ -9,9 +9,12 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
+    x:Name="PlaylistDetails"
     mc:Ignorable="d">
     <Page.Resources>
+        <helpers:LikedTrackConverter x:Key="LikedTrack" />
         <helpers:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <helpers:CurrentTrackConverter x:Key="CurrentTrack" />
     </Page.Resources>
     <ScrollViewer
         x:Name="ContentArea"
@@ -26,7 +29,7 @@
                 Grid.Row="0"
                 Height="400"
                 VerticalAlignment="Top">
-                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.PlaylistImageURL}" />
+                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.PlaylistImageURL, Mode=OneWay}" />
             </Grid>
             <StackPanel Grid.Row="0">
                 <Grid VerticalAlignment="Center">
@@ -45,8 +48,8 @@
                             x:Name="HeroImage"
                             Width="128"
                             Height="128"
-                            AutomationProperties.Name="{x:Bind ViewModel.Item.PlaylistName}"
-                            Source="{x:Bind ViewModel.Item.PlaylistImageURL}"
+                            AutomationProperties.Name="{x:Bind ViewModel.Item.PlaylistName, Mode=OneWay}"
+                            Source="{x:Bind ViewModel.Item.PlaylistImageURL, Mode=OneWay}"
                             Stretch="UniformToFill" />
                     </Grid>
                     <StackPanel
@@ -65,7 +68,7 @@
                             Margin="0,0,0,6"
                             FontSize="16"
                             Opacity="0.8"
-                            Text="{x:Bind ViewModel.Item.PlaylistDescription}"
+                            Text="{x:Bind ViewModel.Item.PlaylistDescription, Mode=OneWay}"
                             TextWrapping="WrapWholeWords"
                             Visibility="Collapsed" />
                         <TextBlock
@@ -111,22 +114,27 @@
                     Fill="{ThemeResource SystemControlPageTextBaseHighBrush}"
                     Opacity="0.3" />
                 <ListView
-                    x:Name="AlbumTracks"
+                    x:Name="PlaylistTracks"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
-                    ItemClick="AlbumTracks_ItemClick"
-                    ItemsSource="{x:Bind ViewModel.tracks}"
+                    ItemClick="PlaylistTracks_ItemClick"
+                    ItemsSource="{x:Bind ViewModel.tracks, Mode=OneWay}"
+                    ScrollViewer.VerticalScrollMode="Disabled"
                     SelectionMode="None"
                     Visibility="{x:Bind ViewModel.IsDataLoading, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
-                            <Setter Property="Padding" Value="12" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="models:RhythmTrack">
-                            <Grid>
+                            <Grid
+                                Margin="4,2,4,2"
+                                Padding="12"
+                                Background="{Binding TrackId, Converter={StaticResource CurrentTrack}, ConverterParameter={Binding ViewModel.player.TrackId, ElementName=PlaylistDetails}, Mode=OneWay}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="Auto" />
@@ -148,7 +156,8 @@
                                     Height="48"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center"
-                                    CornerRadius="6">
+                                    CornerRadius="6"
+                                    ToolTipService.ToolTip="{x:Bind Stats}">
                                     <Image
                                         Width="48"
                                         Height="48"
@@ -186,13 +195,15 @@
                                         Margin="{StaticResource SmallLeftRightMargin}"
                                         Padding="0"
                                         Background="Transparent"
-                                        BorderBrush="Transparent">
+                                        BorderBrush="Transparent"
+                                        Click="ToggleLikeButton_Click">
                                         <FontIcon
                                             HorizontalAlignment="Center"
                                             VerticalAlignment="Center"
                                             FontFamily="{ThemeResource SymbolThemeFontFamily}"
                                             FontSize="14"
-                                            Glyph="&#xEB51;" />
+                                            Foreground="{x:Bind Liked, Converter={StaticResource LikedTrack}}"
+                                            Glyph="{x:Bind TrackLiked()}" />
                                     </Button>
                                     <Button
                                         Width="24"
@@ -225,7 +236,8 @@
                 </ListView>
                 <ListView
                     Margin="{StaticResource SmallTopMargin}"
-                    ItemsSource="{x:Bind ViewModel.shimmers}"
+                    ItemsSource="{x:Bind ViewModel.shimmers, Mode=OneWay}"
+                    ScrollViewer.VerticalScrollMode="Disabled"
                     SelectionMode="None"
                     Visibility="{x:Bind ViewModel.IsDataLoading, Converter={StaticResource BoolToVis}, Mode=OneWay}">
                     <ListView.ItemContainerStyle>

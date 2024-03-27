@@ -1,6 +1,7 @@
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Models;
@@ -66,5 +67,24 @@ public sealed partial class AlbumDetailPage : Page
         var page = (ShellPage)App.MainWindow.Content;
         var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
         page.RhythmPlayer.AddToQueue(track.TrackId);
+    }
+
+    private async void ToggleLikeButton_Click(object sender, RoutedEventArgs e)
+    {
+        var track = (RhythmTrack)((FrameworkElement)sender).DataContext;
+        await ViewModel.ToggleLike(track);
+        var button = (Button)sender;
+        var glyph = track.TrackLiked();
+        var accent = Application.Current.Resources["AccentAAFillColorDefaultBrush"] as SolidColorBrush;
+        var normal = Application.Current.Resources["SystemControlForegroundBaseHighBrush"] as SolidColorBrush;
+        button.Content = new FontIcon
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontFamily = new FontFamily("Segoe MDL2 Assets"),
+            FontSize = 14,
+            Foreground = (bool)track.Liked! ? accent : normal,
+            Glyph = glyph
+        };
     }
 }

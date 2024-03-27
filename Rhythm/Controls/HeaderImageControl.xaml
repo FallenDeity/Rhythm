@@ -42,14 +42,14 @@
                 toolkit:VisualExtensions.NormalizedCenterPoint="0.5"
                 ImageOpened="OnImageOpened"
                 Opacity="{ThemeResource ImageOpacity}"
-                Source="{x:Bind ImageSource}"
+                Source="{x:Bind ImageSource, Mode=OneWay}"
                 Stretch="UniformToFill" />
             <Image
                 x:Name="HeroOverlayImage"
                 VerticalAlignment="Center"
                 toolkit:VisualExtensions.NormalizedCenterPoint="0.5"
                 Opacity="{ThemeResource ImageOpacity}"
-                Source="{x:Bind ImageSource}"
+                Source="{x:Bind ImageSource, Mode=OneWay}"
                 Stretch="UniformToFill" />
             <Rectangle Fill="{ThemeResource SolidBackgroundFillColorBase}" Opacity="0.35" />
         </Grid>

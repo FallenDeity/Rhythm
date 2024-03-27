@@ -125,6 +125,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM tracks WHERE track_id IN (");
             var added = false;
+            var presentTracks = trackIds.Where(tracks.ContainsKey).Select(track => tracks[track]).ToArray();
             foreach (var trackId in trackIds)
             {
                 if (tracks.ContainsKey(trackId)) continue;
@@ -160,6 +161,8 @@ public class DatabaseService : IDatabaseService
                 if (!tracks.ContainsKey(track.TrackId)) tracks.Add(track.TrackId, track);
                 t.Add(track);
             }
+            t.AddRange(presentTracks);
+            t.Sort((a, b) => Array.IndexOf(trackIds, a.TrackId).CompareTo(Array.IndexOf(trackIds, b.TrackId)));
             return t.ToArray();
         }
         catch (Exception e)
@@ -212,6 +215,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM artists WHERE artist_id IN (");
             var added = false;
+            var presentArtists = artistIds.Where(artists.ContainsKey).Select(artist => artists[artist]).ToArray();
             foreach (var artistId in artistIds)
             {
                 if (artists.ContainsKey(artistId)) continue;
@@ -243,6 +247,8 @@ public class DatabaseService : IDatabaseService
                 if (!artists.ContainsKey(artist.ArtistId)) artists.Add(artist.ArtistId, artist);
                 a.Add(artist);
             }
+            a.AddRange(presentArtists);
+            a.Sort((a, b) => Array.IndexOf(artistIds, a.ArtistId).CompareTo(Array.IndexOf(artistIds, b.ArtistId)));
             return a.ToArray();
         }
         catch (Exception e)
@@ -295,6 +301,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM albums WHERE album_id IN (");
             var added = false;
+            var presentAlbums = albumIds.Where(albums.ContainsKey).Select(album => albums[album]).ToArray();
             foreach (var albumId in albumIds)
             {
                 if (albums.ContainsKey(albumId)) continue;
@@ -325,6 +332,8 @@ public class DatabaseService : IDatabaseService
                 if (!albums.ContainsKey(album.AlbumId)) albums.Add(album.AlbumId, album);
                 a.Add(album);
             }
+            a.AddRange(presentAlbums);
+            a.Sort((a, b) => Array.IndexOf(albumIds, a.AlbumId).CompareTo(Array.IndexOf(albumIds, b.AlbumId)));
             return a.ToArray();
         }
         catch (Exception e)
@@ -377,6 +386,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT * FROM playlists WHERE playlist_id IN (");
             var added = false;
+            var presentPlaylists = playlistIds.Where(playlists.ContainsKey).Select(playlist => playlists[playlist]).ToArray();
             foreach (var playlistId in playlistIds)
             {
                 if (playlists.ContainsKey(playlistId)) continue;
@@ -408,6 +418,8 @@ public class DatabaseService : IDatabaseService
                 if (!playlists.ContainsKey(playlist.PlaylistId)) playlists.Add(playlist.PlaylistId, playlist);
                 p.Add(playlist);
             }
+            p.AddRange(presentPlaylists);
+            p.Sort((a, b) => Array.IndexOf(playlistIds, a.PlaylistId).CompareTo(Array.IndexOf(playlistIds, b.PlaylistId)));
             return p.ToArray();
         }
         catch (Exception e)
@@ -444,6 +456,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT artist_id FROM track_artists WHERE track_id IN (");
             var added = false;
+            var presentArtists = trackIds.Where(artists.ContainsKey).Select(track => artists[track]).ToArray();
             foreach (var trackId in trackIds)
             {
                 if (artists.ContainsKey(trackId)) continue;
@@ -461,7 +474,12 @@ public class DatabaseService : IDatabaseService
             {
                 artistIds.Add(reader.GetString(0));
             }
-            return await GetArtists(artistIds.ToArray());
+            var latest = await GetArtists(artistIds.ToArray());
+            var a = new List<RhythmArtist>();
+            a.AddRange(latest);
+            a.AddRange(presentArtists);
+            a.Sort((a, b) => Array.IndexOf(trackIds, a.ArtistId).CompareTo(Array.IndexOf(trackIds, b.ArtistId)));
+            return a.ToArray();
         }
         catch (Exception e)
         {
@@ -497,6 +515,7 @@ public class DatabaseService : IDatabaseService
             var sql = new StringBuilder();
             sql.Append("SELECT artist_id FROM album_artists WHERE album_id IN (");
             var added = false;
+            var presentArtists = albumIds.Where(artists.ContainsKey).Select(album => artists[album]).ToArray();
             foreach (var albumId in albumIds)
             {
                 if (artists.ContainsKey(albumId)) continue;
@@ -514,7 +533,12 @@ public class DatabaseService : IDatabaseService
             {
                 artistIds.Add(reader.GetString(0));
             }
-            return await GetArtists(artistIds.ToArray());
+            var latest = await GetArtists(artistIds.ToArray());
+            var a = new List<RhythmArtist>();
+            a.AddRange(latest);
+            a.AddRange(presentArtists);
+            a.Sort((a, b) => Array.IndexOf(albumIds, a.ArtistId).CompareTo(Array.IndexOf(albumIds, b.ArtistId)));
+            return a.ToArray();
         }
         catch (Exception e)
         {
@@ -524,4 +548,34 @@ public class DatabaseService : IDatabaseService
     }
 
     public bool IsConnected() => _connected;
+
+    public async Task<bool> ToggleLike(string trackId, string userId)
+    {
+        if (App.LikedSongIds.Contains(trackId))
+        {
+            var cmd = new OracleCommand("DELETE FROM track_likes WHERE user_id = :user_id AND track_id = :track_id", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+            await cmd.ExecuteNonQueryAsync();
+            App.LikedSongIds = App.LikedSongIds.Where(id => id != trackId).ToArray();
+            if (tracks.ContainsKey(trackId))
+            {
+                tracks[trackId].Likes--;
+            }
+            return false;
+        }
+        else
+        {
+            var cmd = new OracleCommand("INSERT INTO track_likes (user_id, track_id) VALUES (:user_id, :track_id)", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+            await cmd.ExecuteNonQueryAsync();
+            App.LikedSongIds = App.LikedSongIds.Append(trackId).ToArray();
+            if (tracks.ContainsKey(trackId))
+            {
+                tracks[trackId].Likes++;
+            }
+            return true;
+        }
+    }
 }

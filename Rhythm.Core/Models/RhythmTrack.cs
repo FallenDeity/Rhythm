@@ -81,6 +81,11 @@ public class RhythmTrack
         get; set;
     }
 
+    public bool? Liked
+    {
+        get; set;
+    }
+
     public string TrackDurationString
     {
 
@@ -106,6 +111,10 @@ public class RhythmTrack
             return string.Join(", ", Artists.Select(artist => artist.ArtistName));
         }
     }
+
+    public string Stats => $"{Streams} streams, {Likes} likes";
+
+    public string TrackLiked() => Liked is not null && Liked == true ? "\uEB52" : "\uEB51";
 
     public override string ToString()
     {

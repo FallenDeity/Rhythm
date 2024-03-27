@@ -65,6 +65,7 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
                 foreach (var track in result)
                 {
                     track.Count = count++;
+                    track.Liked = App.LikedSongIds.Contains(track.TrackId);
                     tracks.Add(track);
                 }
             }
@@ -102,6 +103,16 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
         if (span.Seconds > 0 && total < 2) text += $"{span.Seconds} seconds";
         return text;
 
+    }
+
+    public async Task ToggleLike(RhythmTrack track)
+    {
+        var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);
+        var idx = tracks.IndexOf(tracks.First(t => t.TrackId == track.TrackId));
+        if (idx != -1)
+        {
+            tracks[idx].Liked = check;
+        }
     }
 
     public string InfoText => $"{Item?.ArtistName} • {Item?.TrackCount} Tracks • {DurationText()}";
