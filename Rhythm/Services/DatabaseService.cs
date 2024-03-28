@@ -82,7 +82,8 @@ public class DatabaseService : IDatabaseService
         try
         {
             if (tracks.ContainsKey(trackId)) return tracks[trackId];
-            var cmd = new OracleCommand($"SELECT * FROM tracks WHERE track_id = '{trackId}'", GetOracleConnection());
+            var cmd = new OracleCommand($"SELECT * FROM tracks WHERE track_id = :track_id", GetOracleConnection());
+            cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
             var reader = await cmd.ExecuteReaderAsync();
@@ -178,7 +179,8 @@ public class DatabaseService : IDatabaseService
         try
         {
             if (artists.ContainsKey(artistId)) return artists[artistId];
-            var cmd = new OracleCommand($"SELECT * FROM artists WHERE artist_id = '{artistId}'", GetOracleConnection());
+            var cmd = new OracleCommand($"SELECT * FROM artists WHERE artist_id = :artist_id", GetOracleConnection());
+            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
             cmd.AddToStatementCache = true;
             cmd.FetchSize *= 2;
             var reader = await cmd.ExecuteReaderAsync();
@@ -264,7 +266,8 @@ public class DatabaseService : IDatabaseService
         try
         {
             if (albums.ContainsKey(albumId)) return albums[albumId];
-            var cmd = new OracleCommand($"SELECT * FROM albums WHERE album_id = '{albumId}'", GetOracleConnection());
+            var cmd = new OracleCommand($"SELECT * FROM albums WHERE album_id = :album_id", GetOracleConnection());
+            cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
             var reader = await cmd.ExecuteReaderAsync();
@@ -350,7 +353,8 @@ public class DatabaseService : IDatabaseService
         try
         {
             if (playlists.ContainsKey(playlistId)) return playlists[playlistId];
-            var cmd = new OracleCommand($"SELECT * FROM playlists WHERE playlist_id = '{playlistId}'", GetOracleConnection());
+            var cmd = new OracleCommand($"SELECT * FROM playlists WHERE playlist_id = :playlist_id", GetOracleConnection());
+            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
             cmd.FetchSize *= 2;
             cmd.AddToStatementCache = true;
             var reader = await cmd.ExecuteReaderAsync();
@@ -563,4 +567,6 @@ public class DatabaseService : IDatabaseService
             return true;
         }
     }
+
+    public Dictionary<string, RhythmTrack> GetAllTracks() => tracks;
 }

@@ -190,14 +190,18 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         var cmd = new OracleCommand("UPDATE tracks SET streams = streams + 1 WHERE track_id = :trackId", conn);
         cmd.Parameters.Add(new OracleParameter("trackId", trackId));
         await cmd.ExecuteNonQueryAsync();
+        var db = App.GetService<IDatabaseService>();
+        if (!db.GetAllTracks().ContainsKey(trackId)) return;
+        var t = db.GetAllTracks()[trackId];
+        t.Streams++;
+        db.GetAllTracks()[t.TrackId] = t;
+
     }
 
     private async Task CacheDataBatch(CancellationToken token)
     {
         var queueCopy = new LinkedList<string>(_trackQueue);
         var t = await App.GetService<IDatabaseService>().GetTracks(queueCopy.ToArray());
-        var albumIds = t.Select(x => x.TrackAlbumId).Distinct().ToArray();
-        await App.GetService<IDatabaseService>().GetAlbums(albumIds);
         foreach (var track in t)
         {
             if (token.IsCancellationRequested)
@@ -208,14 +212,9 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             if (string.IsNullOrEmpty(track.TrackAudioURL)) continue;
             var vidId = VideoId.TryParse(track.TrackAudioURL)?.Value;
             if (vidId is null || _manifestCache.ContainsKey(vidId)) continue;
-            var stopWatch = new System.Diagnostics.Stopwatch();
-            stopWatch.Start();
             var yt = new YoutubeExplode.YoutubeClient();
             var streamInfo = await yt.Videos.Streams.GetManifestAsync(vidId);
-            stopWatch.Stop();
-            System.Diagnostics.Debug.WriteLine($"Took {stopWatch.ElapsedMilliseconds}ms to cache {track.TrackName}");
             _manifestCache.Add(vidId, streamInfo);
-            System.Diagnostics.Debug.WriteLine($"Cached {track.TrackName}");
         }
     }
 

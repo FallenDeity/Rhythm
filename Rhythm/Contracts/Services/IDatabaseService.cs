@@ -36,5 +36,7 @@ internal interface IDatabaseService
 
     Task<bool> ToggleLike(string trackId, string userId);
 
+    Dictionary<string, RhythmTrack> GetAllTracks();
+
     bool IsConnected();
 }
