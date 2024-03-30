@@ -23,6 +23,8 @@ public class PageService : IPageService
         Configure<SettingsViewModel, SettingsPage>();
         Configure<AlbumDetailViewModel, AlbumDetailPage>();
         Configure<PlaylistDetailViewModel, PlaylistDetailPage>();
+        Configure<ArtistDetailViewModel, ArtistDetailPage>();
+
     }
 
     public Type GetPageType(string key)

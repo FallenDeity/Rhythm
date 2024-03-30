@@ -184,6 +184,11 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     [RelayCommand]
     private void OnArtistClick(RhythmArtist artist)
     {
+        if (artist != null)
+        {
+            _navigationService.SetListDataItemForNextConnectedAnimation(artist);
+            _navigationService.NavigateTo(typeof(ArtistDetailViewModel).FullName!, artist.ArtistId);
+        }
 
     }
 
