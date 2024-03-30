@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Page
+﻿<Page
     x:Class="Rhythm.Views.ArtistDetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -11,7 +10,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
-    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -308,16 +306,20 @@
                 <TextBlock
                     Margin="{StaticResource MediumTopBottomMargin}"
                     Style="{ThemeResource TitleTextBlockStyle}"
-                    Text="Artist Albums" />
+                    Text="Artist Albums"
+                    Visibility="{x:Bind ViewModel.AlbumsAvailable, Converter={StaticResource BoolToVis}, Mode=OneWay}" />
                 <ScrollViewer
                     VerticalAlignment="Center"
                     HorizontalScrollBarVisibility="Hidden"
                     HorizontalScrollMode="Enabled"
                     VerticalScrollBarVisibility="Disabled"
-                    VerticalScrollMode="Disabled">
+                    VerticalScrollMode="Disabled"
+                    Visibility="{x:Bind ViewModel.AlbumsAvailable, Converter={StaticResource BoolToVis}, Mode=OneWay}">
                     <StackPanel Orientation="Horizontal">
                         <controls:AdaptiveGridView
                             x:Name="ArtistAlbums"
+                            animations:Connected.ListItemElementName="itemThumbnail"
+                            animations:Connected.ListItemKey="animationKeyArtistGrid"
                             DesiredWidth="210"
                             IsItemClickEnabled="True"
                             ItemClickCommand="{x:Bind ViewModel.AlbumClickCommand}"
@@ -330,6 +332,11 @@
                             SelectionMode="None"
                             StretchContentForSingleRow="True"
                             Visibility="{x:Bind ViewModel.AlbumsLoaded, Converter={StaticResource BoolToVis}, Mode=OneWay}">
+                            <controls:AdaptiveGridView.ItemContainerStyle>
+                                <Style TargetType="GridViewItem">
+                                    <Setter Property="Margin" Value="8,8,8,8" />
+                                </Style>
+                            </controls:AdaptiveGridView.ItemContainerStyle>
                             <controls:AdaptiveGridView.ItemTemplate>
                                 <DataTemplate x:DataType="models:RhythmAlbum">
                                     <Grid
@@ -344,16 +351,16 @@
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
                                         <Grid
-                                            x:Name="itemHero"
+                                            x:Name="itemThumbnail"
                                             Grid.Row="0"
                                             Width="180"
                                             Height="180"
                                             Background="{ThemeResource LayerOnAcrylicFillColorDefault}"
                                             CornerRadius="5">
                                             <Image
-                                                Name="{x:Bind AlbumName}"
                                                 Width="180"
                                                 Height="180"
+                                                AutomationProperties.Name="{x:Bind AlbumName}"
                                                 Source="{x:Bind AlbumImageURL}"
                                                 Stretch="UniformToFill" />
                                         </Grid>
@@ -462,7 +469,6 @@
                         <Setter Target="Info.FontSize" Value="14" />
                         <Setter Target="itemHero.Width" Value="192" />
                         <Setter Target="itemHero.Height" Value="192" />
-
                         <Setter Target="HeroImage.Width" Value="192" />
                         <Setter Target="HeroImage.Height" Value="192" />
                     </VisualState.Setters>

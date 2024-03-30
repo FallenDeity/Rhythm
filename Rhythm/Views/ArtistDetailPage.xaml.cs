@@ -63,14 +63,6 @@ public sealed partial class ArtistDetailPage : Page
         }
     }
 
-    private void ArtistAlbums_ItemClick(object sender, ItemClickEventArgs e)
-    {
-
-        var album = (RhythmAlbum)e.ClickedItem;
-        ViewModel.NavigateToAlbum(album.AlbumId);
-
-    }
-
     private void AlbumMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;

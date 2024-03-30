@@ -25,6 +25,9 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
     [ObservableProperty]
     private string? infoString;
 
+    [ObservableProperty]
+    private bool albumsAvailable = true;
+
     private DispatcherQueue? dispatcherQueue;
     public RhythmMediaPlayer player
     {
@@ -50,6 +53,7 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
     {
         if (album != null)
         {
+            _navigationService.SetListDataItemForNextConnectedAnimation(album);
             _navigationService.NavigateTo(typeof(AlbumDetailViewModel).FullName!, album.AlbumId);
         }
     }
@@ -73,31 +77,15 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
         var data = await App.GetService<IDatabaseService>().GetTracks(trackIds.ToArray());
         return data;
     }
-    /*    public async Task<RhythmAlbum[]?> GetArtistAlbums()
-        {
-            if (Item is null) return null;
-            var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-            var cmd = new OracleCommand("SELECT album_id FROM artist_albums WHERE artist_id = :artist_id", conn);
-            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = Item.ArtistId;
-            var reader = await cmd.ExecuteReaderAsync();
-            var albumIds = new List<string>();
-            while (await reader.ReadAsync())
-            {
-                albumIds.Add(reader.GetString(0));
-            }
 
-            var data = await App.GetService<IDatabaseService>().GetAlbums(albumIds.ToArray());
-            return data is null ? Array.Empty<RhythmAlbum>() : data;
-        }*/
     public async Task<RhythmAlbum[]> GetArtistAlbums()
     {
         if (Item is null) return Array.Empty<RhythmAlbum>();
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT album_id FROM artist_albums WHERE artist_id=:artist_id", conn);
+        var cmd = new OracleCommand("SELECT album_id FROM artist_albums WHERE artist_id = :artist_id", conn);
         cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = Item.ArtistId;
         var reader = await cmd.ExecuteReaderAsync();
         var albums = new List<string>();
-        albums.Clear();
         while (reader.Read())
         {
             albums.Add(reader.GetString(0));
@@ -106,11 +94,12 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
         dispatcherQueue?.TryEnqueue(() =>
         {
             rhythmAlbums.Clear();
-            foreach (var item in albumData)
+            foreach (var _item in albumData)
             {
-                if (!rhythmAlbums.Contains(item)) rhythmAlbums.Add(item);
+                if (!rhythmAlbums.Contains(_item)) rhythmAlbums.Add(_item);
             }
             AlbumsLoaded = true;
+            AlbumsAvailable = rhythmAlbums.Count > 0;
         });
         return albumData is null ? Array.Empty<RhythmAlbum>() : albumData;
     }
@@ -141,26 +130,12 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
                     Tracks.Add(new RhythmTrackItem { RhythmTrack = track, RhythmMediaPlayer = player });
                 }
             }
-
             dispatcherQueue = DispatcherQueue.GetForCurrentThread();
             if (!AlbumsLoaded)
             {
                 rhythmAlbums.Clear();
                 _ = Task.Run(() => GetArtistAlbums());
             }
-
-            /*            var albums = await Task.Run(() => GetArtistAlbums());
-                        if (albums is not null)
-                        {
-                            rhythmAlbums.Clear();
-                            var count = 1;
-                            foreach (var album in albums)
-                            {
-                                album.Count = count++;
-                                rhythmAlbums.Add(album);
-                            }
-                        }*/
-
             InfoString = InfoText;
             IsDataLoading = false;
         }
@@ -223,10 +198,7 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
         return span.Seconds > 5 ? $"about {span.Seconds} seconds ago" : "just now";
     }
 
-
     public string JoinedOn => Item != null ? Relativize(Item.CreatedAt) : "Unknown";
+
     public string InfoText => $"{Item?.ArtistBio} \n\n{Item?.AlbumCount} Albums • {Item?.TrackCount} Tracks • {Item?.FollowerCount} Followers\nJoined {JoinedOn}";
-
-
-
 }

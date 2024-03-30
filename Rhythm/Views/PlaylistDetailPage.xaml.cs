@@ -93,4 +93,13 @@ public sealed partial class PlaylistDetailPage : Page
             Glyph = glyph
         };
     }
+
+    private void ArtistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        if (track.RhythmTrack.Artists is not null && track.RhythmTrack.Artists.Any())
+        {
+            ViewModel.NavigateToArtist(track.RhythmTrack.Artists[0].ArtistId);
+        }
+    }
 }

@@ -36,6 +36,7 @@ public sealed partial class AlbumDetailPage : Page
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         base.OnNavigatedTo(e);
+        this.RegisterElementForConnectedAnimation("animationKeyArtistGrid", itemHero);
         this.RegisterElementForConnectedAnimation("animationKeyContentGrid", itemHero);
     }
 
@@ -68,6 +69,15 @@ public sealed partial class AlbumDetailPage : Page
         var page = (ShellPage)App.MainWindow.Content;
         var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
         page.RhythmPlayer.AddToQueue(track.RhythmTrack.TrackId);
+    }
+
+    private void ArtistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        if (track.RhythmTrack.Artists is not null && track.RhythmTrack.Artists.Any())
+        {
+            ViewModel.NavigateToArtist(track.RhythmTrack.Artists[0].ArtistId);
+        }
     }
 
     private async void ToggleLikeButton_Click(object sender, RoutedEventArgs e)

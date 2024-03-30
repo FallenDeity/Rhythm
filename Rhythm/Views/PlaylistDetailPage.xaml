@@ -225,7 +225,7 @@
                                                 <MenuFlyoutItem Text="Add to Library" />
                                                 <MenuFlyoutSeparator />
                                                 <MenuFlyoutItem Click="AlbumMenuFlyoutItem_Click" Text="Go to Album" />
-                                                <MenuFlyoutItem Text="Go to Artist" />
+                                                <MenuFlyoutItem Click="ArtistMenuFlyoutItem_Click" Text="Go to Artist" />
                                             </MenuFlyout>
                                         </Button.Flyout>
                                     </Button>

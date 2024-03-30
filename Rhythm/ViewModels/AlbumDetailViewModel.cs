@@ -131,5 +131,10 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
         }
     }
 
+    public void NavigateToArtist(string artistId)
+    {
+        _navigationService.NavigateTo(typeof(ArtistDetailViewModel).FullName!, artistId);
+    }
+
     public string InfoText => $"{Item?.ArtistName} • {Item?.TrackCount} Tracks • {DurationText()}";
 }

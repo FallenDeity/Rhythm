@@ -145,6 +145,11 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
         _navigationService.NavigateTo(typeof(AlbumDetailViewModel).FullName!, albumId);
     }
 
+    public void NavigateToArtist(string artistId)
+    {
+        _navigationService.NavigateTo(typeof(ArtistDetailViewModel).FullName!, artistId);
+    }
+
     public async Task ToggleLike(RhythmTrack track)
     {
         var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);

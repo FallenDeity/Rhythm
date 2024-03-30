@@ -7,7 +7,6 @@
     xmlns:helpers="using:Rhythm.Helpers"
     xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
     mc:Ignorable="d">
     <Page.Resources>
@@ -215,7 +214,7 @@
                                                 <MenuFlyoutItem Text="Add to Playlist" />
                                                 <MenuFlyoutItem Text="Add to Library" />
                                                 <MenuFlyoutSeparator />
-                                                <MenuFlyoutItem Text="Go to Artist" />
+                                                <MenuFlyoutItem Click="ArtistMenuFlyoutItem_Click" Text="Go to Artist" />
                                             </MenuFlyout>
                                         </Button.Flyout>
                                     </Button>
