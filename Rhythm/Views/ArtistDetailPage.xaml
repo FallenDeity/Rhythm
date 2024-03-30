@@ -1,14 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
-    x:Class="Rhythm.Views.AlbumDetailPage"
+    x:Class="Rhythm.Views.ArtistDetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:helpers="using:Rhythm.Helpers"
     xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
+    NavigationCacheMode="Enabled"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -28,7 +31,7 @@
                 Grid.Row="0"
                 Height="400"
                 VerticalAlignment="Top">
-                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.AlbumImageURL, Mode=OneWay}" />
+                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.ArtistImageURL, Mode=OneWay}" />
             </Grid>
             <StackPanel Grid.Row="0">
                 <Grid VerticalAlignment="Center">
@@ -47,8 +50,8 @@
                             x:Name="HeroImage"
                             Width="128"
                             Height="128"
-                            AutomationProperties.Name="{x:Bind ViewModel.Item.AlbumName, Mode=OneWay}"
-                            Source="{x:Bind ViewModel.Item.AlbumImageURL, Mode=OneWay}"
+                            AutomationProperties.Name="{x:Bind ViewModel.Item.ArtistName, Mode=OneWay}"
+                            Source="{x:Bind ViewModel.Item.ArtistImageURL, Mode=OneWay}"
                             Stretch="UniformToFill" />
                     </Grid>
                     <StackPanel
@@ -61,7 +64,7 @@
                             FontSize="24"
                             FontWeight="ExtraBold"
                             Style="{ThemeResource TitleLargeTextBlockStyle}"
-                            Text="{x:Bind ViewModel.Item.AlbumName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.ArtistName, Mode=OneWay}" />
                         <TextBlock
                             x:Name="Info"
                             FontSize="12"
@@ -105,10 +108,10 @@
                     Fill="{ThemeResource SystemControlPageTextBaseHighBrush}"
                     Opacity="0.3" />
                 <ListView
-                    x:Name="AlbumTracks"
+                    x:Name="ArtistTracks"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
-                    ItemClick="AlbumTracks_ItemClick"
+                    ItemClick="ArtistTracks_ItemClick"
                     ItemsSource="{x:Bind ViewModel.Tracks, Mode=OneWay}"
                     ScrollViewer.VerticalScrollMode="Disabled"
                     SelectionMode="None"
@@ -215,7 +218,7 @@
                                                 <MenuFlyoutItem Text="Add to Playlist" />
                                                 <MenuFlyoutItem Text="Add to Library" />
                                                 <MenuFlyoutSeparator />
-                                                <MenuFlyoutItem Text="Go to Artist" />
+                                                <MenuFlyoutItem Click="AlbumMenuFlyoutItem_Click" Text="Go to Album" />
                                             </MenuFlyout>
                                         </Button.Flyout>
                                     </Button>
@@ -302,6 +305,136 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+                <TextBlock
+                    Margin="{StaticResource MediumTopBottomMargin}"
+                    Style="{ThemeResource TitleTextBlockStyle}"
+                    Text="Artist Albums" />
+                <ScrollViewer
+                    VerticalAlignment="Center"
+                    HorizontalScrollBarVisibility="Hidden"
+                    HorizontalScrollMode="Enabled"
+                    VerticalScrollBarVisibility="Disabled"
+                    VerticalScrollMode="Disabled">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:AdaptiveGridView
+                            x:Name="ArtistAlbums"
+                            DesiredWidth="210"
+                            IsItemClickEnabled="True"
+                            ItemClickCommand="{x:Bind ViewModel.AlbumClickCommand}"
+                            ItemHeight="265"
+                            ItemsSource="{x:Bind ViewModel.rhythmAlbums, Mode=OneWay}"
+                            OneRowModeEnabled="True"
+                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                            ScrollViewer.HorizontalScrollMode="Disabled"
+                            ScrollViewer.VerticalScrollMode="Disabled"
+                            SelectionMode="None"
+                            StretchContentForSingleRow="True"
+                            Visibility="{x:Bind ViewModel.AlbumsLoaded, Converter={StaticResource BoolToVis}, Mode=OneWay}">
+                            <controls:AdaptiveGridView.ItemTemplate>
+                                <DataTemplate x:DataType="models:RhythmAlbum">
+                                    <Grid
+                                        MaxWidth="210"
+                                        Padding="{StaticResource XSmallLeftTopRightBottomMargin}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="6"
+                                        PointerEntered="Grid_PointerEntered"
+                                        PointerExited="Grid_PointerExited">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid
+                                            x:Name="itemHero"
+                                            Grid.Row="0"
+                                            Width="180"
+                                            Height="180"
+                                            Background="{ThemeResource LayerOnAcrylicFillColorDefault}"
+                                            CornerRadius="5">
+                                            <Image
+                                                Name="{x:Bind AlbumName}"
+                                                Width="180"
+                                                Height="180"
+                                                Source="{x:Bind AlbumImageURL}"
+                                                Stretch="UniformToFill" />
+                                        </Grid>
+                                        <StackPanel
+                                            Grid.Row="1"
+                                            Margin="{ThemeResource XSmallLeftTopRightBottomMargin}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                            <TextBlock
+                                                Margin="0,4,0,8"
+                                                HorizontalAlignment="Center"
+                                                FontSize="16"
+                                                Style="{ThemeResource ListTitleStyle}"
+                                                Text="{x:Bind AlbumName}" />
+                                            <TextBlock
+                                                HorizontalAlignment="Center"
+                                                Opacity="0.7"
+                                                Style="{ThemeResource ListSubTitleStyle}"
+                                                Text="{x:Bind ArtistNames}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </controls:AdaptiveGridView.ItemTemplate>
+                        </controls:AdaptiveGridView>
+                        <controls:AdaptiveGridView
+                            DesiredWidth="210"
+                            IsItemClickEnabled="False"
+                            ItemHeight="280"
+                            ItemsSource="{x:Bind ViewModel.shimmers, Mode=OneWay}"
+                            ScrollViewer.HorizontalScrollMode="Disabled"
+                            ScrollViewer.VerticalScrollMode="Disabled"
+                            SelectionMode="None"
+                            Visibility="{x:Bind ViewModel.AlbumsLoaded, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
+                            <controls:AdaptiveGridView.ItemTemplate>
+                                <DataTemplate x:DataType="labs:Shimmer">
+                                    <Grid
+                                        MaxWidth="210"
+                                        Margin="{ThemeResource XSmallLeftTopRightBottomMargin}"
+                                        Padding="{StaticResource XSmallLeftTopRightBottomMargin}"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        CornerRadius="6">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <Grid
+                                            Grid.Row="0"
+                                            Width="180"
+                                            Height="180"
+                                            CornerRadius="5">
+                                            <labs:Shimmer
+                                                Width="180"
+                                                Height="180"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="5" />
+                                        </Grid>
+                                        <StackPanel
+                                            Grid.Row="1"
+                                            Margin="{ThemeResource SmallTopMargin}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                            <labs:Shimmer
+                                                Width="120"
+                                                Height="18"
+                                                Margin="{ThemeResource XSmallLeftTopRightBottomMargin}"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="6" />
+                                            <labs:Shimmer
+                                                Width="160"
+                                                Height="16"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="6" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </controls:AdaptiveGridView.ItemTemplate>
+                        </controls:AdaptiveGridView>
+                    </StackPanel>
+                </ScrollViewer>
             </StackPanel>
         </Grid>
         <VisualStateManager.VisualStateGroups>
@@ -317,6 +450,7 @@
                         <Setter Target="itemHero.Height" Value="250" />
                         <Setter Target="HeroImage.Width" Value="256" />
                         <Setter Target="HeroImage.Height" Value="250" />
+
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -328,6 +462,7 @@
                         <Setter Target="Info.FontSize" Value="14" />
                         <Setter Target="itemHero.Width" Value="192" />
                         <Setter Target="itemHero.Height" Value="192" />
+
                         <Setter Target="HeroImage.Width" Value="192" />
                         <Setter Target="HeroImage.Height" Value="192" />
                     </VisualState.Setters>
@@ -335,4 +470,5 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </ScrollViewer>
+
 </Page>
