@@ -147,7 +147,10 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <Grid Grid.Row="0" Margin="{StaticResource NavigationViewPageContentMargin}">
+                <Grid
+                    Grid.Row="0"
+                    Margin="{StaticResource NavigationViewPageContentMargin}"
+                    CornerRadius="6">
                     <Frame x:Name="NavigationFrame" />
                 </Grid>
                 <controls:RhythmMediaPlayer

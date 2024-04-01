@@ -32,6 +32,7 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
     }
 
     public ObservableCollection<RhythmTrackItem> Tracks { get; } = new ObservableCollection<RhythmTrackItem>();
+    public ObservableCollection<RhythmTrackItem> SearchedTracks { get; } = new ObservableCollection<RhythmTrackItem>();
 
     public ObservableCollection<string> shimmers { get; } = new ObservableCollection<string>();
 
@@ -158,6 +159,19 @@ public partial class PlaylistDetailViewModel : ObservableRecipient, INavigationA
         {
             Tracks[idx].RhythmTrack.Liked = check;
         }
+    }
+
+    public ObservableCollection<RhythmTrackItem> GetSearchPlaylist(string queryText)
+    {
+
+        var filteredTracks = Tracks.Where(track =>
+            track.RhythmTrack.TrackName.Contains(queryText, StringComparison.OrdinalIgnoreCase));
+        SearchedTracks.Clear();
+        foreach (var track in filteredTracks)
+        {
+            SearchedTracks.Add(track);
+        }
+        return SearchedTracks;
     }
 
     public string InfoText => $"{Owner} • {Item?.TrackCount} Tracks • {DurationText()}";

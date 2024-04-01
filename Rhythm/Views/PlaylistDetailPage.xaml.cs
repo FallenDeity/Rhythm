@@ -1,6 +1,8 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
@@ -25,7 +27,7 @@ public sealed partial class PlaylistDetailPage : Page
     {
         get;
     }
-
+    public ObservableCollection<RhythmTrackItem> SearchedTracks = new ObservableCollection<RhythmTrackItem>();
     public PlaylistDetailPage()
     {
         ViewModel = App.GetService<PlaylistDetailViewModel>();
@@ -101,5 +103,43 @@ public sealed partial class PlaylistDetailPage : Page
         {
             ViewModel.NavigateToArtist(track.RhythmTrack.Artists[0].ArtistId);
         }
+    }
+
+    private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+
+        if (args.ChosenSuggestion != null)
+        {
+            SearchedTracks = ViewModel.GetSearchPlaylist(sender.Text);
+            PlaylistTracks.ItemsSource = SearchedTracks;
+        }
+        else
+        {
+            PlaylistTracks.ItemsSource = ViewModel.Tracks;
+        }
+    }
+
+    private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        var suggestions = ViewModel.GetSearchPlaylist(sender.Text);
+        List<string> suggestionsList = new List<string>();
+        foreach (var suggestion in suggestions)
+        {
+            suggestionsList.Add(suggestion.RhythmTrack.TrackName);
+        }
+        if (suggestionsList != null && suggestionsList.Count > 0)
+        {
+            PlaylistTracks.ItemsSource = suggestions;
+            sender.ItemsSource = suggestionsList;
+        }
+        else
+        {
+            sender.ItemsSource = new string[] { "No results found" };
+        }
+    }
+
+    private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        controlsSearchBox.Focus(FocusState.Programmatic);
     }
 }

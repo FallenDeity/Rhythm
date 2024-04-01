@@ -1,6 +1,8 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
@@ -27,6 +29,7 @@ public sealed partial class AlbumDetailPage : Page
         get;
     }
 
+    public ObservableCollection<RhythmTrackItem> SearchedTracks = new ObservableCollection<RhythmTrackItem>();
     public AlbumDetailPage()
     {
         ViewModel = App.GetService<AlbumDetailViewModel>();
@@ -97,5 +100,43 @@ public sealed partial class AlbumDetailPage : Page
             Foreground = (bool)track.RhythmTrack.Liked! ? accent : normal,
             Glyph = glyph
         };
+    }
+
+    private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+    {
+
+        if (args.ChosenSuggestion != null)
+        {
+            SearchedTracks = ViewModel.GetSearchAlbums(sender.Text);
+            AlbumTracks.ItemsSource = SearchedTracks;
+        }
+        else
+        {
+            AlbumTracks.ItemsSource = ViewModel.Tracks;
+        }
+    }
+
+    private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        var suggestions = ViewModel.GetSearchAlbums(sender.Text);
+        List<string> suggestionsList = new List<string>();
+        foreach (var suggestion in suggestions)
+        {
+            suggestionsList.Add(suggestion.RhythmTrack.TrackName);
+        }
+        if (suggestionsList != null && suggestionsList.Count > 0)
+        {
+            AlbumTracks.ItemsSource = suggestions;
+            sender.ItemsSource = suggestionsList;
+        }
+        else
+        {
+            sender.ItemsSource = new string[] { "No results found" };
+        }
+    }
+
+    private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        controlsSearchBox.Focus(FocusState.Programmatic);
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="Rhythm.Views.PlaylistDetailPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -80,7 +80,109 @@
                             TextWrapping="WrapWholeWords" />
                     </StackPanel>
                 </Grid>
-                <Grid Margin="16,36,16,0">
+                <StackPanel Margin="0,36,0,0">
+                    <Grid Margin="{StaticResource SmallLeftRightMargin}" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="PlayAllButton"
+                            Grid.Column="0"
+                            Width="48"
+                            Height="48"
+                            Margin="0,0,20,0"
+                            Padding="0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            CornerRadius="24"
+                            ToolTipService.ToolTip="PlayAll">
+                            <FontIcon
+                                x:Name="PlayPauseIcon"
+                                FontSize="20"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xE768;" />
+                        </Button>
+                        <Button
+                            x:Name="ShuffleButton"
+                            Grid.Column="1"
+                            Width="Auto"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            Padding="12,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            CornerRadius="10"
+                            ToolTipService.ToolTip="Shuffle">
+                            <FontIcon
+                                x:Name="ShuffleIcon"
+                                FontSize="15"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xE8B1;" />
+                        </Button>
+                        <Button
+                            x:Name="LikeButton"
+                            Grid.Column="2"
+                            Width="Auto"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            Padding="12,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            CornerRadius="10"
+                            ToolTipService.ToolTip="Like">
+                            <FontIcon
+                                x:Name="LikeIcon"
+                                FontSize="15"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xEB51;" />
+                        </Button>
+                        <Button
+                            x:Name="FollowButton"
+                            Grid.Column="3"
+                            Width="Auto"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            Padding="12,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            CornerRadius="10"
+                            ToolTipService.ToolTip="Follow">
+                            <FontIcon
+                                x:Name="FollowIcon"
+                                FontSize="15"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xE8FA;" />
+                        </Button>
+                        <AutoSuggestBox
+                            x:Name="controlsSearchBox"
+                            Grid.Column="4"
+                            MinWidth="200"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            x:FieldModifier="public"
+                            KeyboardAcceleratorPlacementMode="Hidden"
+                            MaxSuggestionListHeight="320"
+                            PlaceholderText="Search in Playlist"
+                            QueryIcon="Find"
+                            QuerySubmitted="OnControlsSearchBoxQuerySubmitted"
+                            TextChanged="OnControlsSearchBoxTextChanged">
+                            <AutoSuggestBox.KeyboardAccelerators>
+                                <KeyboardAccelerator
+                                    Key="F"
+                                    Invoked="CtrlF_Invoked"
+                                    Modifiers="Control" />
+                            </AutoSuggestBox.KeyboardAccelerators>
+                        </AutoSuggestBox>
+                    </Grid>
+                </StackPanel>
+                <Grid Margin="16,12,16,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -115,6 +217,7 @@
                     Opacity="0.3" />
                 <ListView
                     x:Name="PlaylistTracks"
+                    MinHeight="700"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
                     ItemClick="PlaylistTracks_ItemClick"
