@@ -87,6 +87,7 @@
                             Padding="0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
+                            Command="{x:Bind PlayAllCommand}"
                             CornerRadius="24"
                             ToolTipService.ToolTip="PlayAll">
                             <FontIcon
@@ -101,11 +102,13 @@
                             Width="Auto"
                             Height="30"
                             Margin="0,0,20,0"
-                            Padding="12,0"
+                            Padding="6,4,6,4"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Background="Transparent"
-                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            Command="{x:Bind ShuffleAlbumCommand}"
+                            CornerRadius="13"
                             ToolTipService.ToolTip="Shuffle">
                             <FontIcon
                                 x:Name="ShuffleIcon"
@@ -119,11 +122,12 @@
                             Width="Auto"
                             Height="30"
                             Margin="0,0,20,0"
-                            Padding="12,0"
+                            Padding="6,4,6,4"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Background="Transparent"
-                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            CornerRadius="13"
                             ToolTipService.ToolTip="Save">
                             <FontIcon
                                 x:Name="SaveIcon"
@@ -188,7 +192,7 @@
                     Opacity="0.3" />
                 <ListView
                     x:Name="AlbumTracks"
-                    MinHeight="700"
+                    MinHeight="500"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
                     ItemClick="AlbumTracks_ItemClick"
@@ -415,6 +419,14 @@
                         <Setter Target="HeroImage.Height" Value="192" />
                     </VisualState.Setters>
                 </VisualState>
+                <VisualState x:Name="ShuffleStateOn">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShuffleIcon" Storyboard.TargetProperty="Foreground">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentAAFillColorDefaultBrush}" />
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="ShuffleStateOff" />
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </ScrollViewer>

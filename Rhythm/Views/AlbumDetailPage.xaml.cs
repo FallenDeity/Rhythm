@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -7,7 +8,6 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Controls;
-using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -30,6 +30,7 @@ public sealed partial class AlbumDetailPage : Page
     }
 
     public ObservableCollection<RhythmTrackItem> SearchedTracks = new ObservableCollection<RhythmTrackItem>();
+
     public AlbumDetailPage()
     {
         ViewModel = App.GetService<AlbumDetailViewModel>();
@@ -41,6 +42,8 @@ public sealed partial class AlbumDetailPage : Page
         base.OnNavigatedTo(e);
         this.RegisterElementForConnectedAnimation("animationKeyArtistGrid", itemHero);
         this.RegisterElementForConnectedAnimation("animationKeyContentGrid", itemHero);
+        var page = (ShellPage)App.MainWindow.Content;
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
     }
 
     protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -124,7 +127,7 @@ public sealed partial class AlbumDetailPage : Page
         {
             suggestionsList.Add(suggestion.RhythmTrack.TrackName);
         }
-        if (suggestionsList != null && suggestionsList.Count > 0)
+        if (suggestionsList.Count > 0)
         {
             AlbumTracks.ItemsSource = suggestions;
             sender.ItemsSource = suggestionsList;
@@ -133,6 +136,21 @@ public sealed partial class AlbumDetailPage : Page
         {
             sender.ItemsSource = new string[] { "No results found" };
         }
+    }
+
+    [RelayCommand]
+    public void ShuffleAlbum()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        page.RhythmPlayer.Shuffle();
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
+    }
+
+    [RelayCommand]
+    public async Task PlayAll()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        await page.RhythmPlayer.PlayAlbum(ViewModel.Item?.AlbumId!);
     }
 
     private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)

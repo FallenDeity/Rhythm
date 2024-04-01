@@ -142,6 +142,8 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         }
     }
 
+    public bool IsShuffled => _shuffle;
+
     public RhythmMediaPlayer()
     {
         this.InitializeComponent();
@@ -507,6 +509,19 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         TrackId = trackId;
     }
 
+    public void PlayTracks(string[] trackIds)
+    {
+        _trackQueue.Clear();
+        _original.Clear();
+        foreach (var trackId in trackIds)
+        {
+            _original.AddLast(trackId);
+            _trackQueue.AddLast(trackId);
+        }
+        IsPlaying = true;
+        if (_trackQueue.First is not null) TrackId = _trackQueue.First.Value;
+    }
+
     private void PlaybackSession_MediaEnded(MediaPlayer sender, object args)
     {
         dispatcherQueue?.TryEnqueue(DispatcherQueuePriority.High, () =>
@@ -609,7 +624,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
         _ = Task.Run(() => UpdatePlayState());
     }
 
-    private void ShuffleButton_Click(object sender, RoutedEventArgs e)
+    public void Shuffle()
     {
         _shuffle = !_shuffle;
         VisualStateManager.GoToState(this, _shuffle ? "ShuffleStateOn" : "ShuffleStateOff", true);
@@ -628,6 +643,11 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             _trackQueue = newQueue;
         }
         _ = Task.Run(() => UpdatePlayState());
+    }
+
+    private void ShuffleButton_Click(object sender, RoutedEventArgs e)
+    {
+        Shuffle();
     }
 
     public void AddToQueue(string trackId)

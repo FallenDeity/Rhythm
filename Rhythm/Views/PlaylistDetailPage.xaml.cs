@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -27,7 +28,9 @@ public sealed partial class PlaylistDetailPage : Page
     {
         get;
     }
+
     public ObservableCollection<RhythmTrackItem> SearchedTracks = new ObservableCollection<RhythmTrackItem>();
+
     public PlaylistDetailPage()
     {
         ViewModel = App.GetService<PlaylistDetailViewModel>();
@@ -38,6 +41,8 @@ public sealed partial class PlaylistDetailPage : Page
     {
         base.OnNavigatedTo(e);
         this.RegisterElementForConnectedAnimation("animationKeyContentGrid", itemHero);
+        var page = (ShellPage)App.MainWindow.Content;
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
     }
 
     protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -127,7 +132,7 @@ public sealed partial class PlaylistDetailPage : Page
         {
             suggestionsList.Add(suggestion.RhythmTrack.TrackName);
         }
-        if (suggestionsList != null && suggestionsList.Count > 0)
+        if (suggestionsList.Count > 0)
         {
             PlaylistTracks.ItemsSource = suggestions;
             sender.ItemsSource = suggestionsList;
@@ -136,6 +141,21 @@ public sealed partial class PlaylistDetailPage : Page
         {
             sender.ItemsSource = new string[] { "No results found" };
         }
+    }
+
+    [RelayCommand]
+    public void ShufflePlaylist()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        page.RhythmPlayer.Shuffle();
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
+    }
+
+    [RelayCommand]
+    public async Task PlayAll()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        await page.RhythmPlayer.PlayPlaylist(ViewModel.Item?.PlaylistId!);
     }
 
     private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)

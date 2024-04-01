@@ -148,8 +148,9 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <Grid
+                    x:Name="NavigationFrameGrid"
                     Grid.Row="0"
-                    Margin="{StaticResource NavigationViewPageContentMargin}"
+                    Margin="24,24,24,7"
                     CornerRadius="6">
                     <Frame x:Name="NavigationFrame" />
                 </Grid>
@@ -160,5 +161,25 @@
                     VerticalAlignment="Bottom" />
             </Grid>
         </NavigationView>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="FrameMarginStates">
+                <VisualState x:Name="FrameMarginNarrow">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="600" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationFrameGrid.Margin" Value="36,24,36,7" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="FrameMarginWide">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="NavigationFrameGrid.Margin" Value="48,24,48,7" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
     </Grid>
 </Page>

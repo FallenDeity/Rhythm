@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI.Animations;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -37,6 +38,8 @@ public sealed partial class ArtistDetailPage : Page
     {
         base.OnNavigatedTo(e);
         this.RegisterElementForConnectedAnimation("animationKeyContentGrid", itemHero);
+        var page = (ShellPage)App.MainWindow.Content;
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
     }
 
     protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
@@ -99,6 +102,22 @@ public sealed partial class ArtistDetailPage : Page
         var grid = (Grid)sender;
         var themeResource = App.Current.Resources["ListViewItemPointerOverBackgroundThemeBrush"] as Microsoft.UI.Xaml.Media.SolidColorBrush;
         grid.Background = themeResource;
+    }
+
+    [RelayCommand]
+    public void ShuffleArtist()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        page.RhythmPlayer.Shuffle();
+        VisualStateManager.GoToState(this, page.RhythmPlayer.IsShuffled ? "ShuffleStateOn" : "ShuffleStateOff", true);
+    }
+
+    [RelayCommand]
+    public void PlayAll()
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        var tracks = ViewModel.Tracks.Select(t => t.RhythmTrack.TrackId).ToList();
+        page.RhythmPlayer.PlayTracks(tracks.ToArray());
     }
 
     private void Grid_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)

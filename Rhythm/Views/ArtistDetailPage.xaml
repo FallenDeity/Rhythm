@@ -88,6 +88,7 @@
                             Padding="0"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
+                            Command="{x:Bind PlayAllCommand}"
                             CornerRadius="24"
                             ToolTipService.ToolTip="PlayAll">
                             <FontIcon
@@ -96,18 +97,19 @@
                                 Foreground="{ThemeResource SystemBaseHighColor}"
                                 Glyph="&#xE768;" />
                         </Button>
-
                         <Button
                             x:Name="ShuffleButton"
                             Grid.Column="1"
                             Width="Auto"
                             Height="30"
                             Margin="0,0,20,0"
-                            Padding="12,0"
+                            Padding="6,4,6,4"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Background="Transparent"
-                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            Command="{x:Bind ShuffleArtistCommand}"
+                            CornerRadius="13"
                             ToolTipService.ToolTip="Shuffle">
                             <FontIcon
                                 x:Name="ShuffleIcon"
@@ -115,25 +117,25 @@
                                 Foreground="{ThemeResource SystemBaseHighColor}"
                                 Glyph="&#xE8B1;" />
                         </Button>
-
                         <Button
                             x:Name="FollowButton"
                             Grid.Column="2"
                             Width="Auto"
                             Height="36"
-                            Margin="0,0,20,0"
-                            Padding="12,0"
+                            Padding="6,4,6,4"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            CornerRadius="10"
+                            BorderBrush="Transparent"
+                            CornerRadius="6"
                             ToolTipService.ToolTip="Follow">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Margin="0,0,12,0" Text="Follow" />
                                 <FontIcon
                                     x:Name="FollowIcon"
-                                    FontSize="20"
+                                    Margin="6,0,6,0"
+                                    FontSize="16"
                                     Foreground="{ThemeResource SystemBaseHighColor}"
                                     Glyph="&#xE8FA;" />
+                                <TextBlock Margin="6,0,6,0" Text="Follow" />
                             </StackPanel>
                         </Button>
                     </Grid>
@@ -173,6 +175,7 @@
                     Opacity="0.3" />
                 <ListView
                     x:Name="ArtistTracks"
+                    MinHeight="400"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
                     ItemClick="ArtistTracks_ItemClick"
@@ -523,7 +526,6 @@
                         <Setter Target="itemHero.Height" Value="250" />
                         <Setter Target="HeroImage.Width" Value="256" />
                         <Setter Target="HeroImage.Height" Value="250" />
-
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -539,6 +541,14 @@
                         <Setter Target="HeroImage.Height" Value="192" />
                     </VisualState.Setters>
                 </VisualState>
+                <VisualState x:Name="ShuffleStateOn">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShuffleIcon" Storyboard.TargetProperty="Foreground">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentAAFillColorDefaultBrush}" />
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="ShuffleStateOff" />
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </ScrollViewer>
