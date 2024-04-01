@@ -6,6 +6,7 @@ using Rhythm.Contracts.Services;
 using Rhythm.Contracts.ViewModels;
 using Rhythm.Controls;
 using Rhythm.Core.Models;
+using Rhythm.Services;
 using Rhythm.Views;
 
 namespace Rhythm.ViewModels;
@@ -29,7 +30,7 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
     }
 
     public ObservableCollection<RhythmTrackItem> Tracks { get; } = new ObservableCollection<RhythmTrackItem>();
-
+    public ObservableCollection<RhythmTrackItem> SearchedTracks { get; } = new ObservableCollection<RhythmTrackItem>();
     public ObservableCollection<string> shimmers { get; } = new ObservableCollection<string>();
 
     public AlbumDetailViewModel(INavigationService navigationService)
@@ -136,5 +137,17 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
         _navigationService.NavigateTo(typeof(ArtistDetailViewModel).FullName!, artistId);
     }
 
+    public ObservableCollection<RhythmTrackItem> GetSearchAlbums(string queryText)
+    {
+
+        var filteredTracks = Tracks.Where(track =>
+            track.RhythmTrack.TrackName.Contains(queryText, StringComparison.OrdinalIgnoreCase));
+        SearchedTracks.Clear();
+        foreach (var track in filteredTracks)
+        {
+            SearchedTracks.Add(track);
+        }
+        return SearchedTracks;
+    }
     public string InfoText => $"{Item?.ArtistName} • {Item?.TrackCount} Tracks • {DurationText()}";
 }
