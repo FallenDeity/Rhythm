@@ -116,6 +116,8 @@ public partial class App : Application
             services.AddTransient<PlaylistDetailPage>();
             services.AddTransient<ArtistDetailViewModel>();
             services.AddTransient<ArtistDetailPage>();
+            services.AddTransient<TrackDetailViewModel>();
+            services.AddTransient<TrackDetailPage>();
 
 
             // Configuration
