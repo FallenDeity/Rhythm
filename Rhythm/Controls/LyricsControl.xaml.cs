@@ -8,18 +8,23 @@ using Rhythm.Views;
 namespace Rhythm.Controls;
 public sealed partial class LyricsControl : UserControl
 {
+    public static readonly DependencyProperty LyricsProperty = DependencyProperty.Register("Lyrics", typeof(string), typeof(LyricsControl), null);
     public LyricsControl()
     {
         this.InitializeComponent();
     }
 
+    public string LyricsText
+    {
+        get => (string)GetValue(LyricsProperty);
+        set => SetValue(LyricsProperty, value);
+    }
+
     private void UserControl_Loaded(object sender, RoutedEventArgs e)
     {
-        var page = (ShellPage)App.MainWindow.Content;
-        var lyrics = page.RhythmPlayer.GetTrackLyrics();
-        if (lyrics != null && !string.IsNullOrEmpty(lyrics))
+        if (LyricsText != null && !string.IsNullOrEmpty(LyricsText))
         {
-            Lyrics.Text = lyrics;
+            Lyrics.Text = LyricsText;
         }
         else
         {
