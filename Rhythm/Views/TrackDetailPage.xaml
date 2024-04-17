@@ -1,0 +1,308 @@
+<Page
+    x:Class="Rhythm.Views.TrackDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:animations="using:CommunityToolkit.WinUI.UI.Animations"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:Rhythm.Helpers"
+    xmlns:labs="using:CommunityToolkit.Labs.WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Rhythm.Core.Models"
+    xmlns:userControls="using:Rhythm.Controls"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:LikedTrackConverter x:Key="LikedTrack" />
+        <helpers:CurrentTrackConverter x:Key="CurrentTrack" />
+        <helpers:BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Page.Resources>
+    <ScrollViewer
+        x:Name="ContentArea"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <Grid Padding="0,14,0,108">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid
+                Grid.Row="0"
+                Height="400"
+                VerticalAlignment="Top">
+                <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.TrackImageURL, Mode=OneWay}" />
+            </Grid>
+            <StackPanel Grid.Row="0">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid
+                        x:Name="itemHero"
+                        Grid.Column="0"
+                        Width="128"
+                        Height="128"
+                        Margin="{StaticResource SmallLeftRightMargin}"
+                        CornerRadius="6">
+                        <Image
+                            x:Name="HeroImage"
+                            Width="128"
+                            Height="128"
+                            Source="{x:Bind ViewModel.Item.TrackImageURL, Mode=OneWay}"
+                            Stretch="UniformToFill" />
+                    </Grid>
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="{StaticResource MediumLeftRightMargin}"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical">
+                        <TextBlock
+                            x:Name="Title"
+                            FontSize="24"
+                            FontWeight="ExtraBold"
+                            Style="{ThemeResource TitleLargeTextBlockStyle}"
+                            Text="{x:Bind ViewModel.Item.TrackName, Mode=OneWay}" />
+                        <TextBlock
+                            x:Name="Info"
+                            FontSize="12"
+                            FontWeight="Normal"
+                            Opacity="0.8"
+                            Text="{x:Bind ViewModel.InfoString, Mode=OneWay}"
+                            TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </Grid>
+                <StackPanel Margin="0,20,0,0">
+                    <Grid Margin="{StaticResource MediumLeftRightMargin}" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            x:Name="ShuffleButton"
+                            Grid.Column="0"
+                            Width="Auto"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            Padding="6,4,6,4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            Command="{x:Bind ShuffleArtistCommand}"
+                            CornerRadius="13"
+                            ToolTipService.ToolTip="Shuffle">
+                            <FontIcon
+                                x:Name="ShuffleIcon"
+                                FontSize="15"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xE8B1;" />
+                        </Button>
+                        <Button
+                            x:Name="LikeButton"
+                            Grid.Column="1"
+                            Width="Auto"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            Padding="6,4,6,4"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            BorderBrush="Transparent"
+                            CornerRadius="13"
+                            ToolTipService.ToolTip="Like">
+                            <FontIcon
+                                x:Name="LikeIcon"
+                                FontSize="15"
+                                Foreground="{ThemeResource SystemBaseHighColor}"
+                                Glyph="&#xEB51;" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel
+                        Grid.Column="0"
+                        Margin="{StaticResource XSmallLeftTopRightBottomMargin}"
+                        Orientation="Vertical">
+                        <StackPanel
+                            Grid.Row="0"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical">
+                            <TextBlock
+                                Margin="{StaticResource SmallLeftMargin}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                FontSize="28"
+                                Opacity="0.9"
+                                Text="Track Artists" />
+                            <ListView
+                                x:Name="TrackArtists"
+                                MinHeight="400"
+                                Margin="{StaticResource SmallTopMargin}"
+                                IsItemClickEnabled="True"
+                                ItemClick="TrackArtists_ItemClick"
+                                ItemsSource="{x:Bind ViewModel.Artists, Mode=OneWay}"
+                                ScrollViewer.VerticalScrollMode="Disabled"
+                                SelectionMode="None"
+                                Visibility="{x:Bind ViewModel.IsDataLoading, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:RhythmArtist">
+                                        <Grid Margin="4,2,4,2" Padding="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid
+                                                Grid.Column="0"
+                                                Width="60"
+                                                Height="60"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="6">
+                                                <Image
+                                                    Width="60"
+                                                    Height="60"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    AutomationProperties.Name="{x:Bind ArtistName}"
+                                                    Source="{x:Bind ArtistImageURL}"
+                                                    Stretch="UniformToFill" />
+                                            </Grid>
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Margin="20,0,0,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontSize="20"
+                                                MaxLines="1"
+                                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                                Text="{x:Bind ArtistName}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Row="0"
+                            HorizontalAlignment="Stretch"
+                            Orientation="Vertical">
+                            <TextBlock
+                                Margin="{StaticResource SmallLeftMargin}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                FontSize="28"
+                                Opacity="0.9"
+                                Text="Track Album" />
+                            <ListView
+                                x:Name="TrackAlbum"
+                                MinHeight="400"
+                                Margin="{StaticResource SmallTopMargin}"
+                                IsItemClickEnabled="True"
+                                ItemClick="TrackAlbum_ItemClick"
+                                ItemsSource="{x:Bind ViewModel.album, Mode=OneWay}"
+                                ScrollViewer.VerticalScrollMode="Disabled"
+                                SelectionMode="None"
+                                Visibility="{x:Bind ViewModel.AlbumsLoaded, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:RhythmAlbum">
+                                        <Grid Margin="4,2,4,2" Padding="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid
+                                                Grid.Column="0"
+                                                Width="60"
+                                                Height="60"
+                                                HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="6">
+                                                <Image
+                                                    Width="60"
+                                                    Height="60"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Source="{x:Bind AlbumImageURL, Mode=OneWay}"
+                                                    Stretch="UniformToFill" />
+                                            </Grid>
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                Margin="20,0,0,0"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                FontSize="20"
+                                                MaxLines="1"
+                                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                                Text="{x:Bind AlbumName, Mode=OneWay}"
+                                                TextTrimming="CharacterEllipsis" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+
+                        </StackPanel>
+                    </StackPanel>
+                    <userControls:LyricsControl Grid.Column="1" LyricsText="{x:Bind ViewModel.Item.Lyrics}" />
+                </Grid>
+            </StackPanel>
+        </Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1100" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="Title.FontSize" Value="72" />
+                        <Setter Target="Info.FontSize" Value="18" />
+                        <Setter Target="itemHero.Width" Value="256" />
+                        <Setter Target="itemHero.Height" Value="250" />
+                        <Setter Target="HeroImage.Width" Value="256" />
+                        <Setter Target="HeroImage.Height" Value="250" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="600" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="Title.FontSize" Value="40" />
+                        <Setter Target="Info.FontSize" Value="14" />
+                        <Setter Target="itemHero.Width" Value="192" />
+                        <Setter Target="itemHero.Height" Value="192" />
+                        <Setter Target="HeroImage.Width" Value="192" />
+                        <Setter Target="HeroImage.Height" Value="192" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState x:Name="ShuffleStateOn">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ShuffleIcon" Storyboard.TargetProperty="Foreground">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource AccentAAFillColorDefaultBrush}" />
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="ShuffleStateOff" />
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+    </ScrollViewer>
+
+</Page>

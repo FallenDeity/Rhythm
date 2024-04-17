@@ -200,6 +200,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
         {
             page.RhythmPlayer.PlayTrack(track.TrackId);
         }
+        if (track != null)
+        {
+            _navigationService.NavigateTo(typeof(TrackDetailViewModel).FullName!, track.TrackId);
+        }
     }
 
     [RelayCommand]
