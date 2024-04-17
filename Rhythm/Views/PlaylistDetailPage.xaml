@@ -10,6 +10,7 @@
     xmlns:userControls="using:Rhythm.Controls"
     xmlns:viewModels="using:Rhythm.ViewModels"
     x:Name="PlaylistDetails"
+    Loaded="PlaylistDetails_Loaded"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -138,6 +139,7 @@
                             VerticalAlignment="Center"
                             Background="Transparent"
                             BorderBrush="Transparent"
+                            Command="{x:Bind LikePlaylistCommand}"
                             CornerRadius="13"
                             ToolTipService.ToolTip="Like">
                             <FontIcon
@@ -157,6 +159,7 @@
                             VerticalAlignment="Center"
                             Background="Transparent"
                             BorderBrush="Transparent"
+                            Command="{x:Bind FollowPlaylistCommand}"
                             CornerRadius="13"
                             ToolTipService.ToolTip="Follow">
                             <FontIcon

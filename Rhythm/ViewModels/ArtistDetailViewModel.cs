@@ -179,12 +179,17 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
 
     public async Task ToggleLike(RhythmTrack track)
     {
-        var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);
+        var check = await Task.Run(() => App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!));
         var idx = Tracks.IndexOf(Tracks.First(t => t.RhythmTrack.TrackId == track.TrackId));
         if (idx != -1)
         {
             Tracks[idx].RhythmTrack.Liked = check;
         }
+    }
+
+    public async Task ToggleFollow(RhythmArtist artist)
+    {
+        await Task.Run(() => App.GetService<IDatabaseService>().ToggleFollow(artist.ArtistId, App.currentUser?.UserId!));
     }
 
     public static string Relativize(DateTime date)
@@ -200,5 +205,5 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
 
     public string JoinedOn => Item != null ? Relativize(Item.CreatedAt) : "Unknown";
 
-    public string InfoText => $"{Item?.ArtistBio} \n\n{Item?.AlbumCount} Albums • {Item?.TrackCount} Tracks • {Item?.FollowerCount} Followers\nJoined {JoinedOn}";
+    public string InfoText => $"{Item?.ArtistBio} \n\n{Item?.AlbumCount} Albums ï¿½ {Item?.TrackCount} Tracks ï¿½ {Item?.FollowerCount} Followers\nJoined {JoinedOn}";
 }

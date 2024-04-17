@@ -32,9 +32,19 @@ internal interface IDatabaseService
 
     Task<RhythmPlaylist?> GetPlaylist(string playlistId);
 
+    Task<RhythmUser[]> GetUsers(string[] userIds);
+
     Task<Dictionary<string, RhythmArtist[]>> GetArtistsForTracks(string[] trackIds);
 
     Task<bool> ToggleLike(string trackId, string userId);
+
+    Task<bool> ToggleFollow(string artistId, string userId);
+
+    Task<bool> ToggleFollowPlaylist(string playlistId, string userId);
+
+    Task<bool> ToggleLikePlaylist(string playlistId, string userId);
+
+    Task<bool> ToggleAlbumSave(string albumId, string userId);
 
     Dictionary<string, RhythmTrack> GetAllTracks();
 

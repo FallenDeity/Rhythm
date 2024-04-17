@@ -132,7 +132,7 @@ public sealed partial class SettingsPage : Page
         if (ViewModel.currentUser is not null)
         {
             Username.Text = ViewModel.currentUser.UserName;
-            CreatedAt.Text = "joined " + Relativize(ViewModel.currentUser.CreatedAt);
+            CreatedAt.Text = ViewModel.currentUser.GetAge;
             UsernameTextBox.Text = ViewModel.currentUser.UserName;
             ViewModel.UserLoaded = true;
             var url = ViewModel.currentUser.UserImageURL is null ? DefaultUserImage : ViewModel.currentUser.UserImageURL;

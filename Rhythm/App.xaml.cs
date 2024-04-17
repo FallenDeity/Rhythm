@@ -44,6 +44,30 @@ public partial class App : Application
         set;
     } = Array.Empty<string>();
 
+    public static string[] FollowedArtistIds
+    {
+        get;
+        set;
+    } = Array.Empty<string>();
+
+    public static string[] LikedPlaylistIds
+    {
+        get;
+        set;
+    } = Array.Empty<string>();
+
+    public static string[] FollowedPlaylistIds
+    {
+        get;
+        set;
+    } = Array.Empty<string>();
+
+    public static string[] SavedAlbumIds
+    {
+        get;
+        set;
+    } = Array.Empty<string>();
+
     public static T GetService<T>()
         where T : class
     {
@@ -116,6 +140,8 @@ public partial class App : Application
             services.AddTransient<PlaylistDetailPage>();
             services.AddTransient<ArtistDetailViewModel>();
             services.AddTransient<ArtistDetailPage>();
+            services.AddTransient<SearchViewModel>();
+            services.AddTransient<SearchPage>();
 
 
             // Configuration
@@ -163,6 +189,7 @@ public partial class App : Application
                 Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
                 PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
                 FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
+                SavedAlbumCount = reader.GetInt32(reader.GetOrdinal("SAVED_ALBUMS_COUNT")),
                 CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                 UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
             };
@@ -176,6 +203,42 @@ public partial class App : Application
             likedSongs.Add(reader.GetString(0));
         }
         LikedSongIds = likedSongs.ToArray();
+        cmd = new OracleCommand("SELECT artist_id FROM artist_followers WHERE user_id = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        reader = await cmd.ExecuteReaderAsync();
+        var followedArtists = new List<string>();
+        while (reader.Read())
+        {
+            followedArtists.Add(reader.GetString(0));
+        }
+        FollowedArtistIds = followedArtists.ToArray();
+        cmd = new OracleCommand("SELECT playlist_id FROM playlist_likes WHERE user_id = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        reader = await cmd.ExecuteReaderAsync();
+        var likedPlaylists = new List<string>();
+        while (reader.Read())
+        {
+            likedPlaylists.Add(reader.GetString(0));
+        }
+        LikedPlaylistIds = likedPlaylists.ToArray();
+        cmd = new OracleCommand("SELECT playlist_id FROM playlist_followers WHERE user_id = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        reader = await cmd.ExecuteReaderAsync();
+        var followedPlaylists = new List<string>();
+        while (reader.Read())
+        {
+            followedPlaylists.Add(reader.GetString(0));
+        }
+        FollowedPlaylistIds = followedPlaylists.ToArray();
+        cmd = new OracleCommand("SELECT album_id FROM user_saved_albums WHERE user_id = :userId", db);
+        cmd.Parameters.Add(new OracleParameter("userId", userId));
+        reader = await cmd.ExecuteReaderAsync();
+        var savedAlbums = new List<string>();
+        while (reader.Read())
+        {
+            savedAlbums.Add(reader.GetString(0));
+        }
+        SavedAlbumIds = savedAlbums.ToArray();
     }
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

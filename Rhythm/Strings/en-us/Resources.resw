@@ -207,4 +207,7 @@
   <data name="LearnMore.NavigateUri" xml:space="preserve">
     <value>https://github.com/FallenDeity/WinUiAppDemo</value>
   </data>
+  <data name="Shell_Search.Content" xml:space="preserve">
+    <value>Search</value>
+  </data>
 </root>

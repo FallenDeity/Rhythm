@@ -104,6 +104,7 @@ public partial class SettingsViewModel : ObservableRecipient, INavigationAware
                     Country = reader.GetValue(reader.GetOrdinal("COUNTRY")) as string,
                     PlaylistCount = reader.GetInt32(reader.GetOrdinal("PLAYLIST_COUNT")),
                     FavoriteSongCount = reader.GetInt32(reader.GetOrdinal("FAVORITE_SONGS_COUNT")),
+                    SavedAlbumCount = reader.GetInt32(reader.GetOrdinal("SAVED_ALBUMS_COUNT")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
                     UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
                 };

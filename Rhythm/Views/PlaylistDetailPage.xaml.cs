@@ -34,7 +34,7 @@ public sealed partial class PlaylistDetailPage : Page
     public PlaylistDetailPage()
     {
         ViewModel = App.GetService<PlaylistDetailViewModel>();
-        this.InitializeComponent();
+        InitializeComponent();
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -127,7 +127,7 @@ public sealed partial class PlaylistDetailPage : Page
     private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         var suggestions = ViewModel.GetSearchPlaylist(sender.Text);
-        List<string> suggestionsList = new List<string>();
+        var suggestionsList = new List<string>();
         foreach (var suggestion in suggestions)
         {
             suggestionsList.Add(suggestion.RhythmTrack.TrackName);
@@ -161,5 +161,61 @@ public sealed partial class PlaylistDetailPage : Page
     private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
         controlsSearchBox.Focus(FocusState.Programmatic);
+    }
+
+    private void UpdateButtons()
+    {
+        var tooltip = new ToolTip();
+        var text = App.FollowedPlaylistIds.Contains(ViewModel.Item!.PlaylistId!) ? "Unfollow" : "Follow";
+        tooltip.Content = text;
+        ToolTipService.SetToolTip(FollowButton, tooltip);
+        var accent = Application.Current.Resources["AccentAAFillColorDefaultBrush"] as SolidColorBrush;
+        var normal = Application.Current.Resources["SystemControlForegroundBaseHighBrush"] as SolidColorBrush;
+        FollowButton.Content = new FontIcon
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 14,
+            Foreground = App.FollowedPlaylistIds.Contains(ViewModel.Item!.PlaylistId!) ? accent : normal,
+            Glyph = "\uE8FA"
+        };
+        tooltip = new ToolTip();
+        text = App.LikedPlaylistIds.Contains(ViewModel.Item!.PlaylistId!) ? "Dislike" : "Like";
+        tooltip.Content = text;
+        ToolTipService.SetToolTip(LikeButton, tooltip);
+        LikeButton.Content = new FontIcon
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontFamily = new FontFamily("Segoe MDL2 Assets"),
+            FontSize = 14,
+            Foreground = App.LikedPlaylistIds.Contains(ViewModel.Item!.PlaylistId!) ? accent : normal,
+            Glyph = App.LikedPlaylistIds.Contains(ViewModel.Item!.PlaylistId!) ? "\uEB52" : "\uEB51"
+        };
+    }
+
+    private async void PlaylistDetails_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.Item is not null && ViewModel.Item.PlaylistOwner == App.currentUser!.UserId)
+        {
+            LikeButton.Visibility = Visibility.Collapsed;
+            FollowButton.Visibility = Visibility.Collapsed;
+        }
+        while (ViewModel.Item is null) await Task.Delay(10);
+        if (ViewModel.Item is not null) UpdateButtons();
+    }
+
+    [RelayCommand]
+    public async Task FollowPlaylist()
+    {
+        await ViewModel.TogglePlaylistFollow(ViewModel.Item!);
+        UpdateButtons();
+    }
+
+    [RelayCommand]
+    public async Task LikePlaylist()
+    {
+        await ViewModel.TogglePlaylistLike(ViewModel.Item!);
+        UpdateButtons();
     }
 }

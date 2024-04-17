@@ -8,6 +8,7 @@
     xmlns:labs="using:CommunityToolkit.Labs.WinUI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:userControls="using:Rhythm.Controls"
+    Loaded="Page_Loaded"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -127,6 +128,7 @@
                             VerticalAlignment="Center"
                             Background="Transparent"
                             BorderBrush="Transparent"
+                            Command="{x:Bind SaveAlbumCommand}"
                             CornerRadius="13"
                             ToolTipService.ToolTip="Save">
                             <FontIcon
@@ -192,7 +194,7 @@
                     Opacity="0.3" />
                 <ListView
                     x:Name="AlbumTracks"
-                    MinHeight="500"
+                    MinHeight="400"
                     Margin="{StaticResource SmallTopMargin}"
                     IsItemClickEnabled="True"
                     ItemClick="AlbumTracks_ItemClick"

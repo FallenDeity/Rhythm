@@ -30,6 +30,8 @@ public class DatabaseService : IDatabaseService
 
     private readonly Dictionary<string, RhythmPlaylist> playlists = new();
 
+    private readonly Dictionary<string, RhythmUser> users = new();
+
     public OracleConnection? Connection
     {
         get;
@@ -108,6 +110,7 @@ public class DatabaseService : IDatabaseService
                     Artists = a.ContainsKey(trackId) ? a[trackId] : Array.Empty<RhythmArtist>()
                 };
                 if (!tracks.ContainsKey(trackId)) tracks.Add(trackId, track);
+                await GetAlbum(track.TrackAlbumId);
                 return track;
             }
             return null;
@@ -165,6 +168,7 @@ public class DatabaseService : IDatabaseService
             }
             t.AddRange(presentTracks);
             t.Sort((a, b) => Array.IndexOf(trackIds, a.TrackId).CompareTo(Array.IndexOf(trackIds, b.TrackId)));
+            await GetAlbums(t.Select(track => track.TrackAlbumId).ToArray());
             return t.ToArray();
         }
         catch (Exception e)
@@ -435,6 +439,50 @@ public class DatabaseService : IDatabaseService
         }
     }
 
+    public async Task<RhythmUser[]> GetUsers(string[] userIds)
+    {
+        try
+        {
+            var sql = new StringBuilder();
+            sql.Append("SELECT * FROM users WHERE user_id IN (");
+            var added = false;
+            foreach (var userId in userIds)
+            {
+                if (users.ContainsKey(userId)) continue;
+                sql.Append($"'{userId}',");
+                added = true;
+            }
+            if (!added) return Array.Empty<RhythmUser>();
+            sql.Remove(sql.Length - 1, 1);
+            sql.Append(")");
+            var cmd = new OracleCommand(sql.ToString(), GetOracleConnection());
+            cmd.FetchSize *= 2;
+            var reader = await cmd.ExecuteReaderAsync();
+            var u = new List<RhythmUser>();
+            while (reader.Read())
+            {
+                var user = new RhythmUser
+                {
+                    UserId = reader.GetString(reader.GetOrdinal("USER_ID")),
+                    UserName = reader.GetString(reader.GetOrdinal("USERNAME")),
+                    Password = "",
+                    UserImageURL = reader.IsDBNull(reader.GetOrdinal("USER_IMAGE_URL")) ? defaultCover : reader.GetString(reader.GetOrdinal("USER_IMAGE_URL")),
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("CREATED_AT")),
+                    UpdatedAt = reader.GetDateTime(reader.GetOrdinal("UPDATED_AT"))
+                };
+                if (!users.ContainsKey(user.UserId)) users.Add(user.UserId, user);
+                u.Add(user);
+            }
+            return u.ToArray();
+        }
+        catch (Exception e)
+        {
+
+            System.Diagnostics.Debug.WriteLine("Error getting users" + e.Message);
+            return Array.Empty<RhythmUser>();
+        }
+    }
+
     public async Task<Dictionary<string, RhythmArtist[]>> GetArtistsForTracks(string[] trackIds)
     {
         try
@@ -564,6 +612,119 @@ public class DatabaseService : IDatabaseService
             {
                 tracks[trackId].Likes++;
             }
+            return true;
+        }
+    }
+
+    public async Task<bool> ToggleFollow(string artistId, string userId)
+    {
+        if (App.FollowedArtistIds.Contains(artistId))
+        {
+            var cmd = new OracleCommand("DELETE FROM artist_followers WHERE user_id = :user_id AND artist_id = :artist_id", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.FollowedArtistIds = App.FollowedArtistIds.Where(id => id != artistId).ToArray();
+            if (artists.ContainsKey(artistId))
+            {
+                artists[artistId].FollowerCount--;
+            }
+            return false;
+        }
+        else
+        {
+            var cmd = new OracleCommand("INSERT INTO artist_followers (user_id, artist_id) VALUES (:user_id, :artist_id)", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.FollowedArtistIds = App.FollowedArtistIds.Append(artistId).ToArray();
+            if (artists.ContainsKey(artistId))
+            {
+                artists[artistId].FollowerCount++;
+            }
+            return true;
+        }
+    }
+
+    public async Task<bool> ToggleFollowPlaylist(string playlistId, string userId)
+    {
+
+        if (App.FollowedPlaylistIds.Contains(playlistId))
+        {
+            var cmd = new OracleCommand("DELETE FROM playlist_followers WHERE user_id = :user_id AND playlist_id = :playlist_id", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.FollowedPlaylistIds = App.FollowedPlaylistIds.Where(id => id != playlistId).ToArray();
+            if (playlists.ContainsKey(playlistId))
+            {
+                playlists[playlistId].FollowerCount--;
+            }
+            return false;
+        }
+        else
+        {
+            var cmd = new OracleCommand("INSERT INTO playlist_followers (user_id, playlist_id) VALUES (:user_id, :playlist_id)", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.FollowedPlaylistIds = App.FollowedPlaylistIds.Append(playlistId).ToArray();
+            if (playlists.ContainsKey(playlistId))
+            {
+                playlists[playlistId].FollowerCount++;
+            }
+            return true;
+        }
+    }
+
+    public async Task<bool> ToggleLikePlaylist(string playlistId, string userId)
+    {
+        if (App.LikedPlaylistIds.Contains(playlistId))
+        {
+            var cmd = new OracleCommand("DELETE FROM playlist_likes WHERE user_id = :user_id AND playlist_id = :playlist_id", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.LikedPlaylistIds = App.LikedPlaylistIds.Where(id => id != playlistId).ToArray();
+            if (playlists.ContainsKey(playlistId))
+            {
+                playlists[playlistId].LikesCount--;
+            }
+            return false;
+        }
+        else
+        {
+            var cmd = new OracleCommand("INSERT INTO playlist_likes (user_id, playlist_id) VALUES (:user_id, :playlist_id)", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+            await cmd.ExecuteNonQueryAsync();
+            App.LikedPlaylistIds = App.LikedPlaylistIds.Append(playlistId).ToArray();
+            if (playlists.ContainsKey(playlistId))
+            {
+                playlists[playlistId].LikesCount++;
+            }
+            return true;
+        }
+    }
+
+    public async Task<bool> ToggleAlbumSave(string albumId, string userId)
+    {
+        if (App.SavedAlbumIds.Contains(albumId))
+        {
+            var cmd = new OracleCommand("DELETE FROM user_saved_albums WHERE user_id = :user_id AND album_id = :album_id", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
+            await cmd.ExecuteNonQueryAsync();
+            App.SavedAlbumIds = App.SavedAlbumIds.Where(id => id != albumId).ToArray();
+            return false;
+        }
+        else
+        {
+            var cmd = new OracleCommand("INSERT INTO user_saved_albums (user_id, album_id) VALUES (:user_id, :album_id)", GetOracleConnection());
+            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
+            cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
+            await cmd.ExecuteNonQueryAsync();
+            App.SavedAlbumIds = App.SavedAlbumIds.Append(albumId).ToArray();
             return true;
         }
     }

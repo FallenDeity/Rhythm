@@ -10,6 +10,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
+    Loaded="Page_Loaded"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -126,6 +127,7 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             BorderBrush="Transparent"
+                            Command="{x:Bind FollowCommand}"
                             CornerRadius="6"
                             ToolTipService.ToolTip="Follow">
                             <StackPanel Orientation="Horizontal">
@@ -135,7 +137,10 @@
                                     FontSize="16"
                                     Foreground="{ThemeResource SystemBaseHighColor}"
                                     Glyph="&#xE8FA;" />
-                                <TextBlock Margin="6,0,6,0" Text="Follow" />
+                                <TextBlock
+                                    x:Name="FollowButtonText"
+                                    Margin="6,0,6,0"
+                                    Text="Follow" />
                             </StackPanel>
                         </Button>
                     </Grid>

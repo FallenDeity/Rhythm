@@ -124,12 +124,17 @@ public partial class AlbumDetailViewModel : ObservableRecipient, INavigationAwar
 
     public async Task ToggleLike(RhythmTrack track)
     {
-        var check = await App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!);
+        var check = await Task.Run(() => App.GetService<IDatabaseService>().ToggleLike(track.TrackId, App.currentUser?.UserId!));
         var idx = Tracks.IndexOf(Tracks.First(t => t.RhythmTrack.TrackId == track.TrackId));
         if (idx != -1)
         {
             Tracks[idx].RhythmTrack.Liked = check;
         }
+    }
+
+    public async Task ToggleSave(RhythmAlbum album)
+    {
+        await Task.Run(() => App.GetService<IDatabaseService>().ToggleAlbumSave(album.AlbumId, App.currentUser?.UserId!));
     }
 
     public void NavigateToArtist(string artistId)

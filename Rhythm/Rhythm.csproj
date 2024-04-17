@@ -35,6 +35,7 @@
     <PackageReference Include="CommunityToolkit.Labs.WinUI.Shimmer" Version="0.1.240304-pull-531.1658" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.1.240304-pull-355.965" />
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.TokenizingTextBox" Version="8.1.240412-pull-398.1022" />
     <PackageReference Include="CommunityToolkit.WinUI.Media" Version="8.1.240320-pull-370.984" />
     <PackageReference Include="CommunityToolkit.WinUI.Triggers" Version="8.1.240304-pull-355.965" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Animations" Version="7.1.3-build.3.g7719d852da" />

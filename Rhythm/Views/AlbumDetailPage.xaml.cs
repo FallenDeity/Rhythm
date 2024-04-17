@@ -29,7 +29,7 @@ public sealed partial class AlbumDetailPage : Page
         get;
     }
 
-    public ObservableCollection<RhythmTrackItem> SearchedTracks = new ObservableCollection<RhythmTrackItem>();
+    public ObservableCollection<RhythmTrackItem> SearchedTracks = new();
 
     public AlbumDetailPage()
     {
@@ -153,8 +153,39 @@ public sealed partial class AlbumDetailPage : Page
         await page.RhythmPlayer.PlayAlbum(ViewModel.Item?.AlbumId!);
     }
 
+    [RelayCommand]
+    public async Task SaveAlbum()
+    {
+        await ViewModel.ToggleSave(ViewModel.Item!);
+        UpdateButtons();
+    }
+
+    private void UpdateButtons()
+    {
+        var tooltip = new ToolTip();
+        var text = App.SavedAlbumIds.Contains(ViewModel.Item!.AlbumId!) ? "Discard" : "Save";
+        tooltip.Content = text;
+        ToolTipService.SetToolTip(SaveButton, tooltip);
+        var accent = Application.Current.Resources["AccentAAFillColorDefaultBrush"] as SolidColorBrush;
+        var normal = Application.Current.Resources["SystemControlForegroundBaseHighBrush"] as SolidColorBrush;
+        SaveButton.Content = new FontIcon
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 14,
+            Foreground = App.SavedAlbumIds.Contains(ViewModel.Item!.AlbumId!) ? accent : normal,
+            Glyph = "\uE74E"
+        };
+    }
+
     private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
     {
         controlsSearchBox.Focus(FocusState.Programmatic);
+    }
+
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        while (ViewModel.Item is null) await Task.Delay(10);
+        if (ViewModel.Item is not null) UpdateButtons();
     }
 }

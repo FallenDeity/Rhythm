@@ -6,7 +6,6 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Controls;
-using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -120,10 +119,32 @@ public sealed partial class ArtistDetailPage : Page
         page.RhythmPlayer.PlayTracks(tracks.ToArray());
     }
 
+    [RelayCommand]
+    public async Task Follow()
+    {
+        await ViewModel.ToggleFollow(ViewModel.Item!);
+        FollowButtonText.Text = App.FollowedArtistIds.Contains(ViewModel.Item!.ArtistId) ? "Unfollow" : "Follow";
+        var tooltip = new ToolTip();
+        tooltip.Content = App.FollowedArtistIds.Contains(ViewModel.Item!.ArtistId) ? "Unfollow" : "Follow";
+        ToolTipService.SetToolTip(FollowButton, tooltip);
+    }
+
     private void Grid_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {
         var grid = (Grid)sender;
         var themeResource = App.Current.Resources["CardBackgroundFillColorDefaultBrush"] as Microsoft.UI.Xaml.Media.SolidColorBrush;
         grid.Background = themeResource;
+    }
+
+    private async void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        while (ViewModel.Item is null) await Task.Delay(10);
+        var artistIds = App.FollowedArtistIds;
+        if (ViewModel.Item is not null && artistIds.Contains(ViewModel.Item.ArtistId))
+        {
+            FollowButtonText.Text = "Unfollow";
+            var tooltip = new ToolTip() { Content = "Unfollow" };
+            ToolTipService.SetToolTip(FollowButton, tooltip);
+        }
     }
 }

@@ -1,0 +1,435 @@
+<Page
+    x:Class="Rhythm.Views.SearchPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:helpers="using:Rhythm.Helpers"
+    xmlns:local="using:Rhythm.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Rhythm.Core.Models"
+    xmlns:ui="using:CommunityToolkit.WinUI"
+    xmlns:userControls="using:Rhythm.Controls"
+    x:Name="SearchDetails"
+    Loaded="SearchDetails_Loaded"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <helpers:BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Page.Resources>
+    <Grid x:Name="ContentArea">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical">
+            <controls:TokenizingTextBox
+                x:Name="TokenBox"
+                MaxWidth="620"
+                HorizontalAlignment="Center"
+                DataContext="local:SearchViewModel"
+                ItemsSource="{x:Bind ViewModel.SelectedTokens, Mode=TwoWay}"
+                MaximumTokens="1"
+                PlaceholderText="Add Filters"
+                QueryIcon="{ui:FontIconSource Glyph=&#xE721;,
+                                              FontSize=12}"
+                SuggestedItemsSource="{x:Bind ViewModel.Tokens, Mode=OneWay}"
+                TextChanged="TokenBox_TextChanged"
+                TextMemberPath="Text"
+                TokenDelimiter=","
+                TokenItemAdded="TokenBox_TokenItemAdded"
+                TokenItemAdding="TokenItemCreating"
+                TokenItemRemoved="TokenBox_TokenItemRemoved">
+                <controls:TokenizingTextBox.SuggestedItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="16">
+                                <SymbolIcon Symbol="{Binding Icon}" />
+                            </Viewbox>
+                            <TextBlock Padding="8,0,0,0" Text="{Binding Text}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </controls:TokenizingTextBox.SuggestedItemTemplate>
+                <controls:TokenizingTextBox.TokenItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Viewbox Width="16">
+                                <SymbolIcon Symbol="{Binding Icon}" />
+                            </Viewbox>
+                            <TextBlock Padding="8,0,0,0" Text="{Binding Text}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </controls:TokenizingTextBox.TokenItemTemplate>
+            </controls:TokenizingTextBox>
+        </StackPanel>
+        <ListView
+            x:Name="SearchTracks"
+            Grid.Row="1"
+            MinHeight="500"
+            Margin="0,18,0,0"
+            Padding="0,0,0,108"
+            DataFetchSize="3"
+            IncrementalLoadingThreshold="3"
+            IncrementalLoadingTrigger="Edge"
+            IsItemClickEnabled="True"
+            ItemClick="SearchTracks_ItemClick"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="userControls:RhythmTrackItem">
+                    <Grid
+                        Margin="4,2,4,2"
+                        Padding="12,12,6,12"
+                        Background="{x:Bind GetBackground(RhythmTrack.TrackId, RhythmMediaPlayer.TrackId), Mode=OneWay}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="1"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="6"
+                            ToolTipService.ToolTip="{x:Bind RhythmTrack.Stats}">
+                            <Image
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind RhythmTrack.TrackName}"
+                                Source="{x:Bind RhythmTrack.TrackImageURL}"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{StaticResource SmallLeftRightMargin}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                MaxLines="1"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind RhythmTrack.TrackName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="{ThemeResource XXSmallTopMargin}"
+                                FontSize="12"
+                                Opacity="0.7"
+                                Text="{x:Bind RhythmTrack.ArtistNames}" />
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="3"
+                            Margin="{StaticResource SmallRightMargin}"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <Button
+                                Width="24"
+                                Height="24"
+                                Margin="{StaticResource SmallLeftMargin}"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderBrush="Transparent">
+                                <FontIcon
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                                    FontSize="14"
+                                    Glyph="&#xE10C;" />
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Click="AddToQueueMenuFlyoutItem_Click" Text="Add to Queue" />
+                                        <MenuFlyoutItem Text="Add to Playlist" />
+                                        <MenuFlyoutItem Text="Add to Library" />
+                                        <MenuFlyoutSeparator />
+                                        <MenuFlyoutItem Click="AlbumMenuFlyoutItem_Click" Text="Go to Album" />
+                                        <MenuFlyoutItem Click="ArtistMenuFlyoutItem_Click" Text="Go to Artist" />
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView
+            x:Name="SearchAlbums"
+            Grid.Row="1"
+            MinHeight="500"
+            Margin="0,18,0,0"
+            Padding="0,0,0,108"
+            DataFetchSize="3"
+            IncrementalLoadingThreshold="3"
+            IncrementalLoadingTrigger="Edge"
+            IsItemClickEnabled="True"
+            ItemClick="SearchAlbums_ItemClick"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:RhythmAlbum">
+                    <Grid Margin="4,2,4,2" Padding="12,12,6,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="1"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="6"
+                            ToolTipService.ToolTip="{x:Bind}">
+                            <Image
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind AlbumName}"
+                                Source="{x:Bind AlbumImageURL}"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{StaticResource SmallLeftRightMargin}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                MaxLines="1"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind AlbumName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="{ThemeResource XXSmallTopMargin}"
+                                FontSize="12"
+                                Opacity="0.7"
+                                Text="{x:Bind ArtistNames}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView
+            x:Name="SearchArtists"
+            Grid.Row="1"
+            MinHeight="500"
+            Margin="0,18,0,0"
+            Padding="0,0,0,108"
+            DataFetchSize="3"
+            IncrementalLoadingThreshold="3"
+            IncrementalLoadingTrigger="Edge"
+            IsItemClickEnabled="True"
+            ItemClick="SearchArtists_ItemClick"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:RhythmArtist">
+                    <Grid Margin="4,2,4,2" Padding="12,12,6,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="1"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="24"
+                            ToolTipService.ToolTip="{x:Bind}">
+                            <Image
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind ArtistName}"
+                                Source="{x:Bind ArtistImageURL}"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{StaticResource SmallLeftRightMargin}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                MaxLines="1"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind ArtistName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="{ThemeResource XXSmallTopMargin}"
+                                FontSize="12"
+                                Opacity="0.7"
+                                Text="{x:Bind ArtistBio}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView
+            x:Name="SearchPlaylists"
+            Grid.Row="1"
+            MinHeight="500"
+            Margin="0,18,0,0"
+            Padding="0,0,0,108"
+            DataFetchSize="3"
+            IncrementalLoadingThreshold="3"
+            IncrementalLoadingTrigger="Edge"
+            IsItemClickEnabled="True"
+            ItemClick="SearchPlaylists_ItemClick"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:RhythmPlaylist">
+                    <Grid Margin="4,2,4,2" Padding="12,12,6,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="1"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="6"
+                            ToolTipService.ToolTip="{x:Bind}">
+                            <Image
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind PlaylistName}"
+                                Source="{x:Bind PlaylistImageURL}"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{StaticResource SmallLeftRightMargin}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                MaxLines="1"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind PlaylistName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="{ThemeResource XXSmallTopMargin}"
+                                FontSize="12"
+                                Opacity="0.7"
+                                Text="{x:Bind PlaylistDescription}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView
+            x:Name="SearchUsers"
+            Grid.Row="1"
+            MinHeight="500"
+            Margin="0,18,0,0"
+            Padding="0,0,0,108"
+            DataFetchSize="3"
+            IncrementalLoadingThreshold="3"
+            IncrementalLoadingTrigger="Edge"
+            IsItemClickEnabled="True"
+            ItemClick="SearchUsers_ItemClick"
+            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+            ScrollViewer.HorizontalScrollMode="Disabled"
+            SelectionMode="None">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:RhythmUser">
+                    <Grid Margin="4,2,4,2" Padding="12,12,6,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid
+                            Grid.Column="1"
+                            Width="48"
+                            Height="48"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="24"
+                            ToolTipService.ToolTip="{x:Bind}">
+                            <Image
+                                Width="48"
+                                Height="48"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                AutomationProperties.Name="{x:Bind UserName}"
+                                Source="{x:Bind UserImageURL}"
+                                Stretch="UniformToFill" />
+                        </Grid>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{StaticResource SmallLeftRightMargin}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center">
+                            <TextBlock
+                                FontSize="14"
+                                MaxLines="1"
+                                Style="{ThemeResource SubtitleTextBlockStyle}"
+                                Text="{x:Bind UserName}"
+                                TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                Margin="{ThemeResource XXSmallTopMargin}"
+                                FontSize="12"
+                                Opacity="0.7"
+                                Text="{x:Bind GetAge}" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>
