@@ -25,7 +25,6 @@ public class PageService : IPageService
         Configure<PlaylistDetailViewModel, PlaylistDetailPage>();
         Configure<ArtistDetailViewModel, ArtistDetailPage>();
         Configure<TrackDetailViewModel, TrackDetailPage>();
-
         Configure<SearchViewModel, SearchPage>();
     }
 
