@@ -205,5 +205,5 @@ public partial class ArtistDetailViewModel : ObservableRecipient, INavigationAwa
 
     public string JoinedOn => Item != null ? Relativize(Item.CreatedAt) : "Unknown";
 
-    public string InfoText => $"{Item?.ArtistBio} \n\n{Item?.AlbumCount} Albums � {Item?.TrackCount} Tracks � {Item?.FollowerCount} Followers\nJoined {JoinedOn}";
+    public string InfoText => $"{Item?.ArtistBio} \n\n{Item?.AlbumCount} Albums • {Item?.TrackCount} Tracks • {Item?.FollowerCount} Followers\nJoined {JoinedOn}";
 }

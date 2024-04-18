@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI.Animations;
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
@@ -69,6 +71,16 @@ public sealed partial class TrackDetailPage : Page
         //var page = (ShellPage)App.MainWindow.Content;
     }
 
+    private void TrackAlbum_Click(object sender, RoutedEventArgs e)
+    {
+
+        var album = (RhythmAlbum)e.OriginalSource;
+        if (album != null)
+        {
+            ViewModel.NavigateToAlbum(album.AlbumId);
+        }
+    }
+
     private void AlbumMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
@@ -119,8 +131,15 @@ public sealed partial class TrackDetailPage : Page
     public void Play()
     {
         var page = (ShellPage)App.MainWindow.Content;
-        var track = ViewModel.Item.TrackId;
+        var track = ViewModel.Item!.TrackId;
         page.RhythmPlayer.PlayTrack(track);
+    }
+
+    [RelayCommand]
+    public void GoToAlbum()
+    {
+        var albumId = ViewModel.Album!.AlbumId;
+        ViewModel.NavigateToAlbum(albumId);
     }
 
     private void Grid_PointerExited(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
@@ -128,5 +147,48 @@ public sealed partial class TrackDetailPage : Page
         var grid = (Grid)sender;
         var themeResource = App.Current.Resources["CardBackgroundFillColorDefaultBrush"] as Microsoft.UI.Xaml.Media.SolidColorBrush;
         grid.Background = themeResource;
+    }
+
+    private void Page_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var width = e.NewSize.Width;
+        var owidth = e.PreviousSize.Width;
+        if (width > 800 && owidth < 800)
+        {
+            TrackInfo.Children.Clear();
+            TrackDetails.SetValue(DockPanel.DockProperty, Dock.Left);
+            TrackInfo.Children.Add(TrackDetails);
+            Lyrics.SetValue(DockPanel.DockProperty, Dock.Right);
+            TrackInfo.Children.Add(Lyrics);
+        }
+        if (owidth > 800 && width < 800)
+        {
+            TrackInfo.Children.Clear();
+            TrackDetails.SetValue(DockPanel.DockProperty, Dock.Bottom);
+            TrackInfo.Children.Add(TrackDetails);
+            Lyrics.SetValue(DockPanel.DockProperty, Dock.Top);
+            TrackInfo.Children.Add(Lyrics);
+        }
+    }
+
+    private void Page_Loaded(object sender, RoutedEventArgs e)
+    {
+        var width = this.Width;
+        if (width > 800)
+        {
+            TrackInfo.Children.Clear();
+            TrackDetails.SetValue(DockPanel.DockProperty, Dock.Left);
+            TrackInfo.Children.Add(TrackDetails);
+            Lyrics.SetValue(DockPanel.DockProperty, Dock.Right);
+            TrackInfo.Children.Add(Lyrics);
+        }
+        if (width < 800)
+        {
+            TrackInfo.Children.Clear();
+            TrackDetails.SetValue(DockPanel.DockProperty, Dock.Bottom);
+            TrackInfo.Children.Add(TrackDetails);
+            Lyrics.SetValue(DockPanel.DockProperty, Dock.Top);
+            TrackInfo.Children.Add(Lyrics);
+        }
     }
 }
