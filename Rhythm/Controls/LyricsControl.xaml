@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Loaded="UserControl_Loaded"
     mc:Ignorable="d">
-    <Grid>
+    <Grid HorizontalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -16,10 +16,10 @@
         <TextBlock
             x:Name="Title"
             Grid.Row="0"
-            Margin="0,0,0,10"
+            Margin="0,4,0,10"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            FontSize="21"
+            FontSize="28"
             Style="{StaticResource TitleTextBlockStyle}"
             Text="Lyrics" />
         <ScrollViewer
@@ -34,8 +34,8 @@
             <TextBlock
                 x:Name="Lyrics"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                FontSize="13"
+                VerticalAlignment="Top"
+                FontSize="14"
                 Style="{StaticResource BodyTextBlockStyle}"
                 TextAlignment="Center"
                 TextWrapping="Wrap" />
