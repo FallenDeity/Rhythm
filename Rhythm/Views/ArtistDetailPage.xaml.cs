@@ -81,8 +81,9 @@ public sealed partial class ArtistDetailPage : Page
     private async void ToggleLikeButton_Click(object sender, RoutedEventArgs e)
     {
         var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
-        await ViewModel.ToggleLike(track.RhythmTrack);
         var button = (Button)sender;
+        button.IsEnabled = false;
+        await ViewModel.ToggleLike(track.RhythmTrack);
         var glyph = track.RhythmTrack.TrackLiked();
         var accent = Application.Current.Resources["AccentAAFillColorDefaultBrush"] as SolidColorBrush;
         var normal = Application.Current.Resources["SystemControlForegroundBaseHighBrush"] as SolidColorBrush;
@@ -95,6 +96,7 @@ public sealed partial class ArtistDetailPage : Page
             Foreground = (bool)track.RhythmTrack.Liked! ? accent : normal,
             Glyph = glyph
         };
+        button.IsEnabled = true;
     }
     private void Grid_PointerEntered(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
     {

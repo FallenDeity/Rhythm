@@ -1,5 +1,6 @@
 using System.Text;
 using Oracle.ManagedDataAccess.Client;
+using Oracle.ManagedDataAccess.Types;
 using Rhythm.Contracts.Services;
 using Rhythm.Core.Models;
 
@@ -588,32 +589,20 @@ public class DatabaseService : IDatabaseService
 
     public async Task<bool> ToggleLike(string trackId, string userId)
     {
-        if (App.LikedSongIds.Contains(trackId))
+        var cmd = new OracleCommand("toggle_track_like", GetOracleConnection());
+        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = userId;
+        cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+        cmd.Parameters.Add("return", OracleDbType.Boolean).Direction = System.Data.ParameterDirection.ReturnValue;
+        cmd.BindByName = true;
+        await cmd.ExecuteNonQueryAsync();
+        var result = ((OracleBoolean)cmd.Parameters["return"].Value).Value;
+        App.LikedSongIds = result ? App.LikedSongIds.Append(trackId).ToArray() : App.LikedSongIds.Where(id => id != trackId).ToArray();
+        if (tracks.ContainsKey(trackId))
         {
-            var cmd = new OracleCommand("DELETE FROM track_likes WHERE user_id = :user_id AND track_id = :track_id", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
-            await cmd.ExecuteNonQueryAsync();
-            App.LikedSongIds = App.LikedSongIds.Where(id => id != trackId).ToArray();
-            if (tracks.ContainsKey(trackId))
-            {
-                tracks[trackId].Likes--;
-            }
-            return false;
+            tracks[trackId].Likes += result ? 1 : -1;
         }
-        else
-        {
-            var cmd = new OracleCommand("INSERT INTO track_likes (user_id, track_id) VALUES (:user_id, :track_id)", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
-            await cmd.ExecuteNonQueryAsync();
-            App.LikedSongIds = App.LikedSongIds.Append(trackId).ToArray();
-            if (tracks.ContainsKey(trackId))
-            {
-                tracks[trackId].Likes++;
-            }
-            return true;
-        }
+        return result;
     }
 
     public async Task<bool> ToggleFollow(string artistId, string userId)
