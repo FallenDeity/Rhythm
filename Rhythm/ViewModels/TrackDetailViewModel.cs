@@ -19,6 +19,7 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
     [ObservableProperty]
     private RhythmTrack? item;
 
+    [ObservableProperty]
     public RhythmAlbum? album;
 
     [ObservableProperty]
@@ -32,9 +33,6 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
 
     [ObservableProperty]
     private bool _artistsLoaded = false;
-
-    [ObservableProperty]
-    private bool _albumsLoaded = false;
 
     private DispatcherQueue? dispatcherQueue;
     public RhythmMediaPlayer player
@@ -104,7 +102,7 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
         return artistData is null ? Array.Empty<RhythmArtist>() : artistData;
     }
 
-    public async Task<RhythmAlbum> GetTrackAlbum()
+    public async Task<RhythmAlbum?> GetTrackAlbum()
     {
         if (Item is null) return null;
 
@@ -120,8 +118,8 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
             albumID = reader.GetString(0);
 
         }
-        var albumData = await App.GetService<IDatabaseService>().GetAlbum(albumID);
-        AlbumsLoaded = true;
+        var albumData = await Task.Run(() => App.GetService<IDatabaseService>().GetAlbum(albumID));
+        Album = albumData;
         return albumData;
     }
 
@@ -130,7 +128,6 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
         if (parameter is string trackID)
         {
             IsDataLoading = true;
-            InfoString = InfoText;
             var data = await Task.Run(() => App.GetService<IDatabaseService>().GetTrack(trackID));
             Item = data;
 
@@ -143,8 +140,7 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
                 _ = await Task.Run(() => GetTrackArtists());
             }
 
-            var albumData = await Task.Run(() => GetTrackAlbum());
-            album = albumData;
+            _ = GetTrackAlbum();
             InfoString = InfoText;
             IsDataLoading = false;
         }
@@ -179,5 +175,5 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
 
     public string CreatedAt => Item != null ? Relativize(Item.ReleaseDate) : "Unknown";
 
-    public string InfoText => $"{Item?.ArtistNames}";
+    public string InfoText => $"{Item?.ArtistNames}\n{Item?.Likes} Likes • {Item?.Streams} Streams\nReleased {CreatedAt}";
 }

@@ -10,6 +10,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Rhythm.Core.Models"
     xmlns:userControls="using:Rhythm.Controls"
+    Loaded="Page_Loaded"
+    SizeChanged="Page_SizeChanged"
     mc:Ignorable="d">
     <Page.Resources>
         <helpers:LikedTrackConverter x:Key="LikedTrack" />
@@ -118,19 +120,15 @@
                         </Button>
                     </Grid>
                 </StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                <controls:DockPanel x:Name="TrackInfo" HorizontalAlignment="Stretch">
                     <StackPanel
-                        Grid.Column="0"
+                        x:Name="TrackDetails"
+                        MaxWidth="640"
                         Margin="{StaticResource XSmallLeftTopRightBottomMargin}"
+                        HorizontalAlignment="Stretch"
+                        controls:DockPanel.Dock="Bottom"
                         Orientation="Vertical">
-                        <StackPanel
-                            Grid.Row="0"
-                            HorizontalAlignment="Stretch"
-                            Orientation="Vertical">
+                        <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
                             <TextBlock
                                 Margin="{StaticResource SmallLeftMargin}"
                                 HorizontalAlignment="Stretch"
@@ -140,7 +138,6 @@
                                 Text="Track Artists" />
                             <ListView
                                 x:Name="TrackArtists"
-                                MinHeight="400"
                                 Margin="{StaticResource SmallTopMargin}"
                                 IsItemClickEnabled="True"
                                 ItemClick="TrackArtists_ItemClick"
@@ -183,7 +180,7 @@
                                                 Margin="20,0,0,0"
                                                 HorizontalAlignment="Center"
                                                 VerticalAlignment="Center"
-                                                FontSize="20"
+                                                FontSize="16"
                                                 MaxLines="1"
                                                 Style="{ThemeResource SubtitleTextBlockStyle}"
                                                 Text="{x:Bind ArtistName}"
@@ -192,77 +189,67 @@
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
-
                         </StackPanel>
-                        <StackPanel
-                            Grid.Row="0"
-                            HorizontalAlignment="Stretch"
-                            Orientation="Vertical">
+                        <StackPanel HorizontalAlignment="Stretch" Orientation="Vertical">
                             <TextBlock
-                                Margin="{StaticResource SmallLeftMargin}"
+                                Margin="12,6,0,0"
                                 HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
                                 FontSize="28"
                                 Opacity="0.9"
                                 Text="Track Album" />
-                            <ListView
-                                x:Name="TrackAlbum"
-                                MinHeight="400"
-                                Margin="{StaticResource SmallTopMargin}"
-                                IsItemClickEnabled="True"
-                                ItemClick="TrackAlbum_ItemClick"
-                                ItemsSource="{x:Bind ViewModel.album, Mode=OneWay}"
-                                ScrollViewer.VerticalScrollMode="Disabled"
-                                SelectionMode="None"
-                                Visibility="{x:Bind ViewModel.AlbumsLoaded, Converter={StaticResource BoolToVis}, Mode=OneWay, ConverterParameter=Invert}">
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="Padding" Value="0" />
-                                        <Setter Property="Margin" Value="0" />
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                                <ListView.ItemTemplate>
-                                    <DataTemplate x:DataType="models:RhythmAlbum">
-                                        <Grid Margin="4,2,4,2" Padding="12">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <Grid
-                                                Grid.Column="0"
-                                                Width="60"
-                                                Height="60"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center"
-                                                CornerRadius="6">
-                                                <Image
-                                                    Width="60"
-                                                    Height="60"
-                                                    HorizontalAlignment="Center"
-                                                    VerticalAlignment="Center"
-                                                    Source="{x:Bind AlbumImageURL, Mode=OneWay}"
-                                                    Stretch="UniformToFill" />
-                                            </Grid>
-                                            <TextBlock
-                                                Grid.Column="1"
-                                                Margin="20,0,0,0"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                FontSize="20"
-                                                MaxLines="1"
-                                                Style="{ThemeResource SubtitleTextBlockStyle}"
-                                                Text="{x:Bind AlbumName, Mode=OneWay}"
-                                                TextTrimming="CharacterEllipsis" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-
+                            <Button
+                                MinWidth="420"
+                                MaxWidth="640"
+                                Margin="4,12,4,2"
+                                Padding="10"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center"
+                                BorderBrush="Transparent"
+                                Command="{x:Bind GoToAlbumCommand}">
+                                <Grid MinWidth="420" MaxWidth="640">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid
+                                        x:Name="albumHero"
+                                        Grid.Column="0"
+                                        Width="60"
+                                        Height="60"
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="6">
+                                        <Image
+                                            x:Name="AlbumImage"
+                                            Grid.Column="0"
+                                            Width="60"
+                                            Height="60"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Source="{x:Bind ViewModel.Album.AlbumImageURL, Mode=OneWay}"
+                                            Stretch="UniformToFill" />
+                                    </Grid>
+                                    <TextBlock
+                                        x:Name="TrackAlbum"
+                                        Grid.Column="1"
+                                        Margin="20,0,0,0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        MaxLines="1"
+                                        Style="{ThemeResource SubtitleTextBlockStyle}"
+                                        Text="{x:Bind ViewModel.Album.AlbumName, Mode=OneWay}"
+                                        TextTrimming="CharacterEllipsis" />
+                                </Grid>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
-                    <userControls:LyricsControl Grid.Column="1" LyricsText="{x:Bind ViewModel.Item.Lyrics}" />
-                </Grid>
+                    <userControls:LyricsControl
+                        x:Name="Lyrics"
+                        MaxWidth="480"
+                        controls:DockPanel.Dock="Top"
+                        LyricsText="{x:Bind ViewModel.Item.Lyrics}" />
+                </controls:DockPanel>
             </StackPanel>
         </Grid>
         <VisualStateManager.VisualStateGroups>
@@ -304,5 +291,4 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
     </ScrollViewer>
-
 </Page>
