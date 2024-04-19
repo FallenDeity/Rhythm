@@ -144,6 +144,8 @@ public partial class App : Application
             services.AddTransient<TrackDetailPage>();
             services.AddTransient<SearchViewModel>();
             services.AddTransient<SearchPage>();
+            services.AddTransient<LibraryViewModel>();
+            services.AddTransient<LibraryPage>();
 
 
             // Configuration

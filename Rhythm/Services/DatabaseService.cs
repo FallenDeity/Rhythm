@@ -607,115 +607,70 @@ public class DatabaseService : IDatabaseService
 
     public async Task<bool> ToggleFollow(string artistId, string userId)
     {
-        if (App.FollowedArtistIds.Contains(artistId))
+        var cmd = new OracleCommand("toggle_artist_follow", GetOracleConnection());
+        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = userId;
+        cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
+        cmd.Parameters.Add("return", OracleDbType.Boolean).Direction = System.Data.ParameterDirection.ReturnValue;
+        cmd.BindByName = true;
+        await cmd.ExecuteNonQueryAsync();
+        var result = ((OracleBoolean)cmd.Parameters["return"].Value).Value;
+        App.FollowedArtistIds = result ? App.FollowedArtistIds.Append(artistId).ToArray() : App.FollowedArtistIds.Where(id => id != artistId).ToArray();
+        if (artists.ContainsKey(artistId))
         {
-            var cmd = new OracleCommand("DELETE FROM artist_followers WHERE user_id = :user_id AND artist_id = :artist_id", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.FollowedArtistIds = App.FollowedArtistIds.Where(id => id != artistId).ToArray();
-            if (artists.ContainsKey(artistId))
-            {
-                artists[artistId].FollowerCount--;
-            }
-            return false;
+            artists[artistId].FollowerCount += result ? 1 : -1;
         }
-        else
-        {
-            var cmd = new OracleCommand("INSERT INTO artist_followers (user_id, artist_id) VALUES (:user_id, :artist_id)", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("artist_id", OracleDbType.Varchar2).Value = artistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.FollowedArtistIds = App.FollowedArtistIds.Append(artistId).ToArray();
-            if (artists.ContainsKey(artistId))
-            {
-                artists[artistId].FollowerCount++;
-            }
-            return true;
-        }
+        return result;
     }
 
     public async Task<bool> ToggleFollowPlaylist(string playlistId, string userId)
     {
-
-        if (App.FollowedPlaylistIds.Contains(playlistId))
+        var cmd = new OracleCommand("toggle_playlist_follow", GetOracleConnection());
+        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = userId;
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+        cmd.Parameters.Add("return", OracleDbType.Boolean).Direction = System.Data.ParameterDirection.ReturnValue;
+        cmd.BindByName = true;
+        await cmd.ExecuteNonQueryAsync();
+        var result = ((OracleBoolean)cmd.Parameters["return"].Value).Value;
+        App.FollowedPlaylistIds = result ? App.FollowedPlaylistIds.Append(playlistId).ToArray() : App.FollowedPlaylistIds.Where(id => id != playlistId).ToArray();
+        if (playlists.ContainsKey(playlistId))
         {
-            var cmd = new OracleCommand("DELETE FROM playlist_followers WHERE user_id = :user_id AND playlist_id = :playlist_id", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.FollowedPlaylistIds = App.FollowedPlaylistIds.Where(id => id != playlistId).ToArray();
-            if (playlists.ContainsKey(playlistId))
-            {
-                playlists[playlistId].FollowerCount--;
-            }
-            return false;
+            playlists[playlistId].FollowerCount += result ? 1 : -1;
         }
-        else
-        {
-            var cmd = new OracleCommand("INSERT INTO playlist_followers (user_id, playlist_id) VALUES (:user_id, :playlist_id)", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.FollowedPlaylistIds = App.FollowedPlaylistIds.Append(playlistId).ToArray();
-            if (playlists.ContainsKey(playlistId))
-            {
-                playlists[playlistId].FollowerCount++;
-            }
-            return true;
-        }
+        return result;
     }
 
     public async Task<bool> ToggleLikePlaylist(string playlistId, string userId)
     {
-        if (App.LikedPlaylistIds.Contains(playlistId))
+        var cmd = new OracleCommand("toggle_playlist_like", GetOracleConnection());
+        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = userId;
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+        cmd.Parameters.Add("return", OracleDbType.Boolean).Direction = System.Data.ParameterDirection.ReturnValue;
+        cmd.BindByName = true;
+        await cmd.ExecuteNonQueryAsync();
+        var result = ((OracleBoolean)cmd.Parameters["return"].Value).Value;
+        App.LikedPlaylistIds = result ? App.LikedPlaylistIds.Append(playlistId).ToArray() : App.LikedPlaylistIds.Where(id => id != playlistId).ToArray();
+        if (playlists.ContainsKey(playlistId))
         {
-            var cmd = new OracleCommand("DELETE FROM playlist_likes WHERE user_id = :user_id AND playlist_id = :playlist_id", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.LikedPlaylistIds = App.LikedPlaylistIds.Where(id => id != playlistId).ToArray();
-            if (playlists.ContainsKey(playlistId))
-            {
-                playlists[playlistId].LikesCount--;
-            }
-            return false;
+            playlists[playlistId].LikesCount += result ? 1 : -1;
         }
-        else
-        {
-            var cmd = new OracleCommand("INSERT INTO playlist_likes (user_id, playlist_id) VALUES (:user_id, :playlist_id)", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
-            await cmd.ExecuteNonQueryAsync();
-            App.LikedPlaylistIds = App.LikedPlaylistIds.Append(playlistId).ToArray();
-            if (playlists.ContainsKey(playlistId))
-            {
-                playlists[playlistId].LikesCount++;
-            }
-            return true;
-        }
+        return result;
     }
 
     public async Task<bool> ToggleAlbumSave(string albumId, string userId)
     {
-        if (App.SavedAlbumIds.Contains(albumId))
-        {
-            var cmd = new OracleCommand("DELETE FROM user_saved_albums WHERE user_id = :user_id AND album_id = :album_id", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
-            await cmd.ExecuteNonQueryAsync();
-            App.SavedAlbumIds = App.SavedAlbumIds.Where(id => id != albumId).ToArray();
-            return false;
-        }
-        else
-        {
-            var cmd = new OracleCommand("INSERT INTO user_saved_albums (user_id, album_id) VALUES (:user_id, :album_id)", GetOracleConnection());
-            cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = App.currentUser?.UserId!;
-            cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
-            await cmd.ExecuteNonQueryAsync();
-            App.SavedAlbumIds = App.SavedAlbumIds.Append(albumId).ToArray();
-            return true;
-        }
+        var cmd = new OracleCommand("toggle_album_save", GetOracleConnection());
+        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+        cmd.Parameters.Add("user_id", OracleDbType.Varchar2).Value = userId;
+        cmd.Parameters.Add("album_id", OracleDbType.Varchar2).Value = albumId;
+        cmd.Parameters.Add("return", OracleDbType.Boolean).Direction = System.Data.ParameterDirection.ReturnValue;
+        cmd.BindByName = true;
+        await cmd.ExecuteNonQueryAsync();
+        var result = ((OracleBoolean)cmd.Parameters["return"].Value).Value;
+        App.SavedAlbumIds = result ? App.SavedAlbumIds.Append(albumId).ToArray() : App.SavedAlbumIds.Where(id => id != albumId).ToArray();
+        return result;
     }
 
     public Dictionary<string, RhythmTrack> GetAllTracks() => tracks;

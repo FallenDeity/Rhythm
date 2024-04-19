@@ -50,7 +50,8 @@ public sealed partial class SearchPage : Page
         };
     }
 
-    private void SearchDetails_Loaded(object sender, RoutedEventArgs e)
+
+    private async void SearchDetails_Loaded(object sender, RoutedEventArgs e)
     {
         SearchTracks.ItemsSource = trackCollection;
         SearchArtists.ItemsSource = artistCollection;
@@ -67,6 +68,7 @@ public sealed partial class SearchPage : Page
             sources.ElementAt(i).Value.Visibility = Visibility.Collapsed;
         }
         SearchTracks.Visibility = Visibility.Visible;
+        await trackCollection.RefreshAsync();
     }
 
     private async void TokenBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)

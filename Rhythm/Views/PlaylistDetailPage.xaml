@@ -62,8 +62,10 @@
                             x:Name="Title"
                             FontSize="24"
                             FontWeight="ExtraBold"
+                            MaxLines="2"
                             Style="{ThemeResource TitleLargeTextBlockStyle}"
-                            Text="{x:Bind ViewModel.Item.PlaylistName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.PlaylistName, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
                         <TextBlock
                             x:Name="Description"
                             Margin="0,0,0,6"

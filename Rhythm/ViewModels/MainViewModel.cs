@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Data;
 using CommunityToolkit.Labs.WinUI;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -57,7 +58,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     public async Task<RhythmAlbum[]> GetRecommendedAlbums()
     {
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT album_id FROM albums ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
+        var cmd = new OracleCommand("get_user_albums", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.Add("v_user_id", OracleDbType.Varchar2).Value = App.currentUser!.UserId;
+        cmd.Parameters.Add("v_user_albums", OracleDbType.RefCursor, ParameterDirection.Output);
         var reader = await cmd.ExecuteReaderAsync();
         var albums = new List<string>();
         while (reader.Read())
@@ -80,7 +84,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     public async Task<RhythmArtist[]> GetRecommendedArtists()
     {
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT artist_id FROM artists ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
+        var cmd = new OracleCommand("get_user_artists", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.Add("v_user_id", OracleDbType.Varchar2).Value = App.currentUser!.UserId;
+        cmd.Parameters.Add("v_user_artists", OracleDbType.RefCursor, ParameterDirection.Output);
         var reader = await cmd.ExecuteReaderAsync();
         var artists = new List<string>();
         while (reader.Read())
@@ -103,7 +110,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     public async Task<RhythmTrack[]> GetRecommendedTracks()
     {
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT track_id FROM tracks ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
+        var cmd = new OracleCommand("get_user_tracks", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.Add("v_user_id", OracleDbType.Varchar2).Value = App.currentUser!.UserId;
+        cmd.Parameters.Add("v_user_tracks", OracleDbType.RefCursor, ParameterDirection.Output);
         var reader = await cmd.ExecuteReaderAsync();
         var tracks = new List<string>();
         while (reader.Read())
@@ -126,8 +136,10 @@ public partial class MainViewModel : ObservableRecipient, INavigationAware
     public async Task<RhythmPlaylist[]> GetRecommendedPlaylists()
     {
         var conn = App.GetService<IDatabaseService>().GetOracleConnection();
-        var cmd = new OracleCommand("SELECT playlist_id FROM playlists ORDER BY DBMS_RANDOM.VALUE FETCH FIRST 8 ROWS ONLY", conn);
-        cmd.Parameters.Add(new OracleParameter("user_id", App.currentUser?.UserId!));
+        var cmd = new OracleCommand("get_user_playlists", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        cmd.Parameters.Add("v_user_id", OracleDbType.Varchar2).Value = App.currentUser!.UserId;
+        cmd.Parameters.Add("v_user_playlists", OracleDbType.RefCursor, ParameterDirection.Output);
         var reader = await cmd.ExecuteReaderAsync();
         var playlists = new List<string>();
         while (reader.Read())

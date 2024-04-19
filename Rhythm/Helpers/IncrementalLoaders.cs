@@ -13,6 +13,7 @@ public class IncrementalTrackLoader : IIncrementalSource<RhythmTrackItem>
 
     public async Task<IEnumerable<RhythmTrackItem>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
+        System.Diagnostics.Debug.WriteLine("IncrementalTrackLoader: " + queryString);
         var db = App.GetService<IDatabaseService>();
         var query = $"SELECT track_id FROM tracks WHERE LOWER(track_name) LIKE LOWER('%{queryString}%') OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         var offset = pageSize * pageIndex;
@@ -52,6 +53,7 @@ public class IncrementalArtistLoader : IIncrementalSource<RhythmArtist>
 
     public async Task<IEnumerable<RhythmArtist>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
+        System.Diagnostics.Debug.WriteLine("IncrementalArtistLoader: " + queryString);
         var db = App.GetService<IDatabaseService>();
         var query = $"SELECT artist_id FROM artists WHERE LOWER(artist_name) LIKE LOWER('%{queryString}%') OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         var offset = pageSize * pageIndex;
@@ -81,6 +83,7 @@ public class IncrementalAlbumLoader : IIncrementalSource<RhythmAlbum>
 
     public async Task<IEnumerable<RhythmAlbum>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
+        System.Diagnostics.Debug.WriteLine("IncrementalAlbumLoader: " + queryString);
         var db = App.GetService<IDatabaseService>();
         var query = $"SELECT album_id FROM albums WHERE LOWER(album_name) LIKE LOWER('%{queryString}%') OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         var offset = pageSize * pageIndex;
@@ -109,6 +112,7 @@ public class IncrementalPlaylistLoader : IIncrementalSource<RhythmPlaylist>
 
     public async Task<IEnumerable<RhythmPlaylist>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
+        System.Diagnostics.Debug.WriteLine("IncrementalPlaylistLoader: " + queryString);
         var db = App.GetService<IDatabaseService>();
         var query = $"SELECT playlist_id FROM playlists WHERE LOWER(playlist_name) LIKE LOWER('%{queryString}%') OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         var offset = pageSize * pageIndex;
@@ -137,6 +141,7 @@ public class IncrementalUserLoader : IIncrementalSource<RhythmUser>
 
     public async Task<IEnumerable<RhythmUser>> GetPagedItemsAsync(int pageIndex, int pageSize, CancellationToken cancellationToken = default)
     {
+        System.Diagnostics.Debug.WriteLine("IncrementalUserLoader: " + queryString);
         var db = App.GetService<IDatabaseService>();
         var query = $"SELECT user_id FROM users WHERE LOWER(username) LIKE LOWER('%{queryString}%') OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY";
         var offset = pageSize * pageIndex;

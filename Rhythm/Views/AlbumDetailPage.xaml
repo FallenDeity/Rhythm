@@ -60,8 +60,10 @@
                             x:Name="Title"
                             FontSize="12"
                             FontWeight="ExtraBold"
+                            MaxLines="2"
                             Style="{ThemeResource TitleLargeTextBlockStyle}"
-                            Text="{x:Bind ViewModel.Item.AlbumName, Mode=OneWay}" />
+                            Text="{x:Bind ViewModel.Item.AlbumName, Mode=OneWay}"
+                            TextTrimming="CharacterEllipsis" />
                         <TextBlock
                             x:Name="Info"
                             FontSize="12"

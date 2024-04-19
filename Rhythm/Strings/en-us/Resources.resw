@@ -126,17 +126,8 @@
   <data name="Shell_Main.Content" xml:space="preserve">
     <value>Home</value>
   </data>
-  <data name="Shell_ContentGrid.Content" xml:space="preserve">
-    <value>ContentGrid</value>
-  </data>
   <data name="ListDetails_NoSelection.Text" xml:space="preserve">
     <value>Select an item from the list.</value>
-  </data>
-  <data name="Shell_ListDetails.Content" xml:space="preserve">
-    <value>ListDetails</value>
-  </data>
-  <data name="Shell_DataGrid.Content" xml:space="preserve">
-    <value>DataGrid</value>
   </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
     <value>Personalization</value>
@@ -179,12 +170,6 @@
   &lt;/actions&gt;
 &lt;/toast&gt;</value>
   </data>
-  <data name="Shell_PlayList.Content" xml:space="preserve">
-    <value>Playlists</value>
-  </data>
-  <data name="Shell_PlayQueue.Content" xml:space="preserve">
-    <value>Play Queue</value>
-  </data>
   <data name="UserIdCopiedNotification" xml:space="preserve">
     <value>&lt;toast launch="action=ToastClick"&gt;
   &lt;visual&gt;
@@ -209,5 +194,8 @@
   </data>
   <data name="Shell_Search.Content" xml:space="preserve">
     <value>Search</value>
+  </data>
+  <data name="Shell_Library.Content" xml:space="preserve">
+    <value>Library</value>
   </data>
 </root>
