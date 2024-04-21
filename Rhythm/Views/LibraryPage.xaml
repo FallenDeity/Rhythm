@@ -21,8 +21,45 @@
         <Grid Padding="0,14,0,108">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <StackPanel Grid.Row="0">
+            <!--  Search Bar  -->
+            <StackPanel
+                Grid.Row="0"
+                Padding="12,0,12,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Orientation="Horizontal">
+                <AutoSuggestBox
+                    x:Name="SearchBox"
+                    MinWidth="320"
+                    CornerRadius="6"
+                    KeyboardAcceleratorPlacementMode="Hidden"
+                    MaxSuggestionListHeight="320"
+                    PlaceholderText="Search for music"
+                    QueryIcon="Find">
+                    <AutoSuggestBox.KeyboardAccelerators>
+                        <KeyboardAccelerator
+                            Key="F"
+                            Invoked="CtrlF_Invoked"
+                            Modifiers="Control" />
+                    </AutoSuggestBox.KeyboardAccelerators>
+                </AutoSuggestBox>
+                <!--  Create Playlist Button  -->
+                <Button
+                    x:Name="CreatePlaylistButton"
+                    Margin="12,0,0,0"
+                    Padding="4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Click="CreatePlaylistButton_Click">
+                    <FontIcon
+                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
+                        FontSize="14"
+                        Glyph="&#xE710;" />
+                </Button>
+            </StackPanel>
+            <StackPanel Grid.Row="1">
                 <!--  Playlist Loading Animation  -->
                 <ListView
                     Margin="{StaticResource SmallTopMargin}"
@@ -82,11 +119,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Playlist" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xEB52;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
@@ -156,11 +188,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Playlist" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xEB52;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
@@ -225,11 +252,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Album" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xE74E;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
@@ -301,11 +323,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Album" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xE74E;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
@@ -370,11 +387,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Artist" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xE716;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>
@@ -444,11 +456,6 @@
                                         FontSize="11"
                                         Opacity="0.6"
                                         Text="Artist" />
-                                    <FontIcon
-                                        Margin="{StaticResource SmallRightMargin}"
-                                        FontFamily="{ThemeResource SymbolThemeFontFamily}"
-                                        FontSize="14"
-                                        Glyph="&#xE716;" />
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

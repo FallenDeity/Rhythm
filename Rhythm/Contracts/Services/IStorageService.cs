@@ -13,6 +13,10 @@ internal interface IStorageService
 
     Task DeleteAvatar(string name);
 
+    Task<string> UploadPlaylistImage(byte[] image, string name);
+
+    Task DeletePlaylistImage(string name);
+
     void DisconnectFromSupabase();
 
     Supabase.Client GetClient();

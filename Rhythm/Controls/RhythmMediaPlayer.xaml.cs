@@ -217,6 +217,7 @@ public sealed partial class RhythmMediaPlayer : UserControl, INotifyPropertyChan
             var yt = new YoutubeExplode.YoutubeClient();
             var streamInfo = await yt.Videos.Streams.GetManifestAsync(vidId);
             _manifestCache.Add(vidId, streamInfo);
+            System.Diagnostics.Debug.WriteLine($"Cached {track.TrackName}");
         }
     }
 

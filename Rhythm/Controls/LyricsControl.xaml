@@ -24,9 +24,10 @@
             Text="Lyrics" />
         <ScrollViewer
             Grid.Row="1"
-            Width="264"
-            Height="300"
+            MinWidth="264"
+            MinHeight="300"
             Padding="4,0,6,0"
+            Background="{ThemeResource ButtonBackgroundThemeBrush}"
             HorizontalScrollBarVisibility="Disabled"
             HorizontalScrollMode="Disabled"
             VerticalScrollBarVisibility="Auto"

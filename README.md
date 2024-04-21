@@ -1,3 +1,28 @@
+<p align="center"><img src="./Rhythm/Assets/StoreLogo.scale-400.png" alt="Logo" width="248" height="248"></p>
+<h1 align="center">RHYTHM</h1>
+<h4 align="center">A simple music player app for Windows 10 and above using WinUI3</h4>
+
+# Features
+
+- [x] Built using WinUI3, sports modern fluent design.
+- [x] Windows OS responsive theme and accent color support.
+- [x] Play, Pause, Next, Previous, Shuffle, Repeat, Seek, Volume controls.
+- [x] Realtime music streaming
+- [x] Customized recommendations based on user's listening history.
+- [x] User authentication and profile management.
+- [x] User can create and manage playlists.
+- [x] User can like, follow and save albums, artists and songs.
+
+# Screenshots
+
+| Main Page | Themes |
+| --- | --- |
+| ![Main Page](./assets/main-page.png) | ![Themes](./assets/themes.png) |
+| Playlist Page | Search Page |
+| ![Playlist Page](./assets/playlist.png) | ![Search Page](./assets/search.png) |
+| Album Page | Artist Page |
+| ![SQL Editor](./assets/album.png) | ![Settings](./assets/artist.png) |
+
 # Demo
 
 Base WinUi App Setup.
@@ -70,3 +95,7 @@ Right click on the `Add-AppDevPackage.ps1` file and click `Run with PowerShell`.
 
 > [!NOTE]
 > This process may require you to enable `Developer Mode` on your machine. You can enable `Developer Mode` by going to `Settings` > `Update & Security` > `For developers` and then selecting `Developer mode`.
+
+## Environment Setup
+
+You need a working oracle database to run the application. Replace `ORACLE_CONNECTION_STRING` in `DatabaseService.cs` with your connection string. Replace `SUPABASE_KEY` and `SUPAEBASE_URL` in `StorageService.cs` with your supabase key and url respectively.

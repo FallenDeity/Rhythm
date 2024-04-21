@@ -92,7 +92,14 @@ public sealed partial class SettingsPage : Page
             dataReader.ReadBytes(bytes);
             if (bytes.Length > 5000000)
             {
-                await App.MainWindow.ShowMessageDialogAsync("Image size must be less than 5MB");
+                var infoBar = new InfoBar
+                {
+                    Severity = InfoBarSeverity.Error,
+                    Message = "Image size must be less than 5MB",
+                    IsOpen = true
+                };
+                var page = (ShellPage)App.MainWindow.Content;
+                page.InfoBarStackPanel.Children.Add(infoBar);
                 return;
             }
             var format = ImageHelper.GetImageFormat(file.FileType);
@@ -110,6 +117,14 @@ public sealed partial class SettingsPage : Page
                 ViewModel.currentUser.UserImageURL = url;
                 await Task.Run(() => ViewModel.UpdateUserImage(url));
                 UserImage.Source = new BitmapImage(new Uri(url));
+                var infoBar = new InfoBar
+                {
+                    Severity = InfoBarSeverity.Success,
+                    Message = "Image uploaded successfully",
+                    IsOpen = true
+                };
+                var page = (ShellPage)App.MainWindow.Content;
+                page.InfoBarStackPanel.Children.Add(infoBar);
             }
         }
     }
@@ -168,7 +183,14 @@ public sealed partial class SettingsPage : Page
             var name = UsernameTextBox.Text;
             await Task.Run(() => ViewModel.UpdateUserName(name));
             Username.Text = ViewModel.currentUser.UserName;
-            await App.MainWindow.ShowMessageDialogAsync("Username updated successfully");
+            var infoBar = new InfoBar
+            {
+                Severity = InfoBarSeverity.Success,
+                Message = "Username updated successfully",
+                IsOpen = true
+            };
+            var page = (ShellPage)App.MainWindow.Content;
+            page.InfoBarStackPanel.Children.Add(infoBar);
         }
     }
 
@@ -178,8 +200,14 @@ public sealed partial class SettingsPage : Page
         {
             var password = NewPasswordBox.Password;
             await Task.Run(() => ViewModel.UpdateUserPassword(password));
-            await App.MainWindow.ShowMessageDialogAsync("Password updated successfully");
-
+            var infoBar = new InfoBar
+            {
+                Severity = InfoBarSeverity.Success,
+                Message = "Password updated successfully",
+                IsOpen = true
+            };
+            var page = (ShellPage)App.MainWindow.Content;
+            page.InfoBarStackPanel.Children.Add(infoBar);
         }
     }
 
@@ -203,15 +231,15 @@ public sealed partial class SettingsPage : Page
 
     private async void DeleteAccountButton_Click(object sender, RoutedEventArgs e)
     {
-        ContentDialog deleteAccountDialog = new ContentDialog
+        var deleteAccountDialog = new ContentDialog
         {
-            XamlRoot = this.XamlRoot,
+            XamlRoot = XamlRoot,
             Title = "Delete Account",
             Content = "Are you sure you want to delete your account? This action cannot be undone.",
             PrimaryButtonText = "Delete",
             CloseButtonText = "Cancel"
         };
-        ContentDialogResult result = await deleteAccountDialog.ShowAsync();
+        var result = await deleteAccountDialog.ShowAsync();
         if (result == ContentDialogResult.Primary && ViewModel.currentUser is not null)
         {
             await Task.Run(() => ViewModel.DeleteAccount());

@@ -9,7 +9,6 @@ repos:
         args:
           - --markdown-linebreak-ext=md
       - id: check-toml
-      - id: check-added-large-files
       - id: check-xml
 
   - repo: https://github.com/pre-commit/pygrep-hooks

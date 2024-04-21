@@ -86,4 +86,24 @@ public class StorageService : IStorageService
         var bucket = storage.From("Avatars");
         await bucket.Remove(name);
     }
+
+    public async Task<string> UploadPlaylistImage(byte[] image, string name)
+    {
+        if (!_connected) throw new SupabaseConnectionException("Not connected to Supabase.");
+        var storage = Client!.Storage;
+        var bucket = storage.From("Playlists");
+        await bucket.Upload(image, name, new Supabase.Storage.FileOptions
+        {
+            Upsert = true
+        });
+        return $"{bucket.GetPublicUrl(name)}?t={DateTime.Now.Ticks}";
+    }
+
+    public async Task DeletePlaylistImage(string name)
+    {
+        if (!_connected) throw new SupabaseConnectionException("Not connected to Supabase.");
+        var storage = Client!.Storage;
+        var bucket = storage.From("Playlists");
+        await bucket.Remove(name);
+    }
 }

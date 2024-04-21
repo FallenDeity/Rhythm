@@ -125,4 +125,6 @@ public sealed partial class ShellPage : Page
     }
 
     public RhythmMediaPlayer RhythmPlayer => MediaPlayer;
+
+    public StackPanel InfoBarStackPanel => InfoBar;
 }

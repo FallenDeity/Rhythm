@@ -1,4 +1,6 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
@@ -42,5 +44,17 @@ public sealed partial class LibraryPage : Page
     {
         var artist = (RhythmArtist)e.ClickedItem;
         ViewModel.NavigateToArtist(artist.ArtistId);
+    }
+
+    private async void CreatePlaylistButton_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        var dialog = new CreatePlaylistDialog();
+        dialog.XamlRoot = this.XamlRoot;
+        await dialog.ShowAsync();
+    }
+
+    private void CtrlF_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        SearchBox.Focus(FocusState.Programmatic);
     }
 }

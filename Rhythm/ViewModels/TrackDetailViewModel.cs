@@ -175,5 +175,5 @@ public partial class TrackDetailViewModel : ObservableRecipient, INavigationAwar
 
     public string CreatedAt => Item != null ? Relativize(Item.ReleaseDate) : "Unknown";
 
-    public string InfoText => $"{Item?.ArtistNames}\n{Item?.Likes} Likes • {Item?.Streams} Streams\nReleased {CreatedAt}";
+    public string InfoText => $"{Item?.ArtistNames}\n{Item?.Likes} Likes ï¿½ {Item?.Streams} Streams\nReleased {CreatedAt}";
 }
