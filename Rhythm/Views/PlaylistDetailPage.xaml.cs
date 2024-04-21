@@ -8,6 +8,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Controls;
+using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
 
@@ -69,7 +70,7 @@ public sealed partial class PlaylistDetailPage : Page
         }
     }
 
-    private void AlbumMenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void AlbumMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
     {
         var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
         ViewModel.NavigateToAlbum(track.RhythmTrack.TrackAlbumId);
@@ -219,5 +220,91 @@ public sealed partial class PlaylistDetailPage : Page
     {
         await ViewModel.TogglePlaylistLike(ViewModel.Item!);
         UpdateButtons();
+    }
+
+    private async void AddToPlaylistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var userId = App.currentUser!.UserId;
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        var userPlaylists = await Task.Run(() => App.GetService<IDatabaseService>().GetUserPlaylists(userId));
+        var dialog = new AddToPlaylistDialog(new List<RhythmPlaylist>(userPlaylists), track.RhythmTrack);
+        dialog.XamlRoot = XamlRoot;
+        await dialog.ShowAsync();
+    }
+
+    private async void RemoveFromPlaylistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var page = (ShellPage)App.MainWindow.Content;
+        if (ViewModel.Item!.PlaylistOwner != App.currentUser!.UserId)
+        {
+            var info = new InfoBar
+            {
+                Message = "You can only remove tracks from your own playlists",
+                Severity = InfoBarSeverity.Warning,
+                IsOpen = true,
+            };
+            page.InfoBarStackPanel.Children.Add(info);
+            return;
+        }
+        var track = ((RhythmTrackItem)((FrameworkElement)sender).DataContext).RhythmTrack;
+        var playlistId = ViewModel.Item!.PlaylistId;
+        var trackId = track.TrackId;
+        await Task.Run(() => App.GetService<IDatabaseService>().RemoveTrackFromPlaylist(playlistId!, trackId));
+        var copy = new List<RhythmTrackItem>(ViewModel.Tracks);
+        ViewModel.Tracks.Clear();
+        var count = 1;
+        foreach (var t in copy)
+        {
+            if (t.RhythmTrack.TrackId != trackId)
+            {
+                t.RhythmTrack.Count = count++;
+                ViewModel.Tracks.Add(t);
+            }
+        }
+        var infoBar = new InfoBar
+        {
+            Message = $"{track.TrackName} removed from {ViewModel.Item!.PlaylistName}",
+            Severity = InfoBarSeverity.Error,
+            IsOpen = true,
+        };
+        page.InfoBarStackPanel.Children.Add(infoBar);
+    }
+}
+
+public class AddToPlaylistDialog : ContentDialog
+{
+    public AddToPlaylistDialog(List<RhythmPlaylist> playlists, RhythmTrack track)
+    {
+        Title = "Add to Playlist";
+        var comboBox = new ComboBox
+        {
+            MaxDropDownHeight = 200,
+            Width = 300,
+            PlaceholderText = "Select a playlist",
+            ItemsSource = playlists,
+            DisplayMemberPath = "PlaylistName",
+            SelectedValuePath = "PlaylistId",
+            Margin = new Thickness(0, 10, 0, 0)
+        };
+        Content = comboBox;
+        PrimaryButtonText = "Add";
+        PrimaryButtonClick += async (sender, e) =>
+        {
+            var playlistId = (string)comboBox.SelectedValue;
+            var playlist = playlists.First(p => p.PlaylistId == playlistId);
+            var trackId = track.TrackId;
+            await Task.Run(() => App.GetService<IDatabaseService>().AddTrackToPlaylist(playlistId, trackId));
+            var page = (ShellPage)App.MainWindow.Content;
+            var info = new InfoBar
+            {
+                Message = $"{track.TrackName} added to {playlist.PlaylistName}",
+                Severity = InfoBarSeverity.Success,
+                IsOpen = true,
+            };
+            page.InfoBarStackPanel.Children.Add(info);
+            Hide();
+        };
+        SecondaryButtonText = "Cancel";
+        SecondaryButtonClick += (sender, e) => Hide();
     }
 }

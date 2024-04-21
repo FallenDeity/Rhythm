@@ -673,5 +673,52 @@ public class DatabaseService : IDatabaseService
         return result;
     }
 
+    public async Task<RhythmPlaylist[]> GetUserPlaylists(string userId)
+    {
+        var conn = App.GetService<IDatabaseService>().GetOracleConnection();
+        var cmd = new OracleCommand("SELECT playlist_id FROM playlists WHERE playlist_owner = :playlist_owner", conn);
+        cmd.Parameters.Add("playlist_owner", OracleDbType.Varchar2).Value = userId;
+        var reader = await cmd.ExecuteReaderAsync();
+        var playlistIds = new List<string>();
+        while (await reader.ReadAsync())
+        {
+            playlistIds.Add(reader.GetString(0));
+        }
+        var data = await App.GetService<IDatabaseService>().GetPlaylists(playlistIds.ToArray());
+        return data;
+    }
+
     public Dictionary<string, RhythmTrack> GetAllTracks() => tracks;
+
+    public async Task AddTrackToPlaylist(string playlistId, string trackId)
+    {
+        var cmd = new OracleCommand("SELECT COUNT(*) FROM playlist_tracks WHERE playlist_id = :playlist_id AND track_id = :track_id", GetOracleConnection());
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+        cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+        var reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            if (reader.GetInt32(0) > 0) return;
+        }
+        cmd = new OracleCommand("INSERT INTO playlist_tracks (playlist_id, track_id) VALUES (:playlist_id, :track_id)", GetOracleConnection());
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+        cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+        await cmd.ExecuteNonQueryAsync();
+        if (playlists.ContainsKey(playlistId))
+        {
+            playlists[playlistId].TrackCount++;
+        }
+    }
+
+    public async Task RemoveTrackFromPlaylist(string playlistId, string trackId)
+    {
+        var cmd = new OracleCommand("DELETE FROM playlist_tracks WHERE playlist_id = :playlist_id AND track_id = :track_id", GetOracleConnection());
+        cmd.Parameters.Add("playlist_id", OracleDbType.Varchar2).Value = playlistId;
+        cmd.Parameters.Add("track_id", OracleDbType.Varchar2).Value = trackId;
+        await cmd.ExecuteNonQueryAsync();
+        if (playlists.ContainsKey(playlistId))
+        {
+            playlists[playlistId].TrackCount--;
+        }
+    }
 }

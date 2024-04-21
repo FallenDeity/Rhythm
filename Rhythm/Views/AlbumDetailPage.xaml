@@ -303,8 +303,7 @@
                                         <Button.Flyout>
                                             <MenuFlyout>
                                                 <MenuFlyoutItem Click="AddToQueueMenuFlyoutItem_Click" Text="Add to Queue" />
-                                                <MenuFlyoutItem Text="Add to Playlist" />
-                                                <MenuFlyoutItem Text="Add to Library" />
+                                                <MenuFlyoutItem Click="AddToPlaylistMenuFlyoutItem_Click" Text="Add to Playlist" />
                                                 <MenuFlyoutSeparator />
                                                 <MenuFlyoutItem Click="ArtistMenuFlyoutItem_Click" Text="Go to Artist" />
                                             </MenuFlyout>

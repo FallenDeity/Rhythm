@@ -131,6 +131,13 @@
                     CornerRadius="6">
                     <Frame x:Name="NavigationFrame" />
                 </Grid>
+                <StackPanel
+                    x:Name="InfoBar"
+                    Grid.Row="0"
+                    Margin="12,0,12,108"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Bottom"
+                    Spacing="4" />
                 <controls:RhythmMediaPlayer
                     x:Name="MediaPlayer"
                     Grid.Row="0"

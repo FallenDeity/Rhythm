@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Rhythm.Contracts.Services;
 using Rhythm.Controls;
+using Rhythm.Core.Models;
 using Rhythm.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -148,5 +149,15 @@ public sealed partial class ArtistDetailPage : Page
             var tooltip = new ToolTip() { Content = "Unfollow" };
             ToolTipService.SetToolTip(FollowButton, tooltip);
         }
+    }
+
+    private async void AddToPlaylistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var userId = App.currentUser!.UserId;
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        var userPlaylists = await Task.Run(() => App.GetService<IDatabaseService>().GetUserPlaylists(userId));
+        var dialog = new AddToPlaylistDialog(new List<RhythmPlaylist>(userPlaylists), track.RhythmTrack);
+        dialog.XamlRoot = XamlRoot;
+        await dialog.ShowAsync();
     }
 }

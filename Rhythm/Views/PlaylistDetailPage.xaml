@@ -32,7 +32,7 @@
                 VerticalAlignment="Top">
                 <userControls:HeaderImageControl x:Name="HeaderImage" ImageSource="{x:Bind ViewModel.Item.PlaylistImageURL, Mode=OneWay}" />
             </Grid>
-            <StackPanel Grid.Row="0">
+            <StackPanel x:Name="Header" Grid.Row="0">
                 <Grid VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -334,8 +334,8 @@
                                         <Button.Flyout>
                                             <MenuFlyout>
                                                 <MenuFlyoutItem Click="AddToQueueMenuFlyoutItem_Click" Text="Add to Queue" />
-                                                <MenuFlyoutItem Text="Add to Playlist" />
-                                                <MenuFlyoutItem Text="Add to Library" />
+                                                <MenuFlyoutItem Click="AddToPlaylistMenuFlyoutItem_Click" Text="Add to Playlist" />
+                                                <MenuFlyoutItem Click="RemoveFromPlaylistMenuFlyoutItem_Click" Text="Remove from Playlist" />
                                                 <MenuFlyoutSeparator />
                                                 <MenuFlyoutItem Click="AlbumMenuFlyoutItem_Click" Text="Go to Album" />
                                                 <MenuFlyoutItem Click="ArtistMenuFlyoutItem_Click" Text="Go to Artist" />

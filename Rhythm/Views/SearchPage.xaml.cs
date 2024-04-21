@@ -2,6 +2,7 @@ using CommunityToolkit.WinUI;
 using CommunityToolkit.WinUI.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Rhythm.Contracts.Services;
 using Rhythm.Controls;
 using Rhythm.Core.Models;
 using Rhythm.Helpers;
@@ -183,5 +184,15 @@ public sealed partial class SearchPage : Page
                 sources.ElementAt(i).Value.Visibility = Visibility.Collapsed;
             }
         }
+    }
+
+    private async void AddToPlaylistMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+    {
+        var userId = App.currentUser!.UserId;
+        var track = (RhythmTrackItem)((FrameworkElement)sender).DataContext;
+        var userPlaylists = await Task.Run(() => App.GetService<IDatabaseService>().GetUserPlaylists(userId));
+        var dialog = new AddToPlaylistDialog(new List<RhythmPlaylist>(userPlaylists), track.RhythmTrack);
+        dialog.XamlRoot = XamlRoot;
+        await dialog.ShowAsync();
     }
 }

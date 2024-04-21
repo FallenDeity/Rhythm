@@ -46,6 +46,12 @@ internal interface IDatabaseService
 
     Task<bool> ToggleAlbumSave(string albumId, string userId);
 
+    Task<RhythmPlaylist[]> GetUserPlaylists(string userId);
+
+    Task AddTrackToPlaylist(string playlistId, string trackId);
+
+    Task RemoveTrackFromPlaylist(string playlistId, string trackId);
+
     Dictionary<string, RhythmTrack> GetAllTracks();
 
     bool IsConnected();
