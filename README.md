@@ -27,6 +27,10 @@
 
 Base WinUi App Setup.
 
+
+https://github.com/FallenDeity/Rhythm/assets/61227305/a4398082-a7ed-4832-a26d-325bc9a6672c
+
+
 ![Demo](Assets/demo.png)
 
 ## Setup Repository
