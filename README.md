@@ -17,11 +17,11 @@
 
 | Main Page | Themes |
 | --- | --- |
-| ![Main Page](./assets/main-page.png) | ![Themes](./assets/themes.png) |
+| ![Main Page](./Assets/main-page.png) | ![Themes](./Assets/themes.png) |
 | Playlist Page | Search Page |
-| ![Playlist Page](./assets/playlist.png) | ![Search Page](./assets/search.png) |
+| ![Playlist Page](./Assets/playlist.png) | ![Search Page](./Assets/search.png) |
 | Album Page | Artist Page |
-| ![SQL Editor](./assets/album.png) | ![Settings](./assets/artist.png) |
+| ![Album Page](./Assets/album.png) | ![Artist Page](./Assets/artist.png) |
 
 # Demo
 
